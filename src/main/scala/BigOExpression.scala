@@ -14,21 +14,23 @@ case class BigOExpression(powerOfN: Float, powerOfLogN: Int) extends Ordered[Big
     if (this > other) this else other
   }
   def *(other: BigOExpression): BigOExpression = {
-    BigOExpression(this.powerOfN * other.powerOfN, this.powerOfLogN * other.powerOfLogN)
+    BigOExpression(this.powerOfN + other.powerOfN, this.powerOfLogN + other.powerOfLogN)
   }
   def or(other: BigOExpression): BigOExpression = {
     if (this > other) other else this
   }
 
-  override def toString() = (powerOfN, powerOfLogN) match {
-    case (0.0, 0) => "BigO(1)"
-    case (1.0, 0) => "BigO(n)"
-    case (0.5, 0) => "BigO(sqrt(n))"
-    case (power, 0) => s"BigO(n**${power})"
-    case (0.0, 1) => "BigO(log(n))"
-    case (1.0, 1) => "BigO(n log(n))"
-    case (0.0, power) => s"BigO(log(n)**${power})"
-    case (m, x) => s"BigO(n**${powerOfN} log(n)**${powerOfLogN})"
+  override def toString = s"BigO($toShortString)"
+
+  def toShortString = (powerOfN, powerOfLogN) match {
+    case (0.0, 0) => "1"
+    case (1.0, 0) => "n"
+    case (0.5, 0) => "sqrt(n)"
+    case (power, 0) => s"n**$power"
+    case (0.0, 1) => "log(n)"
+    case (1.0, 1) => "n log(n)"
+    case (0.0, power) => s"log(n)**$power"
+    case (m, x) => s"n**$powerOfN log(n)**$powerOfLogN"
   }
 }
 

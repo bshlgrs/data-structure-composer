@@ -1,0 +1,65 @@
+
+VectorList {
+    getByIndex <- 1
+    insertAtFront! <- 1
+    insertAtEnd! <- 1
+    deleteAtIndex! <- n
+    deleteBetweenNodes! <- n
+}
+
+InvertibleMonoidMemoizer[f] if f.invertible {
+    reduce[f] <- 1
+    insertAtEnd! <- f
+    insertAtFront! <- f
+    insertNextToNode! if f.commutative <- f
+}
+
+RedBlackTreeList[f] {
+    getByIndex <- log(n)
+    insertNextToNode! <- 1 + f
+    deleteNode! <- 1 + f // check this
+    deleteBetweenNodes! <- log(n) * (1 + f)
+    arbitraryRangeQuery[f] <- log(n)
+    extend! <- log(n) + n
+}
+
+OrderedRedBlackTree[f] {
+    unorderedEach <- n
+    findFirstBy[f] <- 1
+    findLastBy[f] <- 1
+    findKthBy[f] <- log(n)
+    insertAtIndex! <- log(n)
+    deleteNode! <- 1
+    countBetweenBy[f] <- log(n)
+}
+
+HistogramHash[f] {
+    unorderedEach <- n
+    insertAtIndex! <- 1
+    deleteNode! <- 1
+    countOfEquivalenceClass[f] <- 1
+}
+
+SizeOrderedHistogramTree[f] {
+    insertByIndex! <- log(n) + f
+    deleteNode! <- 1
+    countOfEquivalenceClass[f] <- log(n)
+    mostNumerousEquivalenceClass[f] <- 1
+}
+
+SparseArrayForIdempotentRangeQuery[f] if f.idempotent {
+    insertAtEnd! <- f * log(n)
+    indexRangeQuery[f] <- 1
+}
+
+FischerHeunStructure[f] if f.idempotent {
+    extend! <- n
+    indexRangeQuery[f] <- 1
+}
+
+Heap[f] {
+    unorderedEach <- n
+    findFirstBy[f] <- 1
+    deleteNode! <- log(n)
+    insertAtIndex! <- 1
+}

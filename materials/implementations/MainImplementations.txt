@@ -1,0 +1,75 @@
+
+// access by index
+getFirst <- getByIndex
+getNext <- getByIndex
+getByIndex <- getFirst + n * getNext
+getLast <- getByIndex
+getPrev <- getByIndex
+
+// looping
+unorderedEach[f] <- each[f]
+each[f] <- unorderedEach[_] + n * log(n) + f * n
+each[f] <- getByIndex * n + f * n
+each[f] <- getFirst + getNext * n + f * n
+
+// insertions
+insertAtEnd! <- getLast + insertAfterEndNode!
+insertAfterEndNode! <- insertAfterNode!
+insertBeforeFrontNode! <- insertBeforeNode!
+insertAtFront! <- getFirst + insertBeforeFrontNode!
+insertAtIndex! <- getByIndex + (insertAfterNode! | insertBeforeNode! )
+insertAfterNode! <- insertNextToNode!
+insertBeforeNode! <- insertNextToNode!
+extend! <- getLast + insertAfterEndNode! * n
+
+// deletions
+deleteAtIndex! <- getAtIndex + deleteNode!
+deleteFirst! <- getFirst + deleteNodeWhichIsFirst!
+deleteLast! <- getLast + deleteNodeWhichIsLast!
+deleteNodeWhichIsFirst! <- deleteNode!
+deleteNodeWhichIsLast! <- deleteNode!
+deleteBetweenNodes! <- n * (deleteNode! + getNext)
+deleteAtIndex! <- deleteBetweenNodes!
+
+
+// updates
+updateFirstNode! <- getFirst + updateNodeWhichIsFirst!
+updateNodeWhichIsFirst! <- updateNode!
+updateFirstNode! <- deleteFirst! + insertAfterFrontNode!
+
+updateLastNode! <- getLast + updateNodeWhichIsLast!
+updateNodeWhichIsLast! <- updateNode!
+updateLastNode! <- deleteLast! + insertAfterEndNode!
+
+updateByIndex! <- deleteAtIndex! + insertNextToNode!
+updateByIndex! <- getAtIndex + updateNode!
+
+// stuff about orderings by values
+quickSelect[f] <- unorderedEach[f]
+getKthBy[f] <- quickSelect[f]
+getFirstBy[f] <- reduce[func{commutative} <- f, _]
+getFirstBy[f] <- getKthBy[f]
+getLastBy[f] <- reduce[func{commutative} <- f, _]
+getLastBy[f] <- getKthBy[f]
+countBetweenBy[f] <- unorderedEach[f]
+getMaximum <- getFirstBy[_]
+getMinimum <- getLastBy[_]
+deleteMinimumBy![f] <- getMinimumBy[f] + deleteNode!
+
+// other reductions
+count <- unorderedEach[_]
+contains <- count
+select[f] <- unorderedEach[f]
+reduce[f, zero] <- zero + each[f]
+reduce[f, zero] if f.commutative <- zero + unorderedEach[f]
+
+countOfEquivalenceClass[f] <- unorderedEach[f]
+mostNumerousEquivalenceClass[f] <- unorderedEach[f]
+mostCommonElement <- mostNumerousEquivalenceClass[_]
+
+indexRangeQuery[f] <- unorderedEach[f]
+// eg, querying for the number of elements in the range (a, b)
+arbitraryRangeQuery[f] <- unorderedEach[f]
+
+
+

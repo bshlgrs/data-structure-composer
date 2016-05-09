@@ -1,0 +1,6 @@
+// This isn't quite right.
+addon DoubleStackQueue {
+    getLast <-> getFirst
+    insertAtFront! <- insertAtEnd! + deleteFromEnd! // CHECK THIS
+    deleteFirst! <-> deleteLast!
+}
