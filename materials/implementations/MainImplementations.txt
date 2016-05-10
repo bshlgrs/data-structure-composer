@@ -55,6 +55,9 @@ countBetweenBy[f] <- unorderedEach[f]
 getMaximum <- getFirstBy[_]
 getMinimum <- getLastBy[_]
 deleteMinimumBy![f] <- getMinimumBy[f] + deleteNode!
+deleteMaximumBy![f] <- getMaximumBy[f] + deleteNode!
+deleteMinimum! <- deleteMinimumBy![_]
+deleteMaximum! <- deleteMaximumBy![_]
 
 // other reductions
 count <- unorderedEach[_]
@@ -67,9 +70,15 @@ countOfEquivalenceClass[f] <- unorderedEach[f]
 mostNumerousEquivalenceClass[f] <- unorderedEach[f]
 mostCommonElement <- mostNumerousEquivalenceClass[_]
 
-indexRangeQuery[f] <- unorderedEach[f]
-// eg, querying for the number of elements in the range (a, b)
-arbitraryRangeQuery[f] <- unorderedEach[f]
+// eg, querying for the sum of the elements between indexes i and j
+twoSidedIndexRangeQuery[f] <- unorderedEach[f]
+// eg, querying for the sum of the elements between index 0 and index i
+oneSidedIndexRangeQuery[f] <- unorderedEach[f]
+
+// eg, querying for the number of elements whose values are in the range (a, b)
+twoSidedValueRangeQuery[f,g] <- unorderedEach[func <- f + g]
+// eg, querying for the sum of the k smallest elements
+oneSidedValueRangeQuery[f,g] <- unorderedEach[func <- f + g]
 
 
 

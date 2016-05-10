@@ -4,16 +4,20 @@ import java.awt.Container
   * Created by buck on 5/7/16.
   */
 
-case class ImplementationStmt(methodName: String,
-                              arguments: List[String],
-                              predicates: List[ImplementationPredicate],
-                              implementation: ImplementationExpr) {
+case class Implementation(methodName: String,
+                          parameters: List[String],
+                          predicates: List[ImplementationPredicate],
+                          implementation: ImplementationExpr) {
   assert(!methodName.contains(" "), "There was a space in your method name! :(")
 
   override def toString = {
-    val argumentString = if (arguments.nonEmpty) s"[${arguments.mkString(",")}]" else ""
+    val parametersString = if (parameters.nonEmpty) s"[${parameters.mkString(",")}]" else ""
     val predicateString = if (predicates.nonEmpty) s" if ${predicates.map(_.toString).mkString(", ")}" else ""
-    s"$methodName$argumentString$predicateString <- $implementation"
+    s"$methodName$parametersString$predicateString <- $implementation"
+  }
+
+  def isSuperSimple: Boolean = {
+    parameters.isEmpty && predicates.isEmpty
   }
 }
 
@@ -82,6 +86,7 @@ abstract class FunctionExpr {
       s"func$propertyString <- $implementation"
     }
   }
+
 }
 
 case class MethodFunctionExpr(name: String, args: List[FunctionExpr]) extends FunctionExpr

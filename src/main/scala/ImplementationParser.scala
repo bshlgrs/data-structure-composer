@@ -11,22 +11,39 @@ import scala.util.{Failure, Success}
 import scala.collection.immutable.Seq
 
 class ImplementationParser(val input: ParserInput) extends Parser {
-  def InputFile: Rule1[List[ImplementationStmt]] = rule {
-    zeroOrMore(Line) ~ EOI ~> ((x: Seq[Option[ImplementationStmt]]) => x.flatten.toList)
+  def InputImplementationFile: Rule1[(List[Implementation], List[DataStructure])] = rule {
+    zeroOrMore(Line) ~ EOI ~> ((lines: Seq[(List[Implementation], List[DataStructure])]) =>
+      (lines.flatMap(_._1).toList, lines.flatMap(_._2).toList)
+    )
   }
 
-  def Line: Rule1[Option[ImplementationStmt]] = rule {
-    (ImplementationStatementP ~> ((x: ImplementationStmt) => Some(x))) | ("//" ~ zeroOrMore(noneOf("\n")) ~ "\n" ~> (() => None)) | zeroOrMore(" ") ~ "\n" ~> (() => None)
+
+  def Line: Rule1[(List[Implementation], List[DataStructure])] = rule {
+    (ImplementationStatementP ~> ((x: Implementation) => (List(x), Nil))) |
+      ("//" ~ zeroOrMore(noneOf("\n")) ~ "\n" ~> (() => (Nil, Nil))) |
+      zeroOrMore(" ") ~ "\n" ~> (() => (Nil, Nil)) |
+      DataStructureExprP ~> ((x: DataStructure) => (Nil, List(x)))
   }
 
   implicit def wspStr(s: String): Rule0 = rule {
     str(s) ~ zeroOrMore(' ')
   }
 
-  def ImplementationStatementP: Rule1[ImplementationStmt] = rule {
+  def DataStructureExprP: Rule1[DataStructure] = rule {
+    // todo: check case
+    ImplementationStatementLHS ~ "{\n" ~ DataStructureExprBody ~ "}" ~> (
+      (name: String, args: Option[Seq[String]], conditions: Option[Seq[ImplementationPredicate]], implementations: List[Implementation]) =>
+        DataStructure(name, args.getOrElse(Nil).toList, conditions.getOrElse(Nil).toList, implementations))
+  }
+
+  def DataStructureExprBody: Rule1[List[Implementation]] = rule {
+    zeroOrMore(Line) ~> ((x: Seq[(List[Implementation], List[DataStructure])]) => x.flatMap(_._1).toList)
+  }
+
+  def ImplementationStatementP: Rule1[Implementation] = rule {
     ImplementationStatementLHS ~ "<-" ~ ImplementationExpressionP ~ "\n" ~> (
       (name: String, args: Option[Seq[String]], conditions: Option[Seq[ImplementationPredicate]], expression: ImplementationExpr) =>
-        ImplementationStmt(name, args.getOrElse(Nil).toList, conditions.getOrElse(Nil).toList, expression))
+        Implementation(name, args.getOrElse(Nil).toList, conditions.getOrElse(Nil).toList, expression))
   }
 
   def ImplementationStatementLHS = rule {
@@ -87,17 +104,20 @@ class ImplementationParser(val input: ParserInput) extends Parser {
   def Digits = rule { oneOrMore(CharPredicate.Digit) }
   def MethodNameString: Rule1[String] = rule { capture(oneOrMore(CharPredicate.Alpha) ~ optional("!")) ~ zeroOrMore(' ') ~> ((x: String) => x.trim()) }
   def VariableNameString = rule { oneOrMore(CharPredicate.Alpha) }
+
+  //////////////////////////////////////
+
+
 }
 
 object ParserTest {
   def main(args: Array[String]) {
-    val text = Source.fromFile("./materials/implementations/MainImplementations.txt").getLines.toList.mkString("\n")
+    val text = Source.fromFile("./materials/implementations/DataStructures.txt").getLines.toList.mkString("\n")
+//    val text = "VectorList {\n    getByIndex <- 1\n    insertAtFront! <- 1\n    insertAtEnd! <- 1\n    deleteAtIndex! <- n\n    deleteBetweenNodes! <- n\n}"
 
-    val parser = new ImplementationParser(text)
-
-    parser.InputFile.run() match {
+    new ImplementationParser(text).InputImplementationFile.run() match {
       case Success(x) => println(x)
-      case Failure(x: ParseError) => println(parser.formatError(x))
+      case Failure(x: ParseError) => println(new ImplementationParser(text).formatError(x))
       case Failure(x) => println(x)
     }
   }

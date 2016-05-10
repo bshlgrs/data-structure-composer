@@ -17,7 +17,8 @@ InvertibleMonoidMemoizer[f] if f.invertible {
 RedBlackTreeList[f] {
     getByIndex <- log(n)
     insertNextToNode! <- 1 + f
-    deleteNode! <- 1 + f // check this
+    // check this
+    deleteNode! <- 1 + f
     deleteBetweenNodes! <- log(n) * (1 + f)
     arbitraryRangeQuery[f] <- log(n)
     extend! <- log(n) + n

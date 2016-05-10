@@ -1,27 +1,13 @@
 /**
-  * Created by buck on 5/1/16.
+  * Created by buck on 5/8/16.
   */
-case class DataStructure(name: String, val providedMethods: Set[Implementation]) {
-
-}
-
-object DataStructure {
-  def easyCreate(name: String, methods: List[(String, BigOExpression)]): DataStructure = {
-    lazy val res: DataStructure = DataStructure(name, methods.toList.map(x => InternalImplementation(Method(x._1), Map(), x._2, res)).toSet)
-    res
+case class DataStructure(name: String,
+                         parameters: List[String],
+                         predicates: List[ImplementationPredicate],
+                         implementations: List[Implementation]) {
+  override def toString: String = {
+    val parameterString = if (parameters.nonEmpty) s"[${parameters.mkString(",")}]" else ""
+    val predicateString = if (predicates.nonEmpty) s" if ${predicates.map(_.toString).mkString(", ")}" else ""
+    s"$name$parameterString$predicateString {\n${implementations.map("    " + _.toString).mkString("\n")}\n}"
   }
-}
-
-object DataStructures {
-  val dataStructures = Set(
-    DataStructure.easyCreate("LinkedList", List(
-      ("getFirst", ConstantTime),
-      ("getNext", ConstantTime))
-    ),
-    DataStructure.easyCreate("ArrayList", List(("getByIndex", ConstantTime))),
-    DataStructure.easyCreate("TreeList", List(
-      ("getByIndex", LogTime),
-      ("getNext", ConstantTime),
-      ("getFirst", ConstantTime)))
-  )
 }
