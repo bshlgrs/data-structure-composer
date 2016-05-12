@@ -22,10 +22,11 @@ case class Implementation(methodName: String,
   def timeOnOwn: Option[BigOExpression] = implementation.timeOnOwn
 
   def timeWith(otherCosts: Map[String, BigOExpression]): Option[BigOExpression] = {
-    implementation.timeWithSubstitutions((use) => otherCosts.get(use.name))
+    val internalCosts = parameters.map(_ -> ConstantTime).toMap
+    implementation.timeWithSubstitutions((use) => (internalCosts ++ otherCosts).get(use.name))
   }
 
-  def methodsUsed: List[String] = implementation.allMethodUses.map(_.name)
+  def freeVariables: List[String] = implementation.allMethodUses.map(_.name).filter(!parameters.contains(_))
 }
 
 case class MethodProperty(name: String) {

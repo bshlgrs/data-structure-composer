@@ -19,6 +19,6 @@ case class Library(implementations: List[Implementation], structures: List[DataS
   }
 
   def implementationsWhichUse(methodName: String): List[Implementation] = {
-    implementations.filter(_.methodsUsed.contains(methodName))
+    implementations.filter(_.freeVariables.contains(methodName))
   }
 }
