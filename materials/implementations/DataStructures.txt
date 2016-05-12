@@ -1,10 +1,10 @@
 
 VectorList {
     getByIndex <- 1
-    insertAtFront! <- 1
     insertAtEnd! <- 1
     deleteAtIndex! <- n
     deleteBetweenNodes! <- n
+    deleteAtEnd! <- 1
 }
 
 InvertibleMonoidMemoizer[f] if f.invertible {
@@ -16,6 +16,8 @@ InvertibleMonoidMemoizer[f] if f.invertible {
 
 RedBlackTreeList[f] {
     getByIndex <- log(n)
+    getNext <- 1
+    getPrev <- 1
     insertNextToNode! <- 1 + f
     // check this
     deleteNode! <- 1 + f
@@ -26,6 +28,10 @@ RedBlackTreeList[f] {
 
 OrderedRedBlackTree[f] {
     unorderedEach <- n
+    getNext <- 1
+    getPrev <- 1
+    getFirst <- 1
+    getLast <- 1
     findFirstBy[f] <- 1
     findLastBy[f] <- 1
     findKthBy[f] <- log(n)

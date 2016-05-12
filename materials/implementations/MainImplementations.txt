@@ -14,17 +14,20 @@ each[f] <- getFirst + getNext * n + f * n
 
 // insertions
 insertAtEnd! <- getLast + insertAfterEndNode!
+insertAfterEndNode! <- insertAtEnd!
 insertAfterEndNode! <- insertAfterNode!
 insertBeforeFrontNode! <- insertBeforeNode!
 insertAtFront! <- getFirst + insertBeforeFrontNode!
-insertAtIndex! <- getByIndex + (insertAfterNode! | insertBeforeNode! )
+insertAtIndex! <- getByIndex + (insertAfterNode! | insertBeforeNode!)
 insertAfterNode! <- insertNextToNode!
 insertBeforeNode! <- insertNextToNode!
 extend! <- getLast + insertAfterEndNode! * n
 
 // deletions
 deleteAtIndex! <- getAtIndex + deleteNode!
+deleteFirst! <- deleteAtIndex!
 deleteFirst! <- getFirst + deleteNodeWhichIsFirst!
+deleteLast! <- deleteAtIndex!
 deleteLast! <- getLast + deleteNodeWhichIsLast!
 deleteNodeWhichIsFirst! <- deleteNode!
 deleteNodeWhichIsLast! <- deleteNode!

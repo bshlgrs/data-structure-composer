@@ -1,8 +1,7 @@
-import java.awt.Container
-
 /**
   * Created by buck on 5/7/16.
   */
+
 
 case class Implementation(methodName: String,
                           parameters: List[String],
@@ -19,6 +18,14 @@ case class Implementation(methodName: String,
   def isSuperSimple: Boolean = {
     parameters.isEmpty && predicates.isEmpty
   }
+
+  def timeOnOwn: Option[BigOExpression] = implementation.timeOnOwn
+
+  def timeWith(otherCosts: Map[String, BigOExpression]): Option[BigOExpression] = {
+    implementation.timeWithSubstitutions((use) => otherCosts.get(use.name))
+  }
+
+  def methodsUsed: List[String] = implementation.allMethodUses.map(_.name)
 }
 
 case class MethodProperty(name: String) {
@@ -37,6 +44,42 @@ abstract class ImplementationExpr {
     case Product(args) => args.map(_.toString).mkString(" * ")
     case MinimumOf(args) => "(" + args.map(_.toString).mkString(" | ") + ")"
     case Constant(expr) => expr.toShortString
+  }
+
+  def timeWithSubstitutions(substitute: MethodUse => Option[BigOExpression]): Option[BigOExpression] = this match {
+    case mu: MethodUse => substitute(mu)
+    case Sum(args) =>
+      val subs = args.map(_.timeWithSubstitutions(substitute))
+      subs.reduce((xOpt: Option[BigOExpression], yOpt: Option[BigOExpression]) => (xOpt, yOpt) match {
+        case (Some(x), Some(y)) => Some(x + y)
+        case _ => None
+      })
+    case Product(args) =>
+      val subs = args.map(_.timeWithSubstitutions(substitute))
+      subs.reduce((xOpt: Option[BigOExpression], yOpt: Option[BigOExpression]) => (xOpt, yOpt) match {
+        case (Some(x), Some(y)) => Some(x * y)
+        case _ => None
+      })
+    case MinimumOf(args) =>
+      args.map(_.timeWithSubstitutions(substitute)).flatMap(_.toList) match {
+        case Nil => None
+        case list => Some(list.reduce(_ or _))
+      }
+    case Constant(x) => Some(x)
+  }
+
+  // if no other methods are defined, how long will this take
+  lazy val timeOnOwn: Option[BigOExpression] = {
+    timeWithSubstitutions((x) => None)
+  }
+
+  def allMethodUses: List[MethodUse] = this match {
+    case MethodUse(name, Nil) => List(MethodUse(name, Nil))
+    case MethodUse(name, args) => List(MethodUse(name, args))
+    case Sum(args) => args.flatMap(_.allMethodUses)
+    case Product(args) => args.flatMap(_.allMethodUses)
+    case MinimumOf(args) => args.flatMap(_.allMethodUses)
+    case Constant(expr) => Nil
   }
 
   def +(other: ImplementationExpr) = (this, other) match {
@@ -86,7 +129,6 @@ abstract class FunctionExpr {
       s"func$propertyString <- $implementation"
     }
   }
-
 }
 
 case class MethodFunctionExpr(name: String, args: List[FunctionExpr]) extends FunctionExpr

@@ -10,4 +10,6 @@ case class DataStructure(name: String,
     val predicateString = if (predicates.nonEmpty) s" if ${predicates.map(_.toString).mkString(", ")}" else ""
     s"$name$parameterString$predicateString {\n${implementations.map("    " + _.toString).mkString("\n")}\n}"
   }
+
+  def isSuperSimple: Boolean = parameters.isEmpty
 }

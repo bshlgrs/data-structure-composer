@@ -17,4 +17,8 @@ case class Library(implementations: List[Implementation], structures: List[DataS
   def simpleImplementationsForMethod(methodName: String): List[Implementation] = {
     methodNameToImplementationsMap(methodName).filter(_.isSuperSimple)
   }
+
+  def implementationsWhichUse(methodName: String): List[Implementation] = {
+    implementations.filter(_.methodsUsed.contains(methodName))
+  }
 }
