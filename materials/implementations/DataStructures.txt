@@ -1,6 +1,15 @@
 
+Array {
+    getByIndex <- 1
+    deleteAtIndex! <- n
+    deleteBetweenNodes! <- n
+    deleteAtEnd! <- 1
+    updateNode! <- 1
+}
+
 VectorList {
     getByIndex <- 1
+    updateNode! <- 1
     insertAtEnd! <- 1
     deleteAtIndex! <- n
     deleteBetweenNodes! <- n
@@ -19,6 +28,7 @@ RedBlackTreeList[f] {
     getNext <- 1
     getPrev <- 1
     insertNextToNode! <- 1 + f
+    updateNode! <- 1
     // check this
     deleteNode! <- 1 + f
     deleteBetweenNodes! <- log(n) * (1 + f)
@@ -32,6 +42,7 @@ OrderedRedBlackTree[f] {
     getPrev <- 1
     getFirst <- 1
     getLast <- 1
+    updateNode! <- 1
     findFirstBy[f] <- 1
     findLastBy[f] <- 1
     findKthBy[f] <- log(n)
@@ -41,12 +52,14 @@ OrderedRedBlackTree[f] {
 }
 
 HistogramHash[f] {
+    updateNode! <- f
     unorderedEach <- n
-    insertAtIndex! <- 1
-    deleteNode! <- 1
+    insertAtIndex! <- f
+    deleteNode! <- f
     countOfEquivalenceClass[f] <- 1
 }
 
+// I'm not sure what this data structure is
 SizeOrderedHistogramTree[f] {
     insertByIndex! <- log(n) + f
     deleteNode! <- 1

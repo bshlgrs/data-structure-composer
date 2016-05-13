@@ -113,7 +113,7 @@ I have parsers to get me data structures and implementations.
 
 Both data structures and implementations are parameterizable.
 
-### Step 1
+### Step 1 - DONE!
 
 Given an unparameterized data structure, choose implementations for all methods, but ignoring parameterization. I need some way of knowing from each implementation whether it came from the data structure or not.
 
@@ -121,10 +121,17 @@ Given an unparameterized data structure, choose implementations for all methods,
 
 Given an unparameterized data structure, choose implementations for all the methods, including the ones which are implemented via a parameterized implementation like `mostCommonElement <- mostNumerousEquivalenceClass[_]`.
 
-This will involve dealing with predicates
+This will involve dealing with predicates.
 
-### After that
+This adds a few complexities.
 
-Things I'll need to support:
+To start with, it means that I need to have multiple different things in my priority queue: methods both with and without free variables. I might need `forall f: unorderedEach[f]` and also `unorderedEach[:getMax]`
 
-- 
+
+
+
+----
+
+Things to do after this:
+
+- **Data views.** There's a sense in which arrays are naturally 
