@@ -18,7 +18,8 @@ insertAfterEndNode! <- insertAtEnd!
 insertAfterEndNode! <- insertAfterNode!
 insertBeforeFrontNode! <- insertBeforeNode!
 insertAtFront! <- getFirst + insertBeforeFrontNode!
-insertAtIndex! <- getByIndex + (insertAfterNode! | insertBeforeNode!)
+insertAtIndex! <- getByIndex + insertAfterNode!
+insertAtIndex! <- getByIndex + insertBeforeNode!
 insertAfterNode! <- insertNextToNode!
 insertBeforeNode! <- insertNextToNode!
 extend! <- getLast + insertAfterEndNode! * n
@@ -34,6 +35,7 @@ deleteNodeWhichIsLast! <- deleteNode!
 deleteBetweenNodes! <- n * (deleteNode! + getNext)
 deleteAtIndex! <- deleteBetweenNodes!
 
+deleteFirstNodeWithValue! <- getFirstNodeWithValue + deleteNode!
 
 // updates
 updateFirstNode! <- getFirst + updateNodeWhichIsFirst!
@@ -55,16 +57,18 @@ getFirstBy[f] <- getKthBy[f]
 getLastBy[f] <- reduce[func{commutative} <- f, _]
 getLastBy[f] <- getKthBy[f]
 countBetweenBy[f] <- unorderedEach[f]
-getMaximum <- getFirstBy[_]
-getMinimum <- getLastBy[_]
+getMaximum <- getFirstBy[valueOrdering]
+getMinimum <- getLastBy[valueOrdering]
 deleteMinimumBy![f] <- getMinimumBy[f] + deleteNode!
 deleteMaximumBy![f] <- getMaximumBy[f] + deleteNode!
-deleteMinimum! <- deleteMinimumBy![_]
-deleteMaximum! <- deleteMaximumBy![_]
+deleteMinimum! <- deleteMinimumBy![valueOrdering]
+deleteMaximum! <- deleteMaximumBy![valueOrdering]
+getFirstNodeWithValue[f] <- unorderedEach[f]
 
 // other reductions
 count <- unorderedEach[_]
 contains <- count
+contains <- getFirstNodeWithValue[f]
 select[f] <- unorderedEach[f]
 reduce[f, zero] <- zero + each[f]
 reduce[f, zero] if f.commutative <- zero + unorderedEach[f]
@@ -74,14 +78,15 @@ mostNumerousEquivalenceClass[f] <- unorderedEach[f]
 mostCommonElement <- mostNumerousEquivalenceClass[_]
 
 // eg, querying for the sum of the elements between indexes i and j
-twoSidedIndexRangeQuery[f] <- unorderedEach[f]
+twoSidedIndexRangeQuery[reduction] <- unorderedEach[reduction]
 // eg, querying for the sum of the elements between index 0 and index i
-oneSidedIndexRangeQuery[f] <- unorderedEach[f]
+oneSidedIndexRangeQuery[reduction] <- unorderedEach[reduction]
+minimumRangeQuery <- twoSidedIndexRangeQuery[_]
 
-// eg, querying for the number of elements whose values are in the range (a, b)
-twoSidedValueRangeQuery[f,g] <- unorderedEach[func <- f + g]
-// eg, querying for the sum of the k smallest elements
-oneSidedValueRangeQuery[f,g] <- unorderedEach[func <- f + g]
+// // eg, querying for the number of elements whose values are in the range (a, b)
+// twoSidedValueRangeQuery[f,reduction] <- unorderedEach[func <- f + reduction]
+// // eg, querying for the sum of the k smallest elements
+// oneSidedValueRangeQuery[f,reduction] <- unorderedEach[func <- f + reduction]
+// oneSidedValueRangeQuery[f,reduction] <- twoSidedValueRangeQuery[func <- f + reduction]
 
-
-
+valueOrdering <- 1

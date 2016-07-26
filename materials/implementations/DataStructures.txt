@@ -23,6 +23,24 @@ InvertibleMonoidMemoizer[f] if f.invertible {
     insertNextToNode! if f.commutative <- f
 }
 
+StackMemoizer[f] {
+    insertAtEnd! <- f
+    reduce[f] <- 1
+    oneSidedRangeQuery[f] <- 1
+}
+
+InvertibleSquareRootBlocks[f] if f.invertible {
+    insertAtEnd! <- 1
+    updateNode! <- 1
+    twoSidedRangeQuery[f] <- sqrt(n)
+}
+
+SquareRootBlocks[f] {
+    insertAtEnd! <- 1
+    updateNode! <- sqrt(n)
+    twoSidedRangeQuery[f] <- sqrt(n)
+}
+
 RedBlackTreeList[f] {
     getByIndex <- log(n)
     getNext <- 1
@@ -33,22 +51,29 @@ RedBlackTreeList[f] {
     deleteNode! <- 1 + f
     deleteBetweenNodes! <- log(n) * (1 + f)
     arbitraryRangeQuery[f] <- log(n)
-    extend! <- log(n) + n
+    extend! <- n
+    oneSidedIndexRangeQuery[f] <- log(n)
+    twoSidedIndexRangeQuery[f] <- log(n)
+
 }
 
-OrderedRedBlackTree[f] {
+// ordered by f, memoizing reductions on g
+OrderedRedBlackTree[f, g] {
     unorderedEach <- n
     getNext <- 1
     getPrev <- 1
     getFirst <- 1
     getLast <- 1
-    updateNode! <- 1
+    updateNode! <- 1 + g
     findFirstBy[f] <- 1
     findLastBy[f] <- 1
     findKthBy[f] <- log(n)
-    insertAtIndex! <- log(n)
-    deleteNode! <- 1
+    insertAtIndex! <- log(n) + g
+    getFirstNodeWithValue[f] <- log(n)
+    deleteNode! <- 1 + g
     countBetweenBy[f] <- log(n)
+    twoSidedValueRangeQuery[g] <- g * log(n)
+    oneSidedValueRangeQuery[g] <- g * log(n)
 }
 
 HistogramHash[f] {

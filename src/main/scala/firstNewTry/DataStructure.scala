@@ -1,10 +1,12 @@
+package firstNewTry
+
 /**
   * Created by buck on 5/8/16.
   */
 case class DataStructure(name: String,
                          parameters: List[String],
-                         predicates: List[ImplementationPredicate],
-                         implementations: List[Implementation]) {
+                         predicates: List[ImplPredicate],
+                         implementations: List[Impl]) {
   override def toString: String = {
     val parameterString = if (parameters.nonEmpty) s"[${parameters.mkString(",")}]" else ""
     val predicateString = if (predicates.nonEmpty) s" if ${predicates.map(_.toString).mkString(", ")}" else ""

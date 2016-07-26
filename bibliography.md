@@ -40,3 +40,5 @@ Pooya Davoodi, [Data Structures: Range Queries and
   We present a succinct dynamic data structure that supports traversing low-arity
   cardinal trees while answering queries during the traversal.
 
+
+https://en.wikipedia.org/wiki/Van_Emde_Boas_tree

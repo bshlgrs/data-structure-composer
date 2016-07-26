@@ -1,0 +1,35 @@
+adt MaxStack {
+    insertAtEnd!
+    getAtEnd
+    deleteAtEnd!
+    getMaximumBy[_]
+}
+
+adt RangeMinimumQuery {
+    extend!: 1
+    twoSidedIndexRangeQuery[1]
+}
+
+adt Queue {
+    insertAtEnd!
+    getAtStart
+    deleteAtStart!
+}
+
+adt QueueWithRandomDeletion extends Queue {
+    deleteByIndex!
+}
+
+adt SetWithKthSmallest {
+    setInsert!
+    setRemove!
+    getKthSmallest
+}
+
+adt ListWithGetIndexOfMin extends List {
+    getMinimum
+}
+
+adt ListWithGetMax extends List {
+    getMaximum
+}

@@ -1,8 +1,11 @@
+package firstNewTry
+
 /**
   * Created by buck on 5/1/16.
   */
-case class BigOExpression(powerOfN: Float, powerOfLogN: Int) extends Ordered[BigOExpression] {
-  def compare(other: BigOExpression): Int = {
+
+case class BigOLiteral(powerOfN: Double, powerOfLogN: Int) extends Ordered[BigOLiteral] {
+  def compare(other: BigOLiteral): Int = {
     val differenceInPowerOfN = this.powerOfN - other.powerOfN
 
     if (differenceInPowerOfN != 0)
@@ -10,13 +13,13 @@ case class BigOExpression(powerOfN: Float, powerOfLogN: Int) extends Ordered[Big
     else
       this.powerOfLogN - other.powerOfLogN
   }
-  def +(other: BigOExpression): BigOExpression = {
+  def +(other: BigOLiteral): BigOLiteral = {
     if (this > other) this else other
   }
-  def *(other: BigOExpression): BigOExpression = {
-    BigOExpression(this.powerOfN + other.powerOfN, this.powerOfLogN + other.powerOfLogN)
+  def *(other: BigOLiteral): BigOLiteral = {
+    BigOLiteral(this.powerOfN + other.powerOfN, this.powerOfLogN + other.powerOfLogN)
   }
-  def or(other: BigOExpression): BigOExpression = {
+  def or(other: BigOLiteral): BigOLiteral = {
     if (this > other) other else this
   }
 
@@ -34,6 +37,7 @@ case class BigOExpression(powerOfN: Float, powerOfLogN: Int) extends Ordered[Big
   }
 }
 
-object ConstantTime extends BigOExpression(0, 0)
-object LogTime extends BigOExpression(0, 1)
-object LinearTime extends BigOExpression(1, 0)
+object ConstantTime extends BigOLiteral(0, 0)
+object LogTime extends BigOLiteral(0, 1)
+object SqrtTime extends BigOLiteral(0.5, 0)
+object LinearTime extends BigOLiteral(1, 0)

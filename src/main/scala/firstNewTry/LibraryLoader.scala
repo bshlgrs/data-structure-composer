@@ -1,8 +1,9 @@
+package firstNewTry
+
 import org.parboiled2.ParseError
 
 import scala.io.Source
-import scala.util.{Try, Failure, Success}
-import java.io.File
+import scala.util.{Failure, Success, Try}
 
 /**
   * Created by buck on 5/9/16.
@@ -20,9 +21,13 @@ object LibraryLoader {
     } yield Library(implementations, dataStructures)).get
   }
 
-  private def parseFile(path: String): Try[(List[Implementation], List[DataStructure])] = {
+  private def parseFile(path: String): Try[(List[Impl], List[DataStructure])] = {
     val text = Source.fromFile(path).getLines.toList.mkString("\n")
 
-    new ImplementationParser(text).InputImplementationFile.run()
+    new ImplParser(text).InputImplementationFile.run() match {
+      case Success(x) => Success(x)
+      case Failure(x: ParseError) => Failure(new RuntimeException(new ImplParser(text).formatError(x)))
+      case Failure(x) => Failure(x)
+    }
   }
 }
