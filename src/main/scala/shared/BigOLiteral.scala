@@ -1,10 +1,9 @@
-package firstNewTry
+package shared
 
 /**
   * Created by buck on 5/1/16.
   */
-
-case class BigOLiteral(powerOfN: Double, powerOfLogN: Int) extends Ordered[BigOLiteral] {
+case class BigOLiteral(powerOfN: Float, powerOfLogN: Int) extends Ordered[BigOLiteral] {
   def compare(other: BigOLiteral): Int = {
     val differenceInPowerOfN = this.powerOfN - other.powerOfN
 
@@ -39,5 +38,4 @@ case class BigOLiteral(powerOfN: Double, powerOfLogN: Int) extends Ordered[BigOL
 
 object ConstantTime extends BigOLiteral(0, 0)
 object LogTime extends BigOLiteral(0, 1)
-object SqrtTime extends BigOLiteral(0.5, 0)
 object LinearTime extends BigOLiteral(1, 0)
