@@ -2,8 +2,8 @@
 
 If this project went really well, what would it be able to do?
 
-- min stack
-- min queue
+- min stack (Implement a stack data structure which supports `insert`, `pop`, and `findMinimumValue`, all in constant time)
+- min queue (like the above, but a queue)
 - Time-travelling key value store
 - List with getIndexOfMax
 - List with getMax
