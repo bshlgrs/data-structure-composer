@@ -38,4 +38,8 @@ case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map())
       Set()
     }
   }
+
+  def toLongString: String = {
+    "Search Result {" + impls.values.map(_.toLongString).mkString("\n") + "}"
+  }
 }

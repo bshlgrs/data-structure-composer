@@ -51,4 +51,8 @@ case class SingleMethodImplOptions(options: Set[UnfreeImpl]) {
   def implsWhichMatchConditions(implPredicates: ImplPredicateList): Set[UnfreeImpl] = {
     options.filter((u: UnfreeImpl) => u.compatibleWithConditions(implPredicates))
   }
+
+  def toLongString: String = {
+    s"  $name {\n" + options.toList.map((unfreeImpl) => s"    ${unfreeImpl.lhs.conditions} <- ${unfreeImpl.cost}").mkString("\n") + "\n  }"
+  }
 }

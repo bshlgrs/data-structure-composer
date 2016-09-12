@@ -62,6 +62,6 @@ object Chooser2 {
   }
 
   def main(args: Array[String]) {
-    println(getAllTimesForDataStructures(implLibrary, DataStructureLibrary.library))
+    println(getAllTimesForDataStructures(implLibrary, DataStructureLibrary.library).toLongString)
   }
 }
