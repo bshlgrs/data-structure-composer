@@ -6,12 +6,14 @@ import shared.BigOLiteral
   * Created by buck on 9/10/16.
   */
 case class SingleMethodImplOptions(options: Set[UnfreeImpl]) {
-  assert(options.forall((u: UnfreeImpl) => u.lhs.name == name))
+  assert(options.forall((u: UnfreeImpl) => u.lhs.name == name),
+    s"SingleMethodImplOptions should only be for a single method, but you have the following unfreeImpls: $options" +
+      s"with names ${options.map(_.lhs.name)} and name $name")
 
   // TODO
   // This should be a dominance frontier, but I'm a terrible programmer, so it's not.
 
-  val name: MethodName = options.head.lhs.name
+  def name: MethodName = options.head.lhs.name
 
   def bestImplementationForConditions(conditions: ImplPredicateList): Option[UnfreeImpl] = {
     implsWhichMatchConditions(conditions).toList.sortBy(_.cost).headOption
