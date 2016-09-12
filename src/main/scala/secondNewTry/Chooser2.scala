@@ -23,7 +23,8 @@ object Chooser2 {
     Impl(ImplLhs("each", List("f")),
       ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> LinearTime, MethodExpr("f") -> LinearTime))),
     Impl(ImplLhs("each", List("f")),
-      ImplRhs(ConstantTime, Map(MethodExpr("getFirst") -> LinearTime, MethodExpr("getNext") -> LinearTime, MethodExpr("f") -> LinearTime)))
+      ImplRhs(ConstantTime, Map(MethodExpr("getFirst") -> LinearTime, MethodExpr("getNext") -> LinearTime, MethodExpr("f") -> LinearTime))),
+    Impl(ImplLhs("getMax"), ImplRhs(ConstantTime, Map(MethodExpr("each") -> ConstantTime)))
   )
 
   def getAllTimes(impls: Set[Impl]): SearchResult = {
@@ -38,18 +39,27 @@ object Chooser2 {
     while (queue.nonEmpty) {
       val (time, unfreeImpl) = queue.dequeue()
 
+      println(s"----------\n\nQueue = $queue\ntime = $time\nunfreeImpl = $unfreeImpl. Search result:\n ${searchResult.toLongString}")
+
       if (searchResult.isOtherImplUseful(unfreeImpl)) {
+        println("It's useful! Adding it now...")
         searchResult = searchResult.addImpl(unfreeImpl)
 
-        for (impl <- impls) {
-          // if we don't already have anything selected
-          val neighborUnfreeImpls = impl.bindToAllOptions(searchResult)
+        for (otherImpl <- impls) {
+          // So we have a random impl. Let's see if the unfreeImpl we just settled on is useful for that impl.
+          // It's only useful if unfreeImpl's methodName is used by the rhs of the otherImpl (this condition is weaker than it could be)
 
-          neighborUnfreeImpls.foreach((u: UnfreeImpl) =>
-            if (searchResult.isOtherImplUseful(u)) {
-              queue ++= List((u.cost, u))
-            }
-          )
+          val otherImplMethodsUsed = otherImpl.rhs.costs.keys.collect({ case MethodExpr(name, _) => name }).toList
+
+          if (otherImplMethodsUsed.contains(unfreeImpl.lhs.name)) {
+            val neighborUnfreeImpls = otherImpl.bindToAllOptions(searchResult)
+
+            neighborUnfreeImpls.foreach((u: UnfreeImpl) =>
+              if (searchResult.isOtherImplUseful(u)) {
+                queue ++= List((u.cost, u))
+              }
+            )
+          }
         }
       }
     }
