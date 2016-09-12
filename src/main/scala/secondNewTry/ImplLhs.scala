@@ -1,13 +1,15 @@
 package secondNewTry
 
+import secondNewTry.ImplLhs.FunctionCondition
+
 /**
   * Created by buck on 7/25/16.
   */
-case class ImplLhs(name: String, parameters: List[String] = Nil, conditions: Set[ImplPredicate] = Set()) {
+case class ImplLhs(name: MethodName, parameters: List[String], conditions: ImplPredicateList) {
   // x dominates y if x can be used in every situation where y can be used
   def dominance(other: ImplLhs): Dominance = {
     if (name == other.name) {
-      other.normalizedConditionsList.zip(normalizedConditionsList).map({
+      other.conditions.list.zip(other.conditions.list).map({
         case (otherConditions: Set[String], thisConditions: Set[String]) =>
           Dominance.fromTwoBools(
             thisConditions.subsetOf(otherConditions),
@@ -20,15 +22,29 @@ case class ImplLhs(name: String, parameters: List[String] = Nil, conditions: Set
     }
   }
 
-  def normalizedConditionsList: List[Set[String]] = {
-    parameters.zipWithIndex.map { case (parameterName, index) =>
-      conditions.filter(_.parameterName == parameterName).map(_.property)
-    }
-  }
-
   def canImplement(methodExpr: MethodExpr): Boolean = {
     methodExpr.canBeImplementedBy(this)
   }
+
+  def addConditions(conditions: ImplPredicateList): ImplLhs = {
+    this.copy(conditions = this.conditions.and(conditions))
+  }
 }
 
-case class ImplPredicate(parameterName: String, property: String)
+object ImplLhs {
+  def apply(name: String, parameters: List[String] = Nil, conditions: ImplPredicateList = ImplPredicateList(Nil)): ImplLhs = {
+    ImplLhs(MethodName(name), parameters, conditions)
+  }
+
+  type FunctionCondition = String
+}
+
+case class ImplPredicate(parameterIdx: Int, property: String)
+
+case class ImplPredicateList(list: List[Set[FunctionCondition]]) {
+  def and(other: ImplPredicateList): ImplPredicateList = {
+    assert(this.list.length == other.list.length)
+
+    ImplPredicateList(this.list.zip(other.list).map({ case ((x, y)) => x union y }))
+  }
+}

@@ -26,44 +26,42 @@ object Chooser2 {
       ImplRhs(ConstantTime, Map(MethodExpr("getFirst") -> LinearTime, MethodExpr("getNext") -> LinearTime, MethodExpr("f") -> LinearTime)))
   )
 
-  def getAllTimes(impls: Set[Impl]): Map[ImplLhs, CostFunction] = {
+  def getAllTimes(impls: Set[Impl]): SearchResult = {
     val queue = mutable.PriorityQueue[(BigOLiteral, UnfreeImpl)]()(Ordering.by((x: (BigOLiteral, UnfreeImpl)) => x._1).reverse)
 
-    val selectedImpls = mutable.Set[Impl]()
+    queue ++= impls.flatMap(_.toUnfreeImpl).map((u: UnfreeImpl) => (u.cost, u)).toList
 
-    def queuePlusSelected: Iterator[Impl] = queue.toIterator.map(_._2) ++ selectedImpls
+    var searchResult = SearchResult()
+
+    def queuePlusSelected: Iterator[Impl] = queue.toIterator.map(_._2) ++ searchResult.allImpls
 
     while (queue.nonEmpty) {
-      val (time, impl) = queue.dequeue()
+      val (time, unfreeImpl) = queue.dequeue()
 
-      if (!(queuePlusSelected.contains(impl) || selectedImpls.exists(_.lhs.dominance(impl.lhs)))) {
-        selectedImpls.add(impl)
+      if (searchResult.isOtherImplUseful(unfreeImpl)) {
+        searchResult = searchResult.addImpl(unfreeImpl)
 
-        for (neighbor <- impls) {
+        for (impl <- impls) {
           // if we don't already have anything selected
-          if (!selectedImpls.exists(_.lhs.dominance(neighbor.lhs))) {
-            neighbor.runtime(selectedImpls)
-          }
+          val neighborUnfreeImpls = impl.bindToAllOptions(searchResult)
+
+          neighborUnfreeImpls.foreach((u: UnfreeImpl) =>
+            if (searchResult.isOtherImplUseful(u)) {
+              queue ++= List((u.cost, u))
+            }
+          )
         }
       }
     }
-    // val queue = priority queue from Impl to CostFunction
-    // while queue:
-    //   impl = queue.pop
-    //   if node is already totally explored, continue. (Remember to take predicates into account)
-    //   set official time for impl to this time
-    //   for impl in implementations which use this implrhs: (might as well just filter)
-    //     if it's now doable but not already in the queue, stick it in! (For efficiency, don't do this if it's dominated
-    //        by something already in the queue)
-    // return costs
-    ???
+
+    searchResult
   }
 
   def getAllTimesForDataStructures(impls: Set[Impl], dataStructures: Set[SimpleDataStructure]) = {
-
+    getAllTimes(impls.union(dataStructures.flatMap(_.sourcedImpls)))
   }
 
   def main(args: Array[String]) {
-    getAllTimesForDataStructures(implLibrary, DataStructureLibrary.library)
+    println(getAllTimesForDataStructures(implLibrary, DataStructureLibrary.library))
   }
 }

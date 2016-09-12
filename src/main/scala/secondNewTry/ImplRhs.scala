@@ -4,6 +4,7 @@ import shared.{ConstantTime, BigOLiteral}
 
 /**
   * Created by buck on 7/25/16.
+  *
   */
 case class ImplRhs(constant: BigOLiteral, costs: Map[MethodExpr, BigOLiteral] = Map()) {
   def +(other: ImplRhs): ImplRhs = {
@@ -14,5 +15,18 @@ case class ImplRhs(constant: BigOLiteral, costs: Map[MethodExpr, BigOLiteral] = 
     }
     ImplRhs(this.constant + other.constant, combinedCosts)
   }
+
+//  // sub in values
+//  def bindToMap(settledImpls: Set[UnfreeImpl]): ImplRhs = {
+//    costs.foldLeft(ImplRhs(this.constant))({case (implRhs: ImplRhs, (methodExpr: MethodExpr, lit: BigOLiteral)) =>
+//      methodExpr.getFastestRelevantImplementationIfAny(settledImpls) match {
+//        case None => implRhs + ImplRhs(ConstantTime, Map(methodExpr -> lit))
+//        case Some(unfreeImpl) => implRhs + unfreeImpl.rhs
+//      }
+//    })
+//  }
 }
 
+//case object ImplRhs {
+//  val ConstantTime: ImplRhs = ImplRhs(ConstantTime)
+//}

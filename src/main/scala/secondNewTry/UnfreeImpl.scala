@@ -6,34 +6,29 @@ import shared.BigOLiteral
   * Created by buck on 7/31/16.
   */
 
+
+/// The RHS here is just an expression like n**2
+// The LHS is a list of conditions that need to be used for this implementation to work
 case class UnfreeImpl(override val lhs: ImplLhs,
-                      override val rhs: ImplRhs,
-                      override val source: Option[ImplSource] = None) extends Impl(lhs, rhs, source) {
-  // TODO: assert that all of the names are in the LHS
-  assert(rhs.costs.keys.forall((k: MethodExpr) => true))
+                      cost: BigOLiteral,
+                      override val source: Option[ImplSource] = None) extends Impl(lhs, ImplRhs(cost), source) {
 
-  // the minimum cost that this implementation could possibly have.
-  def minCost: BigOLiteral = List(rhs.costs.values.min, rhs.constant).min
-
-  def normalizedParameterCosts: List[BigOLiteral] = {
-    // None of the RHS MethodExprs should have args.
-    lhs.parameters.map((name) => rhs.costs(MethodExpr(name)))
-  }
-
-  def getDominance(other: UnfreeImpl): Dominance = {
-    UnfreeImplDominance(this, other)
+  // Does this UnfreeImpl work with a given set of conditions?
+  def compatibleWithConditions(conditions: ImplPredicateList): Boolean = {
+    lhs.conditions.list.zip(conditions.list).forall({case ((thisConditions, thoseConditions)) =>
+      thisConditions subsetOf thoseConditions})
   }
 }
 
-object UnfreeImplDominance extends DominanceFunction[UnfreeImpl] {
-  def apply(x: UnfreeImpl, y: UnfreeImpl): Dominance = {
-    if (x.lhs.name != y.lhs.name) {
-      Neither
-    } else {
-      val generalityDominance = y.lhs.dominance(x.lhs)
-      val timeDominance = Dominance.fromSeqOfOrderedThings(
-        y.normalizedParameterCosts.zip(x.normalizedParameterCosts))
-      generalityDominance.infimum(timeDominance)
-    }
-  }
-}
+//object UnfreeImplDominance extends DominanceFunction[UnfreeImpl] {
+//  def apply(x: UnfreeImpl, y: UnfreeImpl): Dominance = {
+//    if (x.lhs.name != y.lhs.name) {
+//      Neither
+//    } else {
+//      val generalityDominance = y.lhs.dominance(x.lhs)
+//      val timeDominance = Dominance.fromSeqOfOrderedThings(
+//        y.normalizedParameterCosts.zip(x.normalizedParameterCosts))
+//      generalityDominance.infimum(timeDominance)
+//    }
+//  }
+//}
