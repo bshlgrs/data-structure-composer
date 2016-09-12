@@ -61,7 +61,11 @@ object Chooser2 {
     getAllTimes(impls.union(dataStructures.flatMap(_.sourcedImpls)))
   }
 
+  def getAllTimesForDataStructure(impls: Set[Impl], dataStructure: SimpleDataStructure) = {
+    getAllTimes(impls.union(dataStructure.sourcedImpls))
+  }
+
   def main(args: Array[String]) {
-    println(getAllTimesForDataStructures(implLibrary, DataStructureLibrary.library).toLongString)
+    println(getAllTimesForDataStructure(implLibrary, DataStructureLibrary.library("ReadOnlyLinkedList")).toLongString)
   }
 }

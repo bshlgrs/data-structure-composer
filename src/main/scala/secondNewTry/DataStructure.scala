@@ -12,12 +12,18 @@ case class SimpleDataStructure(name: String, impls: Set[Impl]) {
 }
 
 object DataStructureLibrary {
-  val library = Set(
-    SimpleDataStructure("ArrayList", Set(
+  val library = Map(
+    "ArrayList" -> SimpleDataStructure("ArrayList", Set(
       Impl(ImplLhs("getByIndex"), ImplRhs(ConstantTime)),
       Impl(ImplLhs("insertAtEnd!"), ImplRhs(ConstantTime)),
       Impl(ImplLhs("deleteLast!"), ImplRhs(ConstantTime)),
       Impl(ImplLhs("updateNode!"), ImplRhs(ConstantTime))
+    )),
+    "ReadOnlyLinkedList" -> SimpleDataStructure("ReadOnlyLinkedList", Set(
+      Impl(ImplLhs("getFirst"), ImplRhs(ConstantTime)),
+      Impl(ImplLhs("getNext"), ImplRhs(ConstantTime))
     ))
   )
+
+
 }

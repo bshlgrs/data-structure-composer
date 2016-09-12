@@ -40,6 +40,6 @@ case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map())
   }
 
   def toLongString: String = {
-    "Search Result {" + impls.values.map(_.toLongString).mkString("\n") + "}"
+    "Search Result {\n" + impls.values.map(_.toLongString).mkString("\n") + "\n}"
   }
 }

@@ -47,7 +47,7 @@ class Impl(val lhs: ImplLhs, val rhs: ImplRhs, val source: Option[ImplSource] = 
         } yield {
           UnfreeImpl(
             lhs.addConditions(option.lhs.conditions),
-            unfreeImpl.cost + option.cost,
+            unfreeImpl.cost + option.cost * methodCostWeight,
             source)
         }
       }
