@@ -1,6 +1,6 @@
-package secondNewTry
+package implementationSearcher
 
-import secondNewTry.ImplLhs.FunctionCondition
+import implementationSearcher.ImplLhs.FunctionCondition
 
 /**
   * Created by buck on 7/25/16.

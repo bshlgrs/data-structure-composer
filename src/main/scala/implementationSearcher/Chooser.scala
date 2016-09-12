@@ -1,4 +1,4 @@
-package secondNewTry
+package implementationSearcher
 
 import shared._
 
@@ -7,7 +7,7 @@ import scala.collection.mutable
 /**
   * Created by buck on 7/25/16.
   */
-object Chooser2 {
+object Chooser {
   type CostFunction = AffineFunction[String, BigOLiteral]
 
   val implLibrary = Set(
@@ -79,3 +79,4 @@ object Chooser2 {
     println(getAllTimesForDataStructure(implLibrary, DataStructureLibrary.library("ReadOnlyLinkedList")).toLongString)
   }
 }
+

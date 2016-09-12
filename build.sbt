@@ -6,5 +6,6 @@ scalaVersion := "2.11.8"
 
 libraryDependencies += "org.parboiled" %% "parboiled" % "2.1.3"
 libraryDependencies ++= Seq(
-  "com.chuusai" %% "shapeless" % "2.3.1"
+  "com.chuusai" %% "shapeless" % "2.3.1",
+  "com.lihaoyi" %% "fastparse" % "0.3.7"
 )

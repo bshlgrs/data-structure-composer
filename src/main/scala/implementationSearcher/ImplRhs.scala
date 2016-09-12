@@ -1,4 +1,4 @@
-package secondNewTry
+package implementationSearcher
 
 import shared.{ConstantTime, BigOLiteral}
 
