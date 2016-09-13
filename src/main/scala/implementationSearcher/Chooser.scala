@@ -24,7 +24,7 @@ object Chooser {
       ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> LinearTime, MethodExpr("f") -> LinearTime))),
     Impl(ImplLhs("each", List("f")),
       ImplRhs(ConstantTime, Map(MethodExpr("getFirst") -> LinearTime, MethodExpr("getNext") -> LinearTime, MethodExpr("f") -> LinearTime))),
-    Impl(ImplLhs("getMax"), ImplRhs(ConstantTime, Map(MethodExpr("each") -> ConstantTime)))
+    Impl(ImplLhs("getMax"), ImplRhs(ConstantTime, Map(MethodExpr("each", List(UnderscoreFunctionExpr)) -> ConstantTime)))
   )
 
   def getAllTimes(impls: Set[Impl]): SearchResult = {

@@ -33,7 +33,7 @@ class Impl(val lhs: ImplLhs, val rhs: ImplRhs, val source: Option[ImplSource] = 
           option <- options
         } yield {
           UnfreeImpl(
-            lhs.addConditions(option.lhs.conditions),
+            lhs, /// lhs.addConditions(option.lhs.conditions), TODO, OH GOD, FIX ME
             unfreeImpl.cost + option.cost * methodCostWeight,
             source)
         }
@@ -43,7 +43,7 @@ class Impl(val lhs: ImplLhs, val rhs: ImplRhs, val source: Option[ImplSource] = 
   }
 
   def unboundCosts: Map[MethodExpr, BigOLiteral] = {
-    rhs.costs.filterKeys((x) => !lhs.parameters.contains(x.name))
+    rhs.costs.filterKeys((x) => !lhs.parameters.contains(x.name.name))
   }
 
   def toUnfreeImpl: Option[UnfreeImpl] = {

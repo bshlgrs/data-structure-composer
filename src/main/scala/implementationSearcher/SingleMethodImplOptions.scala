@@ -21,7 +21,7 @@ case class SingleMethodImplOptions(options: Set[UnfreeImpl]) {
 
   def add(unfreeImpl: UnfreeImpl): SingleMethodImplOptions = {
     bestImplementationForConditions(unfreeImpl.lhs.conditions) match {
-      // TODO: This is really stupid
+      // TODO: This is really stupid--it doesn't correctly ensure that no items in the set are strictly dominated
       case Some(currentBest) => {
         if (currentBest.cost > unfreeImpl.cost) {
           SingleMethodImplOptions(options + unfreeImpl)
@@ -32,7 +32,6 @@ case class SingleMethodImplOptions(options: Set[UnfreeImpl]) {
       case None => SingleMethodImplOptions(options + unfreeImpl)
     }
   }
-
 
   def isOtherImplUseful(unfreeImpl: UnfreeImpl): Boolean = {
     bestImplementationForConditions(unfreeImpl.lhs.conditions) match {
