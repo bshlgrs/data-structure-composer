@@ -17,14 +17,18 @@ object Chooser {
       Map(MethodExpr("getFirst") -> ConstantTime, MethodExpr("getNext") -> LinearTime))),
     Impl(ImplLhs("getLast"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
     Impl(ImplLhs("getPrev"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
-
     Impl(ImplLhs("unorderedEach", List("f")),
       ImplRhs(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
     Impl(ImplLhs("each", List("f")),
       ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> LinearTime, MethodExpr("f") -> LinearTime))),
     Impl(ImplLhs("each", List("f")),
       ImplRhs(ConstantTime, Map(MethodExpr("getFirst") -> LinearTime, MethodExpr("getNext") -> LinearTime, MethodExpr("f") -> LinearTime))),
-    Impl(ImplLhs("getMax"), ImplRhs(ConstantTime, Map(MethodExpr("each", List(UnderscoreFunctionExpr)) -> ConstantTime)))
+    Impl(ImplLhs("getMax"), ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(AnonymousFunctionExpr(Set("commutative")))) -> ConstantTime))),
+    Impl(ImplLhs("getMaxEarlyBiased"), ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(UnderscoreFunctionExpr)) -> ConstantTime))),
+    Impl(ImplLhs("reduce", List("f")),
+      ImplRhs(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
+    Impl(ImplLhs("reduce", List("f"), Some(ImplPredicateList(List(Set("commutative"))))),
+      ImplRhs(ConstantTime, Map(MethodExpr("unorderedEach", List(NamedFunctionExpr("f"))) -> ConstantTime)))
   )
 
   def getAllTimes(impls: Set[Impl]): SearchResult = {
@@ -39,10 +43,10 @@ object Chooser {
     while (queue.nonEmpty) {
       val (time, unfreeImpl) = queue.dequeue()
 
-      println(s"----------\n\nQueue = $queue\ntime = $time\nunfreeImpl = $unfreeImpl. Search result:\n ${searchResult.toLongString}")
+//      println(s"----------\n\nQueue = $queue\ntime = $time\nunfreeImpl = $unfreeImpl. Search result:\n ${searchResult.toLongString}")
 
       if (searchResult.isOtherImplUseful(unfreeImpl)) {
-        println("It's useful! Adding it now...")
+//        println("It's useful! Adding it now...")
         searchResult = searchResult.addImpl(unfreeImpl)
 
         for (otherImpl <- impls) {
@@ -52,10 +56,10 @@ object Chooser {
           val otherImplMethodsUsed = otherImpl.rhs.costs.keys.collect({ case MethodExpr(name, _) => name }).toList
 
           if (otherImplMethodsUsed.contains(unfreeImpl.lhs.name)) {
-            println(s"Wow, this is used by $otherImpl")
+//            println(s"Wow, this is used by $otherImpl")
             val neighborUnfreeImpls = otherImpl.bindToAllOptions(searchResult)
 
-            println(s"neighborUnfreeImpls are $neighborUnfreeImpls")
+//            println(s"neighborUnfreeImpls are $neighborUnfreeImpls")
             neighborUnfreeImpls.foreach((u: UnfreeImpl) =>
               if (searchResult.isOtherImplUseful(u)) {
                 queue ++= List((u.cost, u))
