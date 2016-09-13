@@ -20,6 +20,11 @@ case class MethodExpr(name: MethodName, args: List[FunctionExpr]) {
     }
   }
 
+  override def toString: String = {
+    val argsString = if (args.isEmpty) "" else s"[${args.map(_.toString).mkString(", ")}]"
+    return name.name + argsString
+  }
+
   def conditions: ImplPredicateList = ImplPredicateList(args.map(_.conditions))
 
 //  // this should probably return a dominance frontier :'(

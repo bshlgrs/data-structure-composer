@@ -19,7 +19,7 @@ case class ImplRhs(constant: BigOLiteral, costs: Map[MethodExpr, BigOLiteral] = 
   override def toString: String = {
     lazy val variableCostString = costs
       .toList
-      .map({ case (m: MethodExpr, c: BigOLiteral) => if (c == ConstantTime) m.toString else s"$c * $m"})
+      .map({ case (m: MethodExpr, c: BigOLiteral) => if (c == ConstantTime) m.toString else s"${c.toShortString} * $m"})
       .mkString(" + ")
 
 
