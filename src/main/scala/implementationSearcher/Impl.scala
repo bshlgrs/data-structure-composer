@@ -24,7 +24,7 @@ class Impl(val lhs: ImplLhs, val rhs: ImplRhs, val source: Option[ImplSource] = 
     unboundCosts.toList match {
       case Nil => Set(this.toUnfreeImpl.get)
       case (methodExpr, methodCostWeight) :: other => {
-        val otherwiseSubbedImpls = Impl(lhs, rhs = ImplRhs(this.rhs.constant, other.toMap), source).bindToAllOptions(searchResult)
+        val otherwiseSubbedImpls = Impl(lhs, rhs = ImplRhs(this.rhs.constant, other.toMap ++ boundCosts), source).bindToAllOptions(searchResult)
 
         val options = searchResult.implsWhichMatchMethodExpr(methodExpr)
 
@@ -34,7 +34,7 @@ class Impl(val lhs: ImplLhs, val rhs: ImplRhs, val source: Option[ImplSource] = 
         } yield {
           UnfreeImpl(
             lhs, /// lhs.addConditions(option.lhs.conditions), TODO, OH GOD, FIX ME
-            unfreeImpl.cost + option.cost * methodCostWeight,
+            unfreeImpl.rhs + option.rhs * methodCostWeight,
             source)
         }
       }
@@ -46,9 +46,13 @@ class Impl(val lhs: ImplLhs, val rhs: ImplRhs, val source: Option[ImplSource] = 
     rhs.costs.filterKeys((x) => !lhs.parameters.contains(x.name.name))
   }
 
+  def boundCosts: Map[MethodExpr, BigOLiteral] = {
+    rhs.costs.filterKeys((x) => lhs.parameters.contains(x.name.name))
+  }
+
   def toUnfreeImpl: Option[UnfreeImpl] = {
-    if (rhs.costs.isEmpty)
-      Some(UnfreeImpl(lhs, rhs.constant, source))
+    if (unboundCosts.isEmpty)
+      Some(UnfreeImpl(lhs, rhs, source))
     else
       None
   }

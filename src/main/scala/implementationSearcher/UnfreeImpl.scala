@@ -9,12 +9,16 @@ import shared.BigOLiteral
 
 /// The RHS here is just an expression like n**2
 // The LHS is a list of conditions that need to be used for this implementation to work
-case class UnfreeImpl(override val lhs: ImplLhs,
-                      cost: BigOLiteral,
-                      override val source: Option[ImplSource] = None) extends Impl(lhs, ImplRhs(cost), source) {
+case class UnfreeImpl(lhs: ImplLhs,
+                      rhs: ImplRhs,
+                      source: Option[ImplSource] = None) {
 
   override def toString: String = {
-    s"$lhs <- ${cost.toShortString}" + source.map("(from " + _ + ")").getOrElse("")
+    s"$lhs <- $rhs" + source.map("(from " + _ + ")").getOrElse("")
+  }
+
+  def cost: BigOLiteral = {
+    rhs.constant
   }
 
   // Does this UnfreeImpl work with a given set of conditions?

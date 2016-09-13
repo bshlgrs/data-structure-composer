@@ -11,24 +11,24 @@ object Chooser {
   type CostFunction = AffineFunction[String, BigOLiteral]
 
   val implLibrary = Set(
-    Impl(ImplLhs("getFirst"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
-    Impl(ImplLhs("getNext"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
-    Impl(ImplLhs("getByIndex"), ImplRhs(ConstantTime,
-      Map(MethodExpr("getFirst") -> ConstantTime, MethodExpr("getNext") -> LinearTime))),
-    Impl(ImplLhs("getLast"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
-    Impl(ImplLhs("getPrev"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
-    Impl(ImplLhs("unorderedEach", List("f")),
-      ImplRhs(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
+//    Impl(ImplLhs("getFirst"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
+//    Impl(ImplLhs("getNext"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
+//    Impl(ImplLhs("getByIndex"), ImplRhs(ConstantTime,
+//      Map(MethodExpr("getFirst") -> ConstantTime, MethodExpr("getNext") -> LinearTime))),
+//    Impl(ImplLhs("getLast"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
+//    Impl(ImplLhs("getPrev"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
+//    Impl(ImplLhs("unorderedEach", List("f")),
+//      ImplRhs(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
     Impl(ImplLhs("each", List("f")),
-      ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> LinearTime, MethodExpr("f") -> LinearTime))),
-    Impl(ImplLhs("each", List("f")),
-      ImplRhs(ConstantTime, Map(MethodExpr("getFirst") -> LinearTime, MethodExpr("getNext") -> LinearTime, MethodExpr("f") -> LinearTime))),
-    Impl(ImplLhs("getMax"), ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(AnonymousFunctionExpr(Set("commutative")))) -> ConstantTime))),
-    Impl(ImplLhs("getMaxEarlyBiased"), ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(UnderscoreFunctionExpr)) -> ConstantTime))),
-    Impl(ImplLhs("reduce", List("f")),
-      ImplRhs(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
-    Impl(ImplLhs("reduce", List("f"), Some(ImplPredicateList(List(Set("commutative"))))),
-      ImplRhs(ConstantTime, Map(MethodExpr("unorderedEach", List(NamedFunctionExpr("f"))) -> ConstantTime)))
+      ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> LinearTime, MethodExpr("f") -> LinearTime)))
+//    Impl(ImplLhs("each", List("f")),
+//      ImplRhs(ConstantTime, Map(MethodExpr("getFirst") -> LinearTime, MethodExpr("getNext") -> LinearTime, MethodExpr("f") -> LinearTime))),
+//    Impl(ImplLhs("getMax"), ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(AnonymousFunctionExpr(Set("commutative")))) -> ConstantTime))),
+//    Impl(ImplLhs("getMaxEarlyBiased"), ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(UnderscoreFunctionExpr)) -> ConstantTime))),
+//    Impl(ImplLhs("reduce", List("f")),
+//      ImplRhs(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
+//    Impl(ImplLhs("reduce", List("f"), Some(ImplPredicateList(List(Set("commutative"))))),
+//      ImplRhs(ConstantTime, Map(MethodExpr("unorderedEach", List(NamedFunctionExpr("f"))) -> ConstantTime)))
   )
 
   def getAllTimes(impls: Set[Impl]): SearchResult = {
@@ -38,7 +38,7 @@ object Chooser {
 
     var searchResult = SearchResult()
 
-    def queuePlusSelected: Iterator[Impl] = queue.toIterator.map(_._2) ++ searchResult.allImpls
+    def queuePlusSelected: Iterator[UnfreeImpl] = queue.toIterator.map(_._2) ++ searchResult.allImpls
 
     while (queue.nonEmpty) {
       val (time, unfreeImpl) = queue.dequeue()
@@ -82,7 +82,7 @@ object Chooser {
   }
 
   def main(args: Array[String]) {
-    println(getAllTimesForDataStructure(implLibrary, DataStructureLibrary.library("ReadOnlyLinkedList")).toLongString)
+    println(getAllTimesForDataStructure(implLibrary, DataStructureLibrary.library("ArrayList")).toLongString)
   }
 }
 

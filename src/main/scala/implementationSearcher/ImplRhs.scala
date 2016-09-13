@@ -16,6 +16,10 @@ case class ImplRhs(constant: BigOLiteral, costs: Map[MethodExpr, BigOLiteral] = 
     ImplRhs(this.constant + other.constant, combinedCosts)
   }
 
+  def *(k: BigOLiteral): ImplRhs = {
+    ImplRhs(this.constant * k, costs.mapValues(_ * k))
+  }
+
   override def toString: String = {
     lazy val variableCostString = costs
       .toList
