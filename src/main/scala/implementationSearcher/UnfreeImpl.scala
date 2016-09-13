@@ -13,6 +13,10 @@ case class UnfreeImpl(override val lhs: ImplLhs,
                       cost: BigOLiteral,
                       override val source: Option[ImplSource] = None) extends Impl(lhs, ImplRhs(cost), source) {
 
+  override def toString: String = {
+    s"$lhs <- ${cost.toShortString}" + source.map("(from " + _ + ")").getOrElse("")
+  }
+
   // Does this UnfreeImpl work with a given set of conditions?
   def compatibleWithConditions(conditions: ImplPredicateList): Boolean = {
     lhs.conditions.list.zip(conditions.list).forall({case ((thisConditions, thoseConditions)) =>

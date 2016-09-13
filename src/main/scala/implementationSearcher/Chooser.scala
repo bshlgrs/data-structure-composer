@@ -52,8 +52,10 @@ object Chooser {
           val otherImplMethodsUsed = otherImpl.rhs.costs.keys.collect({ case MethodExpr(name, _) => name }).toList
 
           if (otherImplMethodsUsed.contains(unfreeImpl.lhs.name)) {
+            println(s"Wow, this is used by $otherImpl")
             val neighborUnfreeImpls = otherImpl.bindToAllOptions(searchResult)
 
+            println(s"neighborUnfreeImpls are $neighborUnfreeImpls")
             neighborUnfreeImpls.foreach((u: UnfreeImpl) =>
               if (searchResult.isOtherImplUseful(u)) {
                 queue ++= List((u.cost, u))

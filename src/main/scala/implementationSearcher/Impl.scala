@@ -15,22 +15,9 @@ deleteMinimumBy![f] <- getMinimumBy[f] + deleteNode!
 
   */
 class Impl(val lhs: ImplLhs, val rhs: ImplRhs, val source: Option[ImplSource] = None) {
-  // takes a method like countBetweenBy[f] <- unorderedEach[f] and turns it into all the different
-  // potentially cheapest options for its implementation.
-
-  // There might be no available implementation, eg if unorderedEach has not been implemented.
-
-  // There might be several, eg if reduce[f] can be implemented by either `if f.commutative <- unorderedEach[f]` or `each[f]`.
-//  def chooseImplsAndBind(settledImpls: Set[UnfreeImpl]): Option[DominanceFrontier[UnfreeImpl]] = {
-//    if (unboundCosts.keys.forall(_.canBeImplementedByAnyOf(settledImpls))) {
-//      val allCostOptions = unboundCosts.keys.map((m: MethodExpr) => m.getFastestRelevantImplementationIfAny(settledImpls))
-//
-//
-//    } else {
-//      None
-//    }
-//  }
-
+  override def toString: String = {
+    s"$lhs <- $rhs " + source.map("(from " + _ + ")").getOrElse("")
+  }
 
   // how do I pass implementation conditions into here? :/
   def bindToAllOptions(searchResult: SearchResult): Set[UnfreeImpl] = {

@@ -16,17 +16,17 @@ case class ImplRhs(constant: BigOLiteral, costs: Map[MethodExpr, BigOLiteral] = 
     ImplRhs(this.constant + other.constant, combinedCosts)
   }
 
-//  // sub in values
-//  def bindToMap(settledImpls: Set[UnfreeImpl]): ImplRhs = {
-//    costs.foldLeft(ImplRhs(this.constant))({case (implRhs: ImplRhs, (methodExpr: MethodExpr, lit: BigOLiteral)) =>
-//      methodExpr.getFastestRelevantImplementationIfAny(settledImpls) match {
-//        case None => implRhs + ImplRhs(ConstantTime, Map(methodExpr -> lit))
-//        case Some(unfreeImpl) => implRhs + unfreeImpl.rhs
-//      }
-//    })
-//  }
-}
+  override def toString: String = {
+    lazy val variableCostString = costs
+      .toList
+      .map({ case (m: MethodExpr, c: BigOLiteral) => if (c == ConstantTime) m.toString else s"$c * $m"})
+      .mkString(" + ")
 
-//case object ImplRhs {
-//  val ConstantTime: ImplRhs = ImplRhs(ConstantTime)
-//}
+
+    (constant, costs.size) match {
+      case (_, 0) => constant.toShortString
+      case (ConstantTime, _) => variableCostString
+      case (_, _) => variableCostString + " + " + constant.toShortString
+    }
+  }
+}

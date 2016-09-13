@@ -53,6 +53,6 @@ case class SingleMethodImplOptions(options: Set[UnfreeImpl]) {
   }
 
   def toLongString: String = {
-    s"  $name {\n" + options.toList.map((unfreeImpl) => s"    ${unfreeImpl.lhs.conditions} <- ${unfreeImpl.cost}").mkString("\n") + "\n  }"
+    s"  ${options.head.lhs.toString} {\n" + options.toList.map((unfreeImpl) => s"    ${unfreeImpl.lhs.conditions} <- ${unfreeImpl.cost}").mkString("\n") + "\n  }"
   }
 }
