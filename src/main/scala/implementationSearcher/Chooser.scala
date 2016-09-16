@@ -1,5 +1,6 @@
 package implementationSearcher
 
+import parsers.MainParser
 import shared._
 
 import scala.collection.mutable
@@ -30,6 +31,15 @@ object Chooser {
     Impl(ImplLhs("getSum"),
       ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(AnonymousFunctionExpr(Set("commutative", "invertible")))) -> ConstantTime)))
   )
+
+  val autoImplLibrary = MainParser.impls.parse(
+    """getFirst <- getByIndex
+      |getNext <- getByIndex
+      |getByIndex <- getFirst + n * getNext
+      |getLast <- getByIndex
+      |getPrev <- getByIndex
+      |each[f] <- n * getByIndex + n * f
+    """.stripMargin).get.value.toSet
 
   // x[f] if x.foo <- 1
   // y[g] <- x[g]
@@ -92,7 +102,7 @@ object Chooser {
   }
 
   def main(args: Array[String]) {
-    println(getAllTimes(testLibrary).toLongString)
+    println(getAllTimesForDataStructure(autoImplLibrary, DataStructureLibrary.library("ArrayList")).toLongString)
   }
 }
 
