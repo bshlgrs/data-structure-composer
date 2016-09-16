@@ -9,8 +9,8 @@ import shared.{ConstantTime, LogTime}
 class ChooserSpec extends FunSpec {
 
   describe("Search") {
-    it("correctly infers times in the simple case") {
-    }
+//    it("correctly infers times in the simple case") {
+//    }
 
     it("correctly infers conditions") {
       val yLhs = ImplLhs("y", List("g"))

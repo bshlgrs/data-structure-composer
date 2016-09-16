@@ -61,3 +61,9 @@ case class Impl(lhs: ImplLhs, rhs: ImplRhs, source: Option[ImplSource] = None) {
     Impl(lhs.addConditions(conditions), rhs, source)
   }
 }
+
+//object Impl {
+//  def apply(lhs: ImplLhs, rhs: ImplRhs, source: Option[DataStructureSource] = None): Impl = {
+//    Impl(lhs, rhs, source)
+//  }
+//}
