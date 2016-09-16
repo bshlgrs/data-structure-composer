@@ -1,6 +1,8 @@
 package parsers
 
 import fastparse.WhitespaceApi
+import implementationSearcher._
+import shared._
 
 /**
   * Created by buck on 9/12/16.
@@ -29,20 +31,44 @@ object MainParser {
   val addSub: P[Int] = P( divMul ~ (CharIn("+-").! ~/ divMul).rep ).map(eval)
   val expr: P[Int]   = P( addSub ~ End )
 
+  val StringChars = !"\"\\".contains(_: Char)
+
+  val name: P[String] = P(CharIn('a'to'z').rep(1).!)
+
+  val namedFunctionExpr: P[NamedFunctionExpr] = {
+    P(CharIn('a'to'z').rep(1).!.map(NamedFunctionExpr))
+  }
+
+  val anonymousFunctionExpr: P[AnonymousFunctionExpr] = {
+    P("_" ~ ("[" ~/ name.!.rep(1, sep=",") ~ "]").? ~ ("<-" ~ implRhs).?).map({case ((mbConditions, rhs)) =>
+      AnonymousFunctionExpr(mbConditions.map(_.toSet).getOrElse(Set()), rhs.getOrElse(ImplRhs(ConstantTime)))
+    })
+  }
+
+  val functionExpr: P[FunctionExpr] = namedFunctionExpr | anonymousFunctionExpr
+
+  val bigOLiteral: P[BigOLiteral] = {
+    "1".!.map((_) => ConstantTime) |
+      "n".!.map((_) => LinearTime) |
+      "log(n)".!.map((_) => LogTime)
+  }
+
+  val implRhs: P[ImplRhs] = bigOLiteral.map(ImplRhs(_, Map()))
+
+  val methodExpr: P[MethodExpr] = P(name.! ~ ("[" ~ functionExpr.rep(1, sep=",") ~ "]").?).map({case ((x, mbFunctions)) =>
+    MethodExpr(x, mbFunctions.map(_.toList).getOrElse(Nil))
+  })
+
   def check(str: String, num: Int) = {
     val Parsed.Success(value, _) = expr.parse(str)
     assert(value == num)
   }
 
   def main (args: Array[String]) {
-    check("1+1", 2)
-    check("1+1*2", 3)
-    check("(1+1*2)+(3*4*5)", 63)
-    check("15/3", 5)
-    check("63/3", 21)
-    check("(1+1*2)+(3*4 *5)/20", 6)
-    check("((1+1*2)+(3*4*5))/3", 21)
-
-
+    println(implRhs.parse("1"))
+    println(anonymousFunctionExpr.parse("_[hello,world] <- 1"))
+    println(anonymousFunctionExpr.parse("_[hello,world] <- 1"))
+//    println(bigOLiteral.parse("log(n)"))
+    println(methodExpr.parse("f[x,y,_]"))
   }
 }

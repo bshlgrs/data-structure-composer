@@ -52,9 +52,9 @@ updateByIndex! <- getAtIndex + updateNode!
 // stuff about orderings by values
 quickSelect[f] <- unorderedEach[f]
 getKthBy[f] <- quickSelect[f]
-getFirstBy[f] <- reduce[func{commutative} <- f, _]
+getFirstBy[f] <- reduce[_{commutative} <- f, _]
 getFirstBy[f] <- getKthBy[f]
-getLastBy[f] <- reduce[func{commutative} <- f, _]
+getLastBy[f] <- reduce[_{commutative} <- f, _]
 getLastBy[f] <- getKthBy[f]
 countBetweenBy[f] <- unorderedEach[f]
 getMaximum <- getFirstBy[valueOrdering]
@@ -84,9 +84,9 @@ oneSidedIndexRangeQuery[reduction] <- unorderedEach[reduction]
 minimumRangeQuery <- twoSidedIndexRangeQuery[_]
 
 // // eg, querying for the number of elements whose values are in the range (a, b)
-// twoSidedValueRangeQuery[f,reduction] <- unorderedEach[func <- f + reduction]
+// twoSidedValueRangeQuery[f,reduction] <- unorderedEach[_ <- f + reduction]
 // // eg, querying for the sum of the k smallest elements
-// oneSidedValueRangeQuery[f,reduction] <- unorderedEach[func <- f + reduction]
-// oneSidedValueRangeQuery[f,reduction] <- twoSidedValueRangeQuery[func <- f + reduction]
+// oneSidedValueRangeQuery[f,reduction] <- unorderedEach[_ <- f + reduction]
+// oneSidedValueRangeQuery[f,reduction] <- twoSidedValueRangeQuery[_ <- f + reduction]
 
 valueOrdering <- 1

@@ -8,5 +8,5 @@ libraryDependencies += "org.parboiled" %% "parboiled" % "2.1.3"
 libraryDependencies ++= Seq(
   "com.chuusai" %% "shapeless" % "2.3.1",
   "com.lihaoyi" %% "fastparse" % "0.3.7",
-  "org.scalatest" % "scalatest_2.11" % "3.0.0" % "test"
+  "org.scalatest" % "scalatest_2.11" % "3.0.0"// % "test"
 )
