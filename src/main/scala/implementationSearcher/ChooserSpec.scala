@@ -15,7 +15,7 @@ class ChooserSpec extends FunSpec {
 
     it("correctly infers conditions") {
       val testLibrary = Set(
-        Impl(ImplLhs("x", List("f"), Some(ImplPredicateList(List(Set("foo"))))), ImplRhs(LogTime)),
+        Impl(ImplLhs("x", List("f"), Some(ImplPredicateList(List(Set("foo"))))), ImplRhs("log(n)")),
         Impl(ImplLhs("y", List("g")), ImplRhs(ConstantTime, Map(MethodExpr("x", List(NamedFunctionExpr("g"))) -> ConstantTime)), None)
       )
 

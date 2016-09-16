@@ -15,25 +15,13 @@ object MainParser {
   import fastparse.noApi._
   import White._
 
-  def eval(tree: (Int, Seq[(String, Int)])) = {
-    val (base, ops) = tree
-    ops.foldLeft(base){ case (left, (op, right)) => op match{
-      case "+" => left + right case "-" => left - right
-      case "*" => left * right case "/" => left / right
-    }}
-  }
+  val name: P[String] = P(!(bigOLiteral) ~ (CharIn('a'to'z','A'to'Z').rep(1) ~ "!".?).!)
 
-  val number: P[Int] = P( CharIn('0'to'9').rep(1).!.map(_.toInt) )
-  val parens: P[Int] = P( "(" ~/ addSub ~ ")" )
-  val factor: P[Int] = P( number | parens )
+  lazy val implLhs: P[ImplLhs] = P(name ~ ("[" ~ name.rep(1, sep=",") ~ "]").?).map({case (name, mbParameters) =>
+    ImplLhs(name, mbParameters.map(_.toList).getOrElse(Nil))
+  })
 
-  val divMul: P[Int] = P( factor ~ (CharIn("*/").! ~/ factor).rep ).map(eval)
-  val addSub: P[Int] = P( divMul ~ (CharIn("+-").! ~/ divMul).rep ).map(eval)
-  val expr: P[Int]   = P( addSub ~ End )
-
-  val StringChars = !"\"\\".contains(_: Char)
-
-  val name: P[String] = P(CharIn('a'to'z').rep(1).!)
+  lazy val impl: P[Impl] = P(implLhs ~ "<-" ~ implRhs).map({ case (lhs, rhs) => Impl(lhs, rhs) })
 
   val namedFunctionExpr: P[NamedFunctionExpr] = {
     P(CharIn('a'to'z').rep(1).!.map(NamedFunctionExpr))
@@ -53,22 +41,29 @@ object MainParser {
       "log(n)".!.map((_) => LogTime)
   }
 
-  val implRhs: P[ImplRhs] = bigOLiteral.map(ImplRhs(_, Map()))
+  val bigOAsImplRhs: P[ImplRhs] = bigOLiteral.map(ImplRhs(_, Map()))
 
-  val methodExpr: P[MethodExpr] = P(name.! ~ ("[" ~ functionExpr.rep(1, sep=",") ~ "]").?).map({case ((x, mbFunctions)) =>
+//  lazy val factorInImplRhs: P[ImplRhs] = ((bigOLiteral ~ "*").? ~ methodExpr).map({ case ((mbBigO, methodExpr)) =>
+//    ImplRhs(ConstantTime, Map(methodExpr -> mbBigO.getOrElse(ConstantTime)))
+//  })
+  lazy val factorInImplRhs: P[ImplRhs] = ((bigOLiteral ~ "*").? ~ methodExpr).map({ case ((mbBigO, mExpr)) =>
+    ImplRhs(ConstantTime, Map(mExpr -> mbBigO.getOrElse(ConstantTime)))
+  })
+
+  val implRhs: P[ImplRhs] = (factorInImplRhs | bigOAsImplRhs).rep(1, sep="+").map(_.reduce(_.+(_)))
+
+  lazy val methodExpr: P[MethodExpr] = P(name.! ~ ("[" ~ functionExpr.rep(1, sep=",") ~ "]").?).map({case ((x, mbFunctions)) =>
     MethodExpr(x, mbFunctions.map(_.toList).getOrElse(Nil))
   })
 
-  def check(str: String, num: Int) = {
-    val Parsed.Success(value, _) = expr.parse(str)
-    assert(value == num)
-  }
-
   def main (args: Array[String]) {
-    println(implRhs.parse("1"))
+    println(bigOLiteral.parse("1"))
+    println(implLhs.parse("m[f]"))
+    println(implRhs.parse("log(n)"))
+    println(anonymousFunctionExpr.parse("_[hello,world] <- n * hello + log(n)"))
     println(anonymousFunctionExpr.parse("_[hello,world] <- 1"))
-    println(anonymousFunctionExpr.parse("_[hello,world] <- 1"))
-//    println(bigOLiteral.parse("log(n)"))
+
     println(methodExpr.parse("f[x,y,_]"))
+    println(impl.parse("insertAtEnd! <- getEnd + insertAfterNode!"))
   }
 }

@@ -1,6 +1,7 @@
 package implementationSearcher
 
 import shared.{ConstantTime, BigOLiteral}
+import parsers.MainParser.implRhs
 
 /**
   * Created by buck on 7/25/16.
@@ -32,5 +33,11 @@ case class ImplRhs(constant: BigOLiteral, costs: Map[MethodExpr, BigOLiteral] = 
       case (ConstantTime, _) => variableCostString
       case (_, _) => variableCostString + " + " + constant.toShortString
     }
+  }
+}
+
+object ImplRhs {
+  def apply(str: String): ImplRhs = {
+    implRhs.parse(str).get.value
   }
 }
