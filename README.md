@@ -107,29 +107,10 @@ HighestNumberMemoizer {
 
 ## Steps to victory
 
-### Where I'm at now
-
-I have parsers to get me data structures and implementations.
-
-Both data structures and implementations are parameterizable.
-
-### Step 1 - DONE!
-
-Given an unparameterized data structure, choose implementations for all methods, but ignoring parameterization. I need some way of knowing from each implementation whether it came from the data structure or not.
-
-### Step 2
-
-Given an unparameterized data structure, choose implementations for all the methods, including the ones which are implemented via a parameterized implementation like `mostCommonElement <- mostNumerousEquivalenceClass[_]`.
-
-This will involve dealing with predicates.
-
-This adds a few complexities.
-
-To start with, it means that I need to have multiple different things in my priority queue: methods both with and without free variables. I might need `forall f: unorderedEach[f]` and also `unorderedEach[:getMax]`
-
-#### other parts
-
-Here's how you make ....?
+- Implement selection of methods from multiple data structures
+- Make a parser.
+- Make a UI. This involves setting up ScalaJS.
+    - I can do the UI in Javascript or ScalaJS.
 
 ----
 

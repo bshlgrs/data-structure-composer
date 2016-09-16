@@ -14,7 +14,7 @@ getMinimum <- getLastBy[valueOrdering]
 deleteMinimumBy![f] <- getMinimumBy[f] + deleteNode!
 
   */
-class Impl(val lhs: ImplLhs, val rhs: ImplRhs, val source: Option[ImplSource] = None) {
+case class Impl(lhs: ImplLhs, rhs: ImplRhs, source: Option[ImplSource] = None) {
   override def toString: String = {
     s"$lhs <- $rhs " + source.map("(from " + _ + ")").getOrElse("")
   }
@@ -24,16 +24,16 @@ class Impl(val lhs: ImplLhs, val rhs: ImplRhs, val source: Option[ImplSource] = 
     unboundCosts.toList match {
       case Nil => Set(this.toUnfreeImpl.get)
       case (methodExpr, methodCostWeight) :: other => {
-        val otherwiseSubbedImpls = Impl(lhs, rhs = ImplRhs(this.rhs.constant, other.toMap ++ boundCosts), source).bindToAllOptions(searchResult)
+        val otherwiseSubbedImpls = this.copy(rhs = ImplRhs(this.rhs.constant, other.toMap ++ boundCosts)).bindToAllOptions(searchResult)
 
-        val options = searchResult.implsWhichMatchMethodExpr(methodExpr)
+        val optionsAndConditions = searchResult.implsWhichMatchMethodExpr(methodExpr, lhs.implPredicateMap)
 
         for {
           unfreeImpl <- otherwiseSubbedImpls
-          option <- options
+          (option, conditions) <- optionsAndConditions
         } yield {
           UnfreeImpl(
-            lhs, /// lhs.addConditions(option.lhs.conditions), TODO, OH GOD, FIX ME
+            lhs.addConditions(conditions),
             unfreeImpl.rhs + option.rhs * methodCostWeight,
             source)
         }
@@ -59,11 +59,5 @@ class Impl(val lhs: ImplLhs, val rhs: ImplRhs, val source: Option[ImplSource] = 
 
   def addConditions(conditions: ImplPredicateList): Impl = {
     Impl(lhs.addConditions(conditions), rhs, source)
-  }
-}
-
-object Impl {
-  def apply(lhs: ImplLhs, rhs: ImplRhs, source: Option[ImplSource] = None): Impl = {
-    new Impl(lhs, rhs, source)
   }
 }

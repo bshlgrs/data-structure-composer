@@ -26,6 +26,45 @@ case class UnfreeImpl(lhs: ImplLhs,
     lhs.conditions.list.zip(conditions.list).forall({case ((thisConditions, thoseConditions)) =>
       thisConditions subsetOf thoseConditions})
   }
+
+  // I'm using `otherMethod[g, h] if g.baz, h.fum` -- this is `this`
+  // This is happening in the course of looking for unfreeImpls for an impl whose implPredicateMap is (f.foo, g.bar)
+  // in my implementation, I used `otherMethod[f, _{fum}]` -- this is the methodExpr
+
+  // I need to return `Some(f.foo, g.bar, f.baz)`.
+
+  // If I was using `otherMethod[g, h] if h.baz`, then I'd return None, because that condition is incompatible with the usage.
+
+  /*
+  Simpler example for NamedFunctionExpr:
+
+   this: `otherMethod[g] if g.baz`
+   implPredicateMap: ()
+   methodExpr: `otherMethod[f]`
+
+   res: Some(Map(f -> baz))
+
+   */
+  def necessaryConditionsToMatch(methodExpr: MethodExpr, implPredicateMap: ImplPredicateMap): Option[ImplPredicateMap] = {
+    val argConditions = methodExpr.args.zipWithIndex.map({case (f: FunctionExpr, idx) => f match {
+      case AnonymousFunctionExpr(properties) => {
+        // If the anonymous function has the necessary properties, then add no conditions and continue
+        if (properties.subsetOf(lhs.conditions.list(idx)))
+          Some(ImplPredicateMap(Map()))
+        else
+          None
+      }
+      case NamedFunctionExpr(name) => {
+        Some(ImplPredicateMap(Map(name -> lhs.conditions.list(idx)))) //////
+      }
+    }})
+
+    if (argConditions contains None)
+      None
+    else {
+      Some(argConditions.flatten.reduceOption(_.and(_)).getOrElse(ImplPredicateMap(Map())))
+    }
+  }
 }
 
 //object UnfreeImplDominance extends DominanceFunction[UnfreeImpl] {

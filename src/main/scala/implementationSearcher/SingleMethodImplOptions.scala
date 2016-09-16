@@ -36,24 +36,27 @@ case class SingleMethodImplOptions(options: Set[UnfreeImpl]) {
   def isOtherImplUseful(unfreeImpl: UnfreeImpl): Boolean = {
     bestImplementationForConditions(unfreeImpl.lhs.conditions) match {
       case Some(currentBest) => {
-        if (currentBest.cost > unfreeImpl.cost) {
-          true
-        } else {
-          false
-        }
+        currentBest.cost > unfreeImpl.cost
       }
       case None => true
     }
   }
 
-  // More impl predicates means that this function returns something better
+  // More impl conditions means that this function returns something better
+  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, implPredicateMap: ImplPredicateMap): Set[(UnfreeImpl, ImplPredicateMap)] =
+    options.flatMap({ (option) =>
+      option.necessaryConditionsToMatch(methodExpr, implPredicateMap).map(option -> _)
+    })
+
+  // More impl conditions means that this function returns something better
   def implsWhichMatchConditions(implPredicates: ImplPredicateList): Set[UnfreeImpl] = {
-    options.filter((u: UnfreeImpl) => u.compatibleWithConditions(implPredicates))
+    options.filter(_.compatibleWithConditions(implPredicates))
   }
 
   def toLongString: String = {
-    s"  ${options.head.lhs.toString} {\n" + options.toList.map((unfreeImpl) => {
-      s"    ${unfreeImpl.lhs.conditions.list} <- ${unfreeImpl.rhs}"
+    val startLhs = options.head.lhs
+    s"  ${ImplLhs(startLhs.name.name, startLhs.parameters).toString} {\n" + options.toList.map((unfreeImpl) => {
+      s"    (${unfreeImpl.lhs.conditions.toNiceString(startLhs.parameters)}) <- ${unfreeImpl.rhs}"
     }).mkString("\n") + "\n  }"
   }
 }

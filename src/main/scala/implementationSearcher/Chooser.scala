@@ -8,27 +8,37 @@ import scala.collection.mutable
   * Created by buck on 7/25/16.
   */
 object Chooser {
-  type CostFunction = AffineFunction[String, BigOLiteral]
-
   val implLibrary = Set(
-//    Impl(ImplLhs("getFirst"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
-//    Impl(ImplLhs("getNext"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
-//    Impl(ImplLhs("getByIndex"), ImplRhs(ConstantTime,
-//      Map(MethodExpr("getFirst") -> ConstantTime, MethodExpr("getNext") -> LinearTime))),
-//    Impl(ImplLhs("getLast"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
-//    Impl(ImplLhs("getPrev"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
-//    Impl(ImplLhs("unorderedEach", List("f")),
-//      ImplRhs(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
+    Impl(ImplLhs("getFirst"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
+    Impl(ImplLhs("getNext"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
+    Impl(ImplLhs("getByIndex"), ImplRhs(ConstantTime,
+      Map(MethodExpr("getFirst") -> ConstantTime, MethodExpr("getNext") -> LinearTime))),
+    Impl(ImplLhs("getLast"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
+    Impl(ImplLhs("getPrev"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
+    Impl(ImplLhs("unorderedEach", List("f")),
+      ImplRhs(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
     Impl(ImplLhs("each", List("f")),
-      ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> LinearTime, MethodExpr("f") -> LinearTime)))
-//    Impl(ImplLhs("each", List("f")),
-//      ImplRhs(ConstantTime, Map(MethodExpr("getFirst") -> LinearTime, MethodExpr("getNext") -> LinearTime, MethodExpr("f") -> LinearTime))),
-//    Impl(ImplLhs("getMax"), ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(AnonymousFunctionExpr(Set("commutative")))) -> ConstantTime))),
-//    Impl(ImplLhs("getMaxEarlyBiased"), ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(UnderscoreFunctionExpr)) -> ConstantTime))),
-//    Impl(ImplLhs("reduce", List("f")),
-//      ImplRhs(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
-//    Impl(ImplLhs("reduce", List("f"), Some(ImplPredicateList(List(Set("commutative"))))),
-//      ImplRhs(ConstantTime, Map(MethodExpr("unorderedEach", List(NamedFunctionExpr("f"))) -> ConstantTime)))
+      ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> LinearTime, MethodExpr("f") -> LinearTime))),
+    Impl(ImplLhs("each", List("f")),
+      ImplRhs(ConstantTime, Map(MethodExpr("getFirst") -> LinearTime, MethodExpr("getNext") -> LinearTime, MethodExpr("f") -> LinearTime))),
+    Impl(ImplLhs("getMax"), ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(AnonymousFunctionExpr(Set("commutative")))) -> ConstantTime))),
+    Impl(ImplLhs("getMaxEarlyBiased"), ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(UnderscoreFunctionExpr)) -> ConstantTime))),
+    Impl(ImplLhs("reduce", List("f")),
+      ImplRhs(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
+    Impl(ImplLhs("reduce", List("f"), Some(ImplPredicateList(List(Set("commutative"))))),
+      ImplRhs(ConstantTime, Map(MethodExpr("unorderedEach", List(NamedFunctionExpr("f"))) -> ConstantTime))),
+    Impl(ImplLhs("getSum"),
+      ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(AnonymousFunctionExpr(Set("commutative", "invertible")))) -> ConstantTime)))
+  )
+
+  // x[f] if x.foo <- 1
+  // y[g] <- x[g]
+  // should infer
+  // y[g] if g.foo <- 1
+  val testLibrary = Set(
+    Impl(ImplLhs("x", List("f"), Some(ImplPredicateList(List(Set("foo"))))), ImplRhs(LogTime)),
+    Impl(ImplLhs("y", List("g")),
+      ImplRhs(ConstantTime, Map(MethodExpr("x", List(NamedFunctionExpr("g"))) -> ConstantTime)))
   )
 
   def getAllTimes(impls: Set[Impl]): SearchResult = {
@@ -82,7 +92,7 @@ object Chooser {
   }
 
   def main(args: Array[String]) {
-    println(getAllTimesForDataStructure(implLibrary, DataStructureLibrary.library("ArrayList")).toLongString)
+    println(getAllTimes(testLibrary).toLongString)
   }
 }
 
