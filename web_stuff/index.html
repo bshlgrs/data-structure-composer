@@ -1,10 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>The Scala.js Tutorial</title>
 </head>
 <body>
+<button id="click-me-button" type="button"
+        onclick="webapp.WebApp().addClickedMessage()">Click me!</button>
+    <script type="text/javascript" src="../target/scala-2.11/scala_big_o-fastopt.js"></script>
 
+    <script type="text/javascript">
+        webapp.WebApp().main()
+    </script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 package implementationSearcher
 
+import parsers.MainParser
 import shared.BigOLiteral
 
 /**
@@ -62,8 +63,8 @@ case class Impl(lhs: ImplLhs, rhs: ImplRhs, source: Option[ImplSource] = None) {
   }
 }
 
-//object Impl {
-//  def apply(lhs: ImplLhs, rhs: ImplRhs, source: Option[DataStructureSource] = None): Impl = {
-//    Impl(lhs, rhs, source)
-//  }
-//}
+object Impl {
+  def apply(string: String): Impl = {
+    MainParser.impl.parse(string).get.value
+  }
+}

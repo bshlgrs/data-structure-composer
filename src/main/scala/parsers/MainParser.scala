@@ -17,11 +17,17 @@ object MainParser {
 
   lazy val name: P[String] = P(!(bigOLiteral) ~ (CharIn('a'to'z','A'to'Z').rep(1) ~ "!".?).!)
 
-  lazy val implLhs: P[ImplLhs] = P(name ~ ("[" ~ name.rep(1, sep=",") ~ "]").?).map({case (name, mbParameters) =>
-    ImplLhs(name, mbParameters.map(_.toList).getOrElse(Nil))
+  lazy val implLhs: P[ImplLhs] = P(name ~ ("[" ~ name.rep(1, sep=",") ~ "]").? ~ ("if " ~ implConditions).?).map({case (funcName, mbParameters, mbConditions) =>
+    val parameters = mbParameters.map(_.toList).getOrElse(Nil)
+    ImplLhs(funcName, parameters, mbConditions.map(_.toList(parameters)))
   })
 
+  lazy val implCondition: P[(String, String)] = P(name ~ "." ~ name)
+  lazy val implConditions: P[ImplPredicateMap] = P(implCondition.rep(1, sep=",")).map((x) => ImplPredicateMap.fromListOfTuples(x.toList))
+
   lazy val impl: P[Impl] = P(implLhs ~ "<-" ~ implRhs).map({ case (lhs, rhs) => Impl(lhs, rhs) })
+
+  lazy val unfreeImpl: P[UnfreeImpl] = P(implLhs ~ "<-" ~ implRhs).map({ case (lhs, rhs) => UnfreeImpl(lhs, rhs) })
 
   lazy val namedFunctionExpr: P[NamedFunctionExpr] = {
     P(CharIn('a'to'z').rep(1).!.map(NamedFunctionExpr))

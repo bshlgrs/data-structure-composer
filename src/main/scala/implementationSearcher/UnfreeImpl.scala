@@ -1,5 +1,6 @@
 package implementationSearcher
 
+import parsers.MainParser
 import shared.BigOLiteral
 
 /**
@@ -47,7 +48,7 @@ case class UnfreeImpl(lhs: ImplLhs,
    */
   def necessaryConditionsToMatch(methodExpr: MethodExpr, implPredicateMap: ImplPredicateMap): Option[ImplPredicateMap] = {
     val argConditions = methodExpr.args.zipWithIndex.map({case (f: FunctionExpr, idx) => f match {
-      case AnonymousFunctionExpr(properties) => {
+      case AnonymousFunctionExpr(properties, _) => {
         // If the anonymous function has the necessary properties, then add no conditions and continue
         if (properties.subsetOf(lhs.conditions.list(idx)))
           Some(ImplPredicateMap(Map()))
@@ -64,6 +65,12 @@ case class UnfreeImpl(lhs: ImplLhs,
     else {
       Some(argConditions.flatten.reduceOption(_.and(_)).getOrElse(ImplPredicateMap(Map())))
     }
+  }
+}
+
+object UnfreeImpl {
+  def apply(string: String): UnfreeImpl = {
+    MainParser.unfreeImpl.parse(string).get.value
   }
 }
 

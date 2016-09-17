@@ -1,5 +1,6 @@
 package implementationSearcher
 
+
 /**
   * Created by buck on 9/10/16.
   */
@@ -43,4 +44,6 @@ case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map())
   def toLongString: String = {
     "Search Result {\n" + impls.values.map(_.toLongString).mkString("\n") + "\n}"
   }
+
+  def get(name: String): Set[UnfreeImpl] = impls(MethodName(name)).options
 }

@@ -52,32 +52,3 @@ object ImplLhs {
 
 case class ImplPredicate(parameterIdx: Int, property: String)
 
-case class ImplPredicateList(list: List[Set[FunctionProperty]]) {
-  def and(other: ImplPredicateList): ImplPredicateList = {
-    assert(this.list.length == other.list.length, (this.list, other.list))
-
-    ImplPredicateList(this.list.zip(other.list).map({ case ((x, y)) => x union y }))
-  }
-
-  def toNiceString(names: List[String]): String = {
-    assert(names.length == list.length)
-
-    list.zip(names).flatMap({ case ((set, name)) => set.toList.map(name + "." + _)}).mkString(", ")
-  }
-
-  def isEmpty: Boolean = list.forall(_.isEmpty)
-}
-
-case class ImplPredicateMap(map: Map[String, Set[FunctionProperty]]) {
-  def and(other: ImplPredicateMap): ImplPredicateMap = {
-    ImplPredicateMap(
-      (map.keys ++ other.map.keys).toSet.map((parameterName: String) =>
-        parameterName -> map.getOrElse(parameterName, Set()).union(other.map.getOrElse(parameterName, Set()))
-      ).toMap
-    )
-  }
-
-  def toList(parameters: List[String]): ImplPredicateList = {
-    ImplPredicateList(parameters.map(map.getOrElse(_, Set())))
-  }
-}
