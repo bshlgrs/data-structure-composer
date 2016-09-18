@@ -47,9 +47,6 @@ class UnfreeImplSpec extends FunSpec {
       assert(rhs == UnfreeImpl.rhs("1"))
     }
 
-//    Impl("x[f] if f.foo <- log(n) + f"),
-//    Impl("y[g] <- x[g]")
-
     it("returns sums") {
       val unfreeImpl = UnfreeImpl("f[x] <- x + log(n)")
       val Some((conditions, rhs)) =
@@ -57,6 +54,21 @@ class UnfreeImplSpec extends FunSpec {
 
       assert(conditions.isEmpty)
       assert(rhs == UnfreeImpl.rhs("y + log(n)"))
+    }
+
+    it("notices when anonymous functions don't match the impl conditions") {
+      val unfreeImpl = UnfreeImpl("f[x] if x.foo <- x")
+      val res = unfreeImpl.bindToContext(MethodExpr.parse("f[_]"), ImplPredicateMap.empty)
+
+      assert(res.isEmpty)
+    }
+
+    it("reports impl conditions for named args") {
+      val unfreeImpl = UnfreeImpl("f[x] if x.foo <- x")
+      val Some((conditions, rhs)) = unfreeImpl.bindToContext(MethodExpr.parse("f[y]"), ImplPredicateMap.empty)
+
+      assert(conditions == ImplPredicateMap(Map("y" -> Set("foo"))))
+      assert(rhs == UnfreeImpl.rhs("y"))
     }
   }
 }

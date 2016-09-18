@@ -72,10 +72,10 @@ case class UnfreeImpl(lhs: ImplLhs,
   }
 
   def bindToContext(methodExpr: MethodExpr, implPredicateMap: ImplPredicateMap): Option[(ImplPredicateMap, AffineBigOCombo[MethodName])] = {
-    val conditionsAndRhses: List[(ImplPredicateMap, Rhs)] = methodExpr.args.zipWithIndex.flatMap({case (f: FunctionExpr, idx) => f match {
+    val conditionsAndRhses: List[Option[(ImplPredicateMap, Rhs)]] = methodExpr.args.zipWithIndex.map({case (f: FunctionExpr, idx) => f match {
       case AnonymousFunctionExpr(properties, fRhs) => {
         // If the anonymous function has the necessary properties, then add no conditions and continue
-        if (properties.subsetOf(lhs.conditions.list(idx))) {
+        if (lhs.conditions.list(idx).subsetOf(properties)) {
           val costOfParamInMethodExprNames = fRhs
 
           val relevantParamName = lhs.parameters(idx)
@@ -105,7 +105,7 @@ case class UnfreeImpl(lhs: ImplLhs,
     else if (conditionsAndRhses.isEmpty) {
       Some(ImplPredicateMap.empty, this.rhs)
     } else {
-      val (conditionsList, rhsList) = conditionsAndRhses.unzip
+      val (conditionsList, rhsList) = conditionsAndRhses.flatten.unzip
 
       Some(conditionsList.reduce(_.and(_)) -> (rhsList.reduce(_ + _) + rhs.k))
     }
