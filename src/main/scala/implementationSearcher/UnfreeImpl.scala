@@ -89,11 +89,12 @@ case class UnfreeImpl(lhs: ImplLhs,
       }
       case NamedFunctionExpr(name) => {
         val relevantParamName = lhs.parameters(idx)
+        val weightOfParam = rhs.m(MethodName(relevantParamName))
 
         Some(
           (
             ImplPredicateMap(Map(name -> lhs.conditions.list(idx))),
-            AffineBigOCombo[MethodName](ConstantTime, Map(MethodName(relevantParamName) -> ConstantTime))
+            AffineBigOCombo[MethodName](ConstantTime, Map(MethodName(name) -> weightOfParam))
             )
         )
       }
@@ -119,6 +120,9 @@ object UnfreeImpl {
 
   type Rhs = AffineBigOCombo[MethodName]
 
+  def rhs(string: String): Rhs = {
+    MainParser.affineBigONameCombo.parse(string).get.value
+  }
 }
 
 //object UnfreeImplDominance extends DominanceFunction[UnfreeImpl] {

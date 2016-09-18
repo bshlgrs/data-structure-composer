@@ -22,7 +22,7 @@ case class AffineBigOCombo[A](k: BigOLiteral, m: Map[A, BigOLiteral] = Map()) {
   override def toString: String = {
     lazy val variableCostString = m
       .toList
-      .map({ case (m: MethodExpr, c: BigOLiteral) => if (c == ConstantTime) m.toString else s"${c.toShortString} * $m"})
+      .map({ case (m, c: BigOLiteral) => if (c == ConstantTime) m.toString else s"${c.toShortString} * $m"})
       .mkString(" + ")
 
 

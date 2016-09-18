@@ -17,7 +17,7 @@ class UnfreeImplSpec extends FunSpec {
         unfreeImpl.bindToContext(MethodExpr.parse("f"), ImplPredicateMap.empty)
 
       assert(conditions == ImplPredicateMap.empty)
-      assert(rhs == Impl.rhs("1"))
+      assert(rhs == UnfreeImpl.rhs("1"))
     }
 
     it("does simple linear time test") {
@@ -26,16 +26,16 @@ class UnfreeImplSpec extends FunSpec {
         unfreeImpl.bindToContext(MethodExpr.parse("f"), ImplPredicateMap.empty)
 
       assert(conditions == ImplPredicateMap.empty)
-      assert(rhs == Impl.rhs("n"))
+      assert(rhs == UnfreeImpl.rhs("n"))
     }
 
     it("correctly passes parameters through") {
-      val unfreeImpl = UnfreeImpl("f[x] <- x")
+      val unfreeImpl = UnfreeImpl("f[x] <- x * n")
       val Some((conditions, rhs)) =
         unfreeImpl.bindToContext(MethodExpr.parse("f[y]"), ImplPredicateMap.empty)
 
       assert(conditions == ImplPredicateMap(Map("y" -> Set())))
-      assert(rhs == Impl.rhs("y"))
+      assert(rhs == UnfreeImpl.rhs("y * n"))
     }
 
     it("correctly deals with anonymous functions") {
@@ -44,7 +44,7 @@ class UnfreeImplSpec extends FunSpec {
         unfreeImpl.bindToContext(MethodExpr.parse("f[_]"), ImplPredicateMap.empty)
 
       assert(conditions == ImplPredicateMap.empty)
-      assert(rhs == Impl.rhs("1"))
+      assert(rhs == UnfreeImpl.rhs("1"))
     }
   }
 }
