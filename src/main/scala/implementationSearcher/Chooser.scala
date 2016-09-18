@@ -10,26 +10,26 @@ import scala.collection.mutable
   */
 object Chooser {
   val implLibrary = Set(
-    Impl(ImplLhs("getFirst"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
-    Impl(ImplLhs("getNext"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
-    Impl(ImplLhs("getByIndex"), ImplRhs(ConstantTime,
+    Impl(ImplLhs("getFirst"), AffineBigOCombo(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
+    Impl(ImplLhs("getNext"), AffineBigOCombo(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
+    Impl(ImplLhs("getByIndex"), AffineBigOCombo(ConstantTime,
       Map(MethodExpr("getFirst") -> ConstantTime, MethodExpr("getNext") -> LinearTime))),
-    Impl(ImplLhs("getLast"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
-    Impl(ImplLhs("getPrev"), ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
+    Impl(ImplLhs("getLast"), AffineBigOCombo(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
+    Impl(ImplLhs("getPrev"), AffineBigOCombo(ConstantTime, Map(MethodExpr("getByIndex") -> ConstantTime))),
     Impl(ImplLhs("unorderedEach", List("f")),
-      ImplRhs(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
+      AffineBigOCombo(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
     Impl(ImplLhs("each", List("f")),
-      ImplRhs(ConstantTime, Map(MethodExpr("getByIndex") -> LinearTime, MethodExpr("f") -> LinearTime))),
+      AffineBigOCombo(ConstantTime, Map(MethodExpr("getByIndex") -> LinearTime, MethodExpr("f") -> LinearTime))),
     Impl(ImplLhs("each", List("f")),
-      ImplRhs(ConstantTime, Map(MethodExpr("getFirst") -> LinearTime, MethodExpr("getNext") -> LinearTime, MethodExpr("f") -> LinearTime))),
-    Impl(ImplLhs("getMax"), ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(AnonymousFunctionExpr(Set("commutative")))) -> ConstantTime))),
-    Impl(ImplLhs("getMaxEarlyBiased"), ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(UnderscoreFunctionExpr)) -> ConstantTime))),
+      AffineBigOCombo(ConstantTime, Map(MethodExpr("getFirst") -> LinearTime, MethodExpr("getNext") -> LinearTime, MethodExpr("f") -> LinearTime))),
+    Impl(ImplLhs("getMax"), AffineBigOCombo(ConstantTime, Map(MethodExpr("reduce", List(AnonymousFunctionExpr(Set("commutative")))) -> ConstantTime))),
+    Impl(ImplLhs("getMaxEarlyBiased"), AffineBigOCombo(ConstantTime, Map(MethodExpr("reduce", List(UnderscoreFunctionExpr)) -> ConstantTime))),
     Impl(ImplLhs("reduce", List("f")),
-      ImplRhs(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
+      AffineBigOCombo(ConstantTime, Map(MethodExpr("each", List(NamedFunctionExpr("f"))) -> ConstantTime))),
     Impl(ImplLhs("reduce", List("f"), Some(ImplPredicateList(List(Set("commutative"))))),
-      ImplRhs(ConstantTime, Map(MethodExpr("unorderedEach", List(NamedFunctionExpr("f"))) -> ConstantTime))),
+      AffineBigOCombo(ConstantTime, Map(MethodExpr("unorderedEach", List(NamedFunctionExpr("f"))) -> ConstantTime))),
     Impl(ImplLhs("getSum"),
-      ImplRhs(ConstantTime, Map(MethodExpr("reduce", List(AnonymousFunctionExpr(Set("commutative", "invertible")))) -> ConstantTime)))
+      AffineBigOCombo(ConstantTime, Map(MethodExpr("reduce", List(AnonymousFunctionExpr(Set("commutative", "invertible")))) -> ConstantTime)))
   )
 
   val autoImplLibrary = MainParser.impls.parse(
@@ -45,11 +45,11 @@ object Chooser {
   // y[g] <- x[g]
   // should infer
   // y[g] if g.foo <- 1
-  val testLibrary = Set(
-    Impl(ImplLhs("x", List("f"), Some(ImplPredicateList(List(Set("foo"))))), ImplRhs(LogTime)),
-    Impl(ImplLhs("y", List("g")),
-      ImplRhs(ConstantTime, Map(MethodExpr("x", List(NamedFunctionExpr("g"))) -> ConstantTime)))
-  )
+//  val testLibrary = Set(
+//    Impl(ImplLhs("x", List("f"), Some(ImplPredicateList(List(Set("foo"))))), AffineBigOCombo[MethodExpr](LogTime)),
+//    Impl(ImplLhs("y", List("g")),
+//      AffineBigOCombo[MethodExpr](ConstantTime, Map(MethodExpr("x", List(NamedFunctionExpr("g"))) -> ConstantTime)))
+//  )
 
   def getAllTimes(impls: Set[Impl]): SearchResult = {
     val queue = mutable.PriorityQueue[(BigOLiteral, UnfreeImpl)]()(Ordering.by((x: (BigOLiteral, UnfreeImpl)) => x._1).reverse)
@@ -73,7 +73,7 @@ object Chooser {
           // So we have a random impl. Let's see if the unfreeImpl we just settled on is useful for that impl.
           // It's only useful if unfreeImpl's methodName is used by the rhs of the otherImpl (this condition is weaker than it could be)
 
-          val otherImplMethodsUsed = otherImpl.rhs.costs.keys.collect({ case MethodExpr(name, _) => name }).toList
+          val otherImplMethodsUsed = otherImpl.rhs.m.keys.collect({ case MethodExpr(name, _) => name }).toList
 
           if (otherImplMethodsUsed.contains(unfreeImpl.lhs.name)) {
 //            println(s"Wow, this is used by $otherImpl")

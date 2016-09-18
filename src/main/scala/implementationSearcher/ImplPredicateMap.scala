@@ -14,6 +14,8 @@ case class ImplPredicateMap(map: Map[String, Set[FunctionProperty]]) {
   def toList(parameters: List[String]): ImplPredicateList = {
     ImplPredicateList(parameters.map(map.getOrElse(_, Set())))
   }
+
+  def isEmpty: Boolean = map.values.forall(_.isEmpty)
 }
 
 object ImplPredicateMap {
@@ -27,4 +29,8 @@ object ImplPredicateMap {
 
     ImplPredicateMap(map2)
   }
+
+  def empty: ImplPredicateMap = ImplPredicateMap(Map())
+
+
 }

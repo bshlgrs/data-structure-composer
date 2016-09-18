@@ -22,18 +22,35 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimes(testLibrary)
 
+      print(res.toLongString)
+
       assert(res.get("x") == Set(UnfreeImpl("x <- n")))
       assert(res.get("y") == Set(UnfreeImpl("y <- n")))
       assert(res.get("z") == Set(UnfreeImpl("z <- n")))
     }
 
-    it("does parameterized things") {
+    it("does simple parameterized things") {
       val testLibrary = Set(
         Impl("x[f] <- n * f"),
         Impl("y <- x[_]")
       )
 
       val res = Chooser.getAllTimes(testLibrary)
+
+      print(res.toLongString)
+
+      assert(res.get("y") == Set(UnfreeImpl("y <- n")))
+    }
+
+    it("does more complex parameterized things") {
+      val testLibrary = Set(
+        Impl("x[f] <- n * f"),
+        Impl("y[f] <- x[f]")
+      )
+
+      val res = Chooser.getAllTimes(testLibrary)
+
+      print(res.toLongString)
 
       assert(res.get("y") == Set(UnfreeImpl("y <- n")))
     }

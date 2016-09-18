@@ -1,6 +1,7 @@
 package implementationSearcher
 
 import implementationSearcher.ImplLhs.FunctionProperty
+import parsers.MainParser
 
 /**
   * Created by buck on 7/31/16.
@@ -23,4 +24,7 @@ case class MethodExpr(name: MethodName, args: List[FunctionExpr]) {
 object MethodExpr {
   def apply(name: String, args: List[FunctionExpr] = Nil): MethodExpr = MethodExpr(MethodName(name), args)
 
+  def parse(string: String): MethodExpr = {
+    MainParser.methodExpr.parse(string).get.value
+  }
 }

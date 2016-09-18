@@ -1,7 +1,7 @@
 package implementationSearcher
 
 import parsers.MainParser
-import shared.BigOLiteral
+import shared.{ConstantTime, BigOLiteral}
 
 /**
   * Created by buck on 7/31/16.
@@ -11,15 +11,19 @@ import shared.BigOLiteral
 /// The RHS here is just an expression like n**2
 // The LHS is a list of conditions that need to be used for this implementation to work
 case class UnfreeImpl(lhs: ImplLhs,
-                      rhs: ImplRhs,
+                      rhs: AffineBigOCombo[MethodName],
                       source: Option[ImplSource] = None) {
+
+  import UnfreeImpl._
+
+  assert(lhs.parameters.nonEmpty || rhs.m.isEmpty)
 
   override def toString: String = {
     s"$lhs <- $rhs" + source.map("(from " + _ + ")").getOrElse("")
   }
 
   def cost: BigOLiteral = {
-    rhs.constant
+    rhs.k
   }
 
   // Does this UnfreeImpl work with a given set of conditions?
@@ -46,7 +50,7 @@ case class UnfreeImpl(lhs: ImplLhs,
    res: Some(Map(f -> baz))
 
    */
-  def necessaryConditionsToMatch(methodExpr: MethodExpr, implPredicateMap: ImplPredicateMap): Option[ImplPredicateMap] = {
+  def necessaryConditionsToMatch(methodExpr: MethodExpr, implPredicateMap: ImplPredicateMap): Set[ImplPredicateMap] = {
     val argConditions = methodExpr.args.zipWithIndex.map({case (f: FunctionExpr, idx) => f match {
       case AnonymousFunctionExpr(properties, _) => {
         // If the anonymous function has the necessary properties, then add no conditions and continue
@@ -56,22 +60,65 @@ case class UnfreeImpl(lhs: ImplLhs,
           None
       }
       case NamedFunctionExpr(name) => {
-        Some(ImplPredicateMap(Map(name -> lhs.conditions.list(idx)))) //////
+        Some(ImplPredicateMap(Map(name -> lhs.conditions.list(idx))))
       }
     }})
 
     if (argConditions contains None)
-      None
+      Set()
     else {
-      Some(argConditions.flatten.reduceOption(_.and(_)).getOrElse(ImplPredicateMap(Map())))
+      Set(argConditions.flatten.reduceOption(_.and(_)).getOrElse(ImplPredicateMap(Map())))
     }
   }
+
+  def bindToContext(methodExpr: MethodExpr, implPredicateMap: ImplPredicateMap): Option[(ImplPredicateMap, AffineBigOCombo[MethodName])] = {
+    val conditionsAndRhses: List[(ImplPredicateMap, Rhs)] = methodExpr.args.zipWithIndex.flatMap({case (f: FunctionExpr, idx) => f match {
+      case AnonymousFunctionExpr(properties, fRhs) => {
+        // If the anonymous function has the necessary properties, then add no conditions and continue
+        if (properties.subsetOf(lhs.conditions.list(idx))) {
+          val costOfParamInMethodExprNames = fRhs
+
+          val relevantParamName = lhs.parameters(idx)
+          val weightOfParam = rhs.m(MethodName(relevantParamName))
+
+          val cost = costOfParamInMethodExprNames * weightOfParam
+
+          Some((ImplPredicateMap.empty, cost))
+        } else
+          None
+      }
+      case NamedFunctionExpr(name) => {
+        val relevantParamName = lhs.parameters(idx)
+
+        Some(
+          (
+            ImplPredicateMap(Map(name -> lhs.conditions.list(idx))),
+            AffineBigOCombo[MethodName](ConstantTime, Map(MethodName(relevantParamName) -> ConstantTime))
+            )
+        )
+      }
+    }})
+
+    if (conditionsAndRhses contains None)
+      None
+    else if (conditionsAndRhses.isEmpty) {
+      Some(ImplPredicateMap.empty, this.rhs)
+    } else {
+      val (conditionsList, rhsList) = conditionsAndRhses.unzip
+
+      Some(conditionsList.reduce(_.and(_)) -> rhsList.reduce(_ + _))
+    }
+  }
+
 }
 
 object UnfreeImpl {
   def apply(string: String): UnfreeImpl = {
     MainParser.unfreeImpl.parse(string).get.value
   }
+
+  type Rhs = AffineBigOCombo[MethodName]
+
 }
 
 //object UnfreeImplDominance extends DominanceFunction[UnfreeImpl] {

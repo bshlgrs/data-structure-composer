@@ -27,17 +27,25 @@ object MainParser {
 
   lazy val impl: P[Impl] = P(implLhs ~ "<-" ~ implRhs).map({ case (lhs, rhs) => Impl(lhs, rhs) })
 
-  lazy val unfreeImpl: P[UnfreeImpl] = P(implLhs ~ "<-" ~ implRhs).map({ case (lhs, rhs) => UnfreeImpl(lhs, rhs) })
+  lazy val unfreeImpl: P[UnfreeImpl] = P(implLhs ~ "<-" ~ affineBigONameCombo).map({ case (lhs, rhs) => UnfreeImpl(lhs, rhs) })
 
   lazy val namedFunctionExpr: P[NamedFunctionExpr] = {
     P(CharIn('a'to'z').rep(1).!.map(NamedFunctionExpr))
   }
 
   lazy val anonymousFunctionExpr: P[AnonymousFunctionExpr] = {
-    P("_" ~ ("[" ~/ name.!.rep(1, sep=",") ~ "]").? ~ ("<-" ~ implRhs).?).map({case ((mbConditions, rhs)) =>
-      AnonymousFunctionExpr(mbConditions.map(_.toSet).getOrElse(Set()), rhs.getOrElse(ImplRhs(ConstantTime)))
+    P("_" ~ ("[" ~/ name.!.rep(1, sep=",") ~ "]").? ~ ("<-" ~ affineBigONameCombo).?).map({case ((mbConditions, mbAbonc)) =>
+      AnonymousFunctionExpr(mbConditions.map(_.toSet).getOrElse(Set()), mbAbonc.getOrElse(AffineBigOCombo(ConstantTime, Map())))
     })
   }
+
+  lazy val affineBigONameCombo: P[AffineBigOCombo[MethodName]] = (factorInAbonc | bigOInAbonc).rep(1, sep="+").map(_.reduce(_.+(_)))
+
+  lazy val factorInAbonc: P[AffineBigOCombo[MethodName]] = ((bigOLiteral ~ "*").? ~ name).map({ case ((mbBigO, mName)) =>
+    AffineBigOCombo(ConstantTime, Map(MethodName(mName) -> mbBigO.getOrElse(ConstantTime)))
+  })
+
+  lazy val bigOInAbonc: P[AffineBigOCombo[MethodName]] = bigOLiteral.map((x) => AffineBigOCombo[MethodName](x, Map()))
 
   lazy val functionExpr: P[FunctionExpr] = namedFunctionExpr | anonymousFunctionExpr
 
@@ -47,13 +55,13 @@ object MainParser {
       "log(n)".!.map((_) => LogTime)
   }
 
-  lazy val bigOAsImplRhs: P[ImplRhs] = bigOLiteral.map(ImplRhs(_, Map()))
+  lazy val bigOAsImplRhs: P[AffineBigOCombo[MethodExpr]] = bigOLiteral.map((x) => AffineBigOCombo(x, Map()))
 
-  lazy val factorInImplRhs: P[ImplRhs] = ((bigOLiteral ~ "*").? ~ methodExpr).map({ case ((mbBigO, mExpr)) =>
-    ImplRhs(ConstantTime, Map(mExpr -> mbBigO.getOrElse(ConstantTime)))
+  lazy val factorInImplRhs: P[AffineBigOCombo[MethodExpr]] = ((bigOLiteral ~ "*").? ~ methodExpr).map({ case ((mbBigO, mExpr)) =>
+    AffineBigOCombo(ConstantTime, Map(mExpr -> mbBigO.getOrElse(ConstantTime)))
   })
 
-  lazy val implRhs: P[ImplRhs] = (factorInImplRhs | bigOAsImplRhs).rep(1, sep="+").map(_.reduce(_.+(_)))
+  lazy val implRhs: P[AffineBigOCombo[MethodExpr]] = (factorInImplRhs | bigOAsImplRhs).rep(1, sep="+").map(_.reduce(_.+(_)))
 
   lazy val methodExpr: P[MethodExpr] = P(name.! ~ ("[" ~ functionExpr.rep(1, sep=",") ~ "]").?).map({case ((x, mbFunctions)) =>
     MethodExpr(x, mbFunctions.map(_.toList).getOrElse(Nil))

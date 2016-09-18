@@ -14,11 +14,11 @@ abstract class FunctionExpr {
   }
 }
 
-object UnderscoreFunctionExpr extends AnonymousFunctionExpr(Set(), ImplRhs(ConstantTime))
+object UnderscoreFunctionExpr extends AnonymousFunctionExpr(Set(), AffineBigOCombo(ConstantTime, Map()))
 case class NamedFunctionExpr(name: String) extends FunctionExpr {
   override def toString = name
 }
 // todo: check that time gets propagated correctly
-case class AnonymousFunctionExpr(properties: Set[String], time: ImplRhs = ImplRhs(ConstantTime)) extends FunctionExpr {
-  override def toString = s"_{${properties.mkString(",")}} <- $time"
+case class AnonymousFunctionExpr(properties: Set[String], cost: AffineBigOCombo[MethodName] = AffineBigOCombo(ConstantTime, Map())) extends FunctionExpr {
+  override def toString = s"_{${properties.mkString(",")}} <- $cost"
 }
