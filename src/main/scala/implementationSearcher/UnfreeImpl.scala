@@ -107,7 +107,7 @@ case class UnfreeImpl(lhs: ImplLhs,
     } else {
       val (conditionsList, rhsList) = conditionsAndRhses.unzip
 
-      Some(conditionsList.reduce(_.and(_)) -> rhsList.reduce(_ + _))
+      Some(conditionsList.reduce(_.and(_)) -> (rhsList.reduce(_ + _) + rhs.k))
     }
   }
 

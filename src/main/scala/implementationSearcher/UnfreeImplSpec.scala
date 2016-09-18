@@ -16,7 +16,7 @@ class UnfreeImplSpec extends FunSpec {
       val Some((conditions, rhs)) =
         unfreeImpl.bindToContext(MethodExpr.parse("f"), ImplPredicateMap.empty)
 
-      assert(conditions == ImplPredicateMap.empty)
+      assert(conditions.isEmpty)
       assert(rhs == UnfreeImpl.rhs("1"))
     }
 
@@ -25,7 +25,7 @@ class UnfreeImplSpec extends FunSpec {
       val Some((conditions, rhs)) =
         unfreeImpl.bindToContext(MethodExpr.parse("f"), ImplPredicateMap.empty)
 
-      assert(conditions == ImplPredicateMap.empty)
+      assert(conditions.isEmpty)
       assert(rhs == UnfreeImpl.rhs("n"))
     }
 
@@ -34,7 +34,7 @@ class UnfreeImplSpec extends FunSpec {
       val Some((conditions, rhs)) =
         unfreeImpl.bindToContext(MethodExpr.parse("f[y]"), ImplPredicateMap.empty)
 
-      assert(conditions == ImplPredicateMap(Map("y" -> Set())))
+      assert(conditions.isEmpty)
       assert(rhs == UnfreeImpl.rhs("y * n"))
     }
 
@@ -43,8 +43,20 @@ class UnfreeImplSpec extends FunSpec {
       val Some((conditions, rhs)) =
         unfreeImpl.bindToContext(MethodExpr.parse("f[_]"), ImplPredicateMap.empty)
 
-      assert(conditions == ImplPredicateMap.empty)
+      assert(conditions.isEmpty)
       assert(rhs == UnfreeImpl.rhs("1"))
+    }
+
+//    Impl("x[f] if f.foo <- log(n) + f"),
+//    Impl("y[g] <- x[g]")
+
+    it("returns sums") {
+      val unfreeImpl = UnfreeImpl("f[x] <- x + log(n)")
+      val Some((conditions, rhs)) =
+        unfreeImpl.bindToContext(MethodExpr.parse("g[y]"), ImplPredicateMap.empty)
+
+      assert(conditions.isEmpty)
+      assert(rhs == UnfreeImpl.rhs("y + log(n)"))
     }
   }
 }

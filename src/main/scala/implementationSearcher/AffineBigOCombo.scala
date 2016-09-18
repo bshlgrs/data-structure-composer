@@ -15,6 +15,10 @@ case class AffineBigOCombo[A](k: BigOLiteral, m: Map[A, BigOLiteral] = Map()) {
     AffineBigOCombo(this.k + other.k, combinedCosts)
   }
 
+  def +(other: BigOLiteral): AffineBigOCombo[A] = {
+    AffineBigOCombo(k + other, m)
+  }
+
   def *(c: BigOLiteral): AffineBigOCombo[A] = {
     AffineBigOCombo(c * k, m.mapValues(_ * c))
   }
