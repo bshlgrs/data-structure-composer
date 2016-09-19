@@ -1,11 +1,11 @@
-package implementationSearcher
+package tests
 
 /**
   * Created by buck on 9/12/16.
   */
 
+import implementationSearcher._
 import org.scalatest.FunSpec
-import shared.{LogTime, ConstantTime}
 
 class ChooserSpec extends FunSpec {
 
@@ -62,8 +62,4 @@ class ChooserSpec extends FunSpec {
       assert(res.impls(MethodName("y")).options.head == UnfreeImpl("y[g] if g.foo <- log(n) + g"))
     }
   }
-//   x[f] if x.foo <- 1
-//   y[g] <- x[g]
-//   should infer
-//   y[g] if g.foo <- 1
 }

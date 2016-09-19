@@ -24,14 +24,11 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: Option[I
     unboundCosts.toList match {
       case Nil => Set(this.toUnfreeImpl.get)
       case (methodExpr, methodCostWeight) :: other => {
-        val otherwiseSubbedImpls = this.copy(rhs = AffineBigOCombo(this.rhs.k, other.toMap ++ boundCosts)).bindToAllOptions(searchResult)
+        val otherwiseSubbedImpls = this.copy(rhs = AffineBigOCombo(this.rhs.bias, other.toMap ++ boundCosts)).bindToAllOptions(searchResult)
 
         val optionsAndConditions = searchResult.implsWhichMatchMethodExpr(methodExpr, lhs.implPredicateMap)
 
         val options: Set[UnfreeImpl] = searchResult.get(methodExpr.name)
-
-
-
 
         for {
           unfreeImpl <- otherwiseSubbedImpls
@@ -48,21 +45,19 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: Option[I
   }
 
   def unboundCosts: Map[MethodExpr, BigOLiteral] = {
-    rhs.m.filterKeys((x) => !lhs.parameters.contains(x.name.name))
+    rhs.weights.filterKeys((x) => !lhs.parameters.contains(x.name.name))
   }
 
   def boundCosts: Map[MethodExpr, BigOLiteral] = {
-    rhs.m.filterKeys((x) => lhs.parameters.contains(x.name.name))
+    rhs.weights.filterKeys((x) => lhs.parameters.contains(x.name.name))
   }
 
   def toUnfreeImpl: Option[UnfreeImpl] = {
     if (unboundCosts.isEmpty)
-      Some(UnfreeImpl(lhs, rhs.copy(m = rhs.m.map({ case ((m: MethodExpr, c: BigOLiteral)) => m.name -> c})), source))
+      Some(UnfreeImpl(lhs, rhs.copy(weights = rhs.weights.map({ case ((m: MethodExpr, c: BigOLiteral)) => m.name -> c})), source))
     else
       None
   }
-
-
 
   def addConditions(conditions: ImplPredicateList): Impl = {
     Impl(lhs.addConditions(conditions), rhs, source)

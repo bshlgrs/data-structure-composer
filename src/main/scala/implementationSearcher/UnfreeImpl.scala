@@ -16,14 +16,24 @@ case class UnfreeImpl(lhs: ImplLhs,
 
   import UnfreeImpl._
 
-  assert(lhs.parameters.nonEmpty || rhs.m.isEmpty)
+  def canEqual(a: Any) = a.isInstanceOf[UnfreeImpl]
+
+  override def equals(that: Any): Boolean =
+    that match {
+      case that: UnfreeImpl => that.canEqual(this) && this.hashCode == that.hashCode
+      case _ => false
+    }
+
+  override def hashCode: Int = UnfreeImpl.hashCode() ^ lhs.hashCode() ^ rhs.hashCode()
+
+  assert(lhs.parameters.nonEmpty || rhs.weights.isEmpty)
 
   override def toString: String = {
     s"$lhs <- $rhs" + source.map("(from " + _ + ")").getOrElse("")
   }
 
   def cost: BigOLiteral = {
-    rhs.k
+    rhs.bias
   }
 
   // Does this UnfreeImpl work with a given set of conditions?
@@ -32,46 +42,9 @@ case class UnfreeImpl(lhs: ImplLhs,
       thisConditions subsetOf thoseConditions})
   }
 
-  // I'm using `otherMethod[g, h] if g.baz, h.fum` -- this is `this`
-  // This is happening in the course of looking for unfreeImpls for an impl whose implPredicateMap is (f.foo, g.bar)
-  // in my implementation, I used `otherMethod[f, _{fum}]` -- this is the methodExpr
-
-  // I need to return `Some(f.foo, g.bar, f.baz)`.
-
-  // If I was using `otherMethod[g, h] if h.baz`, then I'd return None, because that condition is incompatible with the usage.
-
-  /*
-  Simpler example for NamedFunctionExpr:
-
-   this: `otherMethod[g] if g.baz`
-   implPredicateMap: ()
-   methodExpr: `otherMethod[f]`
-
-   res: Some(Map(f -> baz))
-
-   */
-  def necessaryConditionsToMatch(methodExpr: MethodExpr, implPredicateMap: ImplPredicateMap): Set[ImplPredicateMap] = {
-    val argConditions = methodExpr.args.zipWithIndex.map({case (f: FunctionExpr, idx) => f match {
-      case AnonymousFunctionExpr(properties, _) => {
-        // If the anonymous function has the necessary properties, then add no conditions and continue
-        if (properties.subsetOf(lhs.conditions.list(idx)))
-          Some(ImplPredicateMap(Map()))
-        else
-          None
-      }
-      case NamedFunctionExpr(name) => {
-        Some(ImplPredicateMap(Map(name -> lhs.conditions.list(idx))))
-      }
-    }})
-
-    if (argConditions contains None)
-      Set()
-    else {
-      Set(argConditions.flatten.reduceOption(_.and(_)).getOrElse(ImplPredicateMap(Map())))
-    }
-  }
-
   def bindToContext(methodExpr: MethodExpr, implPredicateMap: ImplPredicateMap): Option[(ImplPredicateMap, AffineBigOCombo[MethodName])] = {
+    assert(methodExpr.args.length == this.lhs.parameters.length)
+
     val conditionsAndRhses: List[Option[(ImplPredicateMap, Rhs)]] = methodExpr.args.zipWithIndex.map({case (f: FunctionExpr, idx) => f match {
       case AnonymousFunctionExpr(properties, fRhs) => {
         // If the anonymous function has the necessary properties, then add no conditions and continue
@@ -79,7 +52,7 @@ case class UnfreeImpl(lhs: ImplLhs,
           val costOfParamInMethodExprNames = fRhs
 
           val relevantParamName = lhs.parameters(idx)
-          val weightOfParam = rhs.m(MethodName(relevantParamName))
+          val weightOfParam = rhs.weights(MethodName(relevantParamName))
 
           val cost = costOfParamInMethodExprNames * weightOfParam
 
@@ -89,7 +62,10 @@ case class UnfreeImpl(lhs: ImplLhs,
       }
       case NamedFunctionExpr(name) => {
         val relevantParamName = lhs.parameters(idx)
-        val weightOfParam = rhs.m(MethodName(relevantParamName))
+        val weightOfParam = rhs.weights.getOrElse(MethodName(relevantParamName), {
+          println(s"$this, $methodExpr")
+          ???
+        })
 
         Some(
           (
@@ -107,8 +83,19 @@ case class UnfreeImpl(lhs: ImplLhs,
     } else {
       val (conditionsList, rhsList) = conditionsAndRhses.flatten.unzip
 
-      Some(conditionsList.reduce(_.and(_)) -> (rhsList.reduce(_ + _) + rhs.k))
+      Some(conditionsList.reduce(_.and(_)) -> (rhsList.reduce(_ + _) + rhs.bias))
     }
+  }
+
+  def alphaConvert(newParameterNames: List[String]): UnfreeImpl = {
+    assert(newParameterNames.length == lhs.parameters.length)
+    assert(newParameterNames.toSet.size == newParameterNames.size)
+
+    UnfreeImpl(
+      lhs.alphaConvert(newParameterNames),
+      rhs.mapKeys((x: MethodName) => MethodName(newParameterNames(lhs.parameters.indexOf(x.name)))),
+      source
+    )
   }
 
 }

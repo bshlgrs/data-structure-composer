@@ -1,6 +1,7 @@
-package implementationSearcher
+package tests
+
+import implementationSearcher.{ImplPredicateMap, MethodExpr, UnfreeImpl}
 import org.scalatest.FunSpec
-import shared.{LogTime, ConstantTime}
 
 
 /**
@@ -38,10 +39,19 @@ class UnfreeImplSpec extends FunSpec {
       assert(rhs == UnfreeImpl.rhs("y * n"))
     }
 
-    it("correctly deals with anonymous functions") {
+    it("correctly deals with inapplicable anonymous functions") {
       val unfreeImpl = UnfreeImpl("f[x] <- x")
       val Some((conditions, rhs)) =
         unfreeImpl.bindToContext(MethodExpr.parse("f[_]"), ImplPredicateMap.empty)
+
+      assert(conditions.isEmpty)
+      assert(rhs == UnfreeImpl.rhs("1"))
+    }
+
+    it("correctly deals with applicable anonymous functions") {
+      val unfreeImpl = UnfreeImpl("f[x] if x.foo <- x")
+      val Some((conditions, rhs)) =
+        unfreeImpl.bindToContext(MethodExpr.parse("f[_{foo}]"), ImplPredicateMap.empty)
 
       assert(conditions.isEmpty)
       assert(rhs == UnfreeImpl.rhs("1"))

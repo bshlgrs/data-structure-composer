@@ -5,4 +5,6 @@ package implementationSearcher
   */
 case class MethodName(name: String) {
   def isMutating = name.last == '!'
+
+  override def toString: String = name
 }

@@ -38,6 +38,10 @@ case class ImplLhs(name: MethodName, parameters: List[String], conditions: ImplP
   def propertiesForParameter(parameter: String): Set[FunctionProperty] = {
     this.conditions.list(this.parameters.indexOf(parameter))
   }
+
+  def alphaConvert(newParameterNames: List[String]): ImplLhs = {
+    ImplLhs(name, newParameterNames, conditions)
+  }
 }
 
 object ImplLhs {
@@ -49,6 +53,4 @@ object ImplLhs {
 
   type FunctionProperty = String
 }
-
-case class ImplPredicate(parameterIdx: Int, property: String)
 

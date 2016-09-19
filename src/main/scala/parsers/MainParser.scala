@@ -15,17 +15,21 @@ object MainParser {
   import fastparse.noApi._
   import White._
 
-  lazy val name: P[String] = P(!(bigOLiteral) ~ (CharIn('a'to'z','A'to'Z').rep(1) ~ "!".?).!)
+  lazy val name: P[String] = P(!bigOLiteral ~ (CharIn('a'to'z','A'to'Z').rep(1) ~ "!".?).!)
 
-  lazy val implLhs: P[ImplLhs] = P(name ~ ("[" ~ name.rep(1, sep=",") ~ "]").? ~ ("if " ~ implConditions).?).map({case (funcName, mbParameters, mbConditions) =>
-    val parameters = mbParameters.map(_.toList).getOrElse(Nil)
-    ImplLhs(funcName, parameters, mbConditions.map(_.toList(parameters)))
+  lazy val implLhs: P[ImplLhs] = P(name ~ ("[" ~ name.rep(1, sep=",") ~ "]").? ~ ("if " ~ implConditions).?).map({
+    case (funcName, mbParameters, mbConditions) => {
+      val parameters = mbParameters.map(_.toList).getOrElse(Nil)
+      ImplLhs(funcName, parameters, mbConditions.map(_.toList(parameters)))
+    }
   })
 
   lazy val implCondition: P[(String, String)] = P(name ~ "." ~ name)
   lazy val implConditions: P[ImplPredicateMap] = P(implCondition.rep(1, sep=",")).map((x) => ImplPredicateMap.fromListOfTuples(x.toList))
 
-  lazy val impl: P[Impl] = P(implLhs ~ "<-" ~ implRhs).map({ case (lhs, rhs) => Impl(lhs, rhs) })
+  lazy val impl: P[Impl] = P(implLhs ~ "<-" ~ implRhs ~ Index).map({ case (lhs, rhs, index) => Impl(lhs, rhs, Some(StringSource(s"from $index"))) })
+
+  lazy val nakedImpl: P[Impl] = P(impl ~ End)
 
   lazy val unfreeImpl: P[UnfreeImpl] = P(implLhs ~ "<-" ~ affineBigONameCombo).map({ case (lhs, rhs) => UnfreeImpl(lhs, rhs) })
 
@@ -34,7 +38,7 @@ object MainParser {
   }
 
   lazy val anonymousFunctionExpr: P[AnonymousFunctionExpr] = {
-    P("_" ~ ("[" ~/ name.!.rep(1, sep=",") ~ "]").? ~ ("<-" ~ affineBigONameCombo).?).map({case ((mbConditions, mbAbonc)) =>
+    P("_" ~ ("{" ~/ name.!.rep(1, sep=",") ~ "}").? ~ ("<-" ~ affineBigONameCombo).?).map({case ((mbConditions, mbAbonc)) =>
       AnonymousFunctionExpr(mbConditions.map(_.toSet).getOrElse(Set()), mbAbonc.getOrElse(AffineBigOCombo(ConstantTime, Map())))
     })
   }
@@ -51,32 +55,48 @@ object MainParser {
 
   lazy val bigOLiteral: P[BigOLiteral] = {
     "1".!.map((_) => ConstantTime) |
+      "nlogn".!.map((_) => BigOLiteral(1,1)) |
       "n".!.map((_) => LinearTime) |
       "log(n)".!.map((_) => LogTime)
   }
 
   lazy val bigOAsImplRhs: P[AffineBigOCombo[MethodExpr]] = bigOLiteral.map((x) => AffineBigOCombo(x, Map()))
 
-  lazy val factorInImplRhs: P[AffineBigOCombo[MethodExpr]] = ((bigOLiteral ~ "*").? ~ methodExpr).map({ case ((mbBigO, mExpr)) =>
-    AffineBigOCombo(ConstantTime, Map(mExpr -> mbBigO.getOrElse(ConstantTime)))
-  })
+  lazy val factorInImplRhs: P[AffineBigOCombo[MethodExpr]] = {
+    ((bigOLiteral ~ "*").? ~ methodExpr).map({ case ((mbBigO, mExpr)) =>
+      AffineBigOCombo(ConstantTime, Map(mExpr -> mbBigO.getOrElse(ConstantTime)))
+    })
+  }
 
-  lazy val implRhs: P[AffineBigOCombo[MethodExpr]] = (factorInImplRhs | bigOAsImplRhs).rep(1, sep="+").map(_.reduce(_.+(_)))
+
+  lazy val backwardsFactorInImplRhs: P[AffineBigOCombo[MethodExpr]] = {
+    (methodExpr ~ "*" ~ bigOLiteral).map({ case ((mExpr, bigO)) =>
+      AffineBigOCombo(ConstantTime, Map(mExpr -> bigO))
+    })
+  }
+
+  lazy val implRhs: P[AffineBigOCombo[MethodExpr]] = (factorInImplRhs | bigOAsImplRhs | backwardsFactorInImplRhs).rep(1, sep="+").map(_.reduce(_.+(_)))
 
   lazy val methodExpr: P[MethodExpr] = P(name.! ~ ("[" ~ functionExpr.rep(1, sep=",") ~ "]").?).map({case ((x, mbFunctions)) =>
     MethodExpr(x, mbFunctions.map(_.toList).getOrElse(Nil))
   })
 
-  lazy val impls: P[List[Impl]] = P(impl.rep(1, sep="\n")).map(_.toList)
+  lazy val justMethodExpr: P[MethodExpr] = P(methodExpr ~ End)
+
+  lazy val impls: P[List[Impl]] = P("\n".rep() ~ implLine.rep(1, sep="\n".rep) ~ End).map(_.toList.flatten)
+
+  lazy val implLine: P[Option[Impl]] = P(impl.map(Some(_)) | ("//" ~ CharsWhile(_ != '\n')).map((_) => None))
 
   def main (args: Array[String]) {
-    println(bigOLiteral.parse("1"))
-    println(implLhs.parse("m[f]"))
-    println(implRhs.parse("log(n)"))
-    println(anonymousFunctionExpr.parse("_[hello,world] <- n * hello + log(n)"))
-    println(anonymousFunctionExpr.parse("_[hello,world] <- 1"))
+//    println(bigOLiteral.parse("1"))
+//    println(implLhs.parse("m[f]"))
+//    println(implRhs.parse("log(n)"))
+//    println(anonymousFunctionExpr.parse("_[hello,world] <- n * hello + log(n)"))
+//    println(anonymousFunctionExpr.parse("_[hello,world] <- 1"))
+//
+//    println(methodExpr.parse("f[x,y,_]"))
+    println(impl.parse("each[f] <- getByIndex * n + n * f"))
+    println(P(implRhs ~ End).parse("getByIndex * n"))
 
-    println(methodExpr.parse("f[x,y,_]"))
-    println(impl.parse("insertAtEnd! <- getEnd + insertAfterNode!"))
   }
 }

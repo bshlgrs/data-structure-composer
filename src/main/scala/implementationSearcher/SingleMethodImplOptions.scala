@@ -59,4 +59,29 @@ case class SingleMethodImplOptions(options: Set[UnfreeImpl]) {
       s"    (${unfreeImpl.lhs.conditions.toNiceString(startLhs.parameters)}) <- ${unfreeImpl.rhs}"
     }).mkString("\n") + "\n  }"
   }
+
+  def sum(other: SingleMethodImplOptions): SingleMethodImplOptions = {
+    SingleMethodImplOptions.fromSet(this.options ++ other.options)
+  }
+
+  def product(other: SingleMethodImplOptions): SingleMethodImplOptions = {
+    assert(this.name == other.name)
+
+    SingleMethodImplOptions.fromSet(for {
+      x <- this.options
+      y <- other.options
+    } yield {
+      val translatedY = y.alphaConvert(x.lhs.parameters)
+      val lhs = x.lhs.addConditions(y.lhs.conditions)
+      val rhs = x.rhs + y.rhs
+      UnfreeImpl(lhs, rhs, x.source)
+    })
+  }
+}
+
+object SingleMethodImplOptions {
+  def fromSet(set: Set[UnfreeImpl]): SingleMethodImplOptions = {
+    set.foldLeft(SingleMethodImplOptions(Set(set.head)))(
+      (smio, unfreeImpl) => smio.add(unfreeImpl))
+  }
 }

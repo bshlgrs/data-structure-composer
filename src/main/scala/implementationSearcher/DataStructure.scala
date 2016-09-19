@@ -12,18 +12,27 @@ case class SimpleDataStructure(name: String, impls: Set[Impl]) {
 }
 
 object DataStructureLibrary {
+  val ArrayList = SimpleDataStructure("ArrayList", Set(
+    Impl("getByIndex <- 1"),
+    Impl("insertAtEnd! <- 1"),
+    Impl("deleteLast! <- 1"),
+    Impl("updateNode! <- 1")
+  ))
+
+  val ReadOnlyLinkedList = SimpleDataStructure("ReadOnlyLinkedList", Set(
+    Impl(ImplLhs("getFirst"), AffineBigOCombo(ConstantTime, Map())),
+    Impl(ImplLhs("getNext"), AffineBigOCombo(ConstantTime, Map()))
+  ))
+
+  val SumMemoizer = SimpleDataStructure("SumMemoizer", Set(
+    Impl(ImplLhs("getSum"), AffineBigOCombo(ConstantTime, Map())),
+    Impl(ImplLhs("insertNode"), AffineBigOCombo(ConstantTime, Map()))
+  ))
+
   val library = Map(
-    "ArrayList" -> SimpleDataStructure("ArrayList", Set(
-      Impl(ImplLhs("getByIndex"), AffineBigOCombo(ConstantTime, Map())),
-      Impl(ImplLhs("insertAtEnd!"), AffineBigOCombo(ConstantTime, Map())),
-      Impl(ImplLhs("deleteLast!"), AffineBigOCombo(ConstantTime, Map())),
-      Impl(ImplLhs("updateNode!"), AffineBigOCombo(ConstantTime, Map()))
-    )),
-    "ReadOnlyLinkedList" -> SimpleDataStructure("ReadOnlyLinkedList", Set(
-      Impl(ImplLhs("getFirst"), AffineBigOCombo(ConstantTime, Map())),
-      Impl(ImplLhs("getNext"), AffineBigOCombo(ConstantTime, Map()))
-    ))
+    "ArrayList" -> ArrayList,
+    "ReadOnlyLinkedList" -> ReadOnlyLinkedList,
+    "SumMemoizer" -> SumMemoizer
   )
-
-
 }
+

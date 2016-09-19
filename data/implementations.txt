@@ -8,9 +8,9 @@ getPrev <- getByIndex
 
 // looping
 unorderedEach[f] <- each[f]
-each[f] <- unorderedEach[_] + n * log(n) + f * n
-each[f] <- getByIndex * n + f * n
-each[f] <- getFirst + getNext * n + f * n
+each[f] <- unorderedEach[_] + nlogn + n * f
+each[f] <- n * getByIndex + n * f
+each[f] <- getFirst + n * getNext + n * f
 
 // insertions
 insertAtEnd! <- getLast + insertAfterEndNode!
@@ -22,7 +22,7 @@ insertAtIndex! <- getByIndex + insertAfterNode!
 insertAtIndex! <- getByIndex + insertBeforeNode!
 insertAfterNode! <- insertNextToNode!
 insertBeforeNode! <- insertNextToNode!
-extend! <- getLast + insertAfterEndNode! * n
+extend! <- getLast + n * insertAfterEndNode!
 
 // deletions
 deleteAtIndex! <- getAtIndex + deleteNode!
@@ -32,7 +32,7 @@ deleteLast! <- deleteAtIndex!
 deleteLast! <- getLast + deleteNodeWhichIsLast!
 deleteNodeWhichIsFirst! <- deleteNode!
 deleteNodeWhichIsLast! <- deleteNode!
-deleteBetweenNodes! <- n * (deleteNode! + getNext)
+deleteBetweenNodes! <- n * deleteNode! + n * getNext
 deleteAtIndex! <- deleteBetweenNodes!
 
 deleteFirstNodeWithValue! <- getFirstNodeWithValue + deleteNode!
