@@ -22,3 +22,15 @@ Heap {
     deleteNode! <- log(n)
     insertAtIndex! <- 1
 }
+
+RedBlackOrderStatisticTreeList {
+    getByIndex <- log(n)
+    updateNode! <- 1
+    getNext <- 1
+    getPrev <- 1
+    insertAtEnd! <- 1
+    insertAfterNode!
+    insertAtStart! <- 1
+    deleteNode! <- log(n)
+    deleteBetweenNodes! <- log(n)
+}
