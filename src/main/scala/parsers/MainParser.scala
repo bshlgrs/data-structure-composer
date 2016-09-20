@@ -87,7 +87,7 @@ object MainParser {
 
   lazy val justMethodExpr: P[MethodExpr] = methodExpr ~ End
 
-  lazy val impls: P[Set[Impl]] = P("\n".rep() ~ implLine.rep(1, sep="\n".rep) ~ End).map(_.toSet.flatten)
+  lazy val impls: P[Set[Impl]] = P("\n".rep() ~ implLine.rep(1, sep="\n".rep) ~ "\n".rep() ~ End).map(_.toSet.flatten)
 
   lazy val implLine: P[Option[Impl]] = P(impl.map(Some(_)) | ("//" ~ CharsWhile(_ != '\n')).map((_) => None))
 
@@ -100,7 +100,7 @@ object MainParser {
   lazy val nakedDataStructure: P[DataStructure] = dataStructure ~ End
 
   lazy val dataStructureFile: P[Set[DataStructure]] = {
-    P("\n".rep() ~ dataStructure.rep(sep="\n".rep()) ~ End).map(_.toSet)
+    P("\n".rep() ~ dataStructure.rep(sep="\n".rep()) ~ "\n".rep() ~ End).map(_.toSet)
   }
 
   def main (args: Array[String]) {

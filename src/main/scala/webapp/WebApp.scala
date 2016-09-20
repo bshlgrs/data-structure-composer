@@ -3,6 +3,7 @@ package webapp
 import implementationSearcher.{DataStructure, Chooser, Impl}
 import parsers.MainParser
 
+import scala.scalajs.js
 import scala.scalajs.js.JSApp
 import org.scalajs.dom
 import dom.document
@@ -25,10 +26,20 @@ object WebApp extends JSApp {
   }
 
   @JSExport
-  def makeChoices(implsString: String, dataStructuresString: String): List[(String, String)] = {
+  def makeChoices(implsString: String, dataStructuresString: String): js.Array[js.Array[String]] = {
     val impls: Set[Impl] = MainParser.impls.parse(implsString).get.value
     val dataStructures: Set[DataStructure] = MainParser.dataStructureFile.parse(dataStructuresString).get.value
 
-    dataStructures.map((x) => x -> Chooser.getAllTimesForDataStructure(impls, x).toLongString).toList.sortBy(_._1.name).map((x) => x._1.name -> x._2)
+    val resultStrings = {
+      dataStructures
+        .map((x) =>
+          x -> Chooser.getAllTimesForDataStructure(impls, x).toLongString)
+        .toList
+        .sortBy(_._1.name)
+        .map((x) => x._1.name -> x._2)
+        .map((x) => js.Array(x._1, x._2))
+    }
+
+    js.Array(resultStrings:_*)
   }
 }
