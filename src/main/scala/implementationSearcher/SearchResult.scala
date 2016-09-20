@@ -33,9 +33,9 @@ case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map())
   // If instead of `myMethod[f]` I was calling this with `myMethod[_{foo}]`:
   // If I see `myMethod[g] if g.foo <- log(n)`, I want to return that.
   // If I see `myMethod[g] if g.bar <- log(n**2)`, I want to not include that one. !!!
-  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, implPredicateMap: ImplPredicateMap): Set[(UnfreeImpl, ImplPredicateMap, AffineBigOCombo[MethodName])] = {
+  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, implLhs: ImplLhs, searchResult: SearchResult): Set[(UnfreeImpl, ImplPredicateMap, AffineBigOCombo[MethodName])] = {
     if (impls.contains(methodExpr.name)) {
-      impls(methodExpr.name).implsWhichMatchMethodExpr(methodExpr, implPredicateMap)
+      impls(methodExpr.name).implsWhichMatchMethodExpr(methodExpr, implLhs, searchResult)
     } else {
       Set()
     }

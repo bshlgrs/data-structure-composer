@@ -13,6 +13,8 @@ case class MethodExpr(name: MethodName, args: List[FunctionExpr]) {
     return name.name + argsString
   }
 
+  def getNames: Set[String] = Set(name.name) ++ args.flatMap(_.getNames)
+
 //  // this should probably return a dominance frontier :'(
 //  def getFastestRelevantImplementationIfAny(impls: Set[UnfreeImpl]): Option[UnfreeImpl] = {
 //    /// THIS IS FUCKED UP

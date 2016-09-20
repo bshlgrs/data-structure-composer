@@ -49,9 +49,9 @@ object Chooser {
           // So we have a random impl. Let's see if the unfreeImpl we just settled on is useful for that impl.
           // It's only useful if unfreeImpl's methodName is used by the rhs of the otherImpl (this condition is weaker than it could be)
 
-          val otherImplMethodsUsed = otherImpl.rhs.weights.keys.collect({ case MethodExpr(name, _) => name }).toList
+          val otherImplMethodsUsed = otherImpl.getNames
 
-          if (otherImplMethodsUsed.contains(unfreeImpl.lhs.name)) {
+          if (otherImplMethodsUsed.contains(unfreeImpl.lhs.name.name)) {
             val neighborUnfreeImpls = otherImpl.bindToAllOptions(searchResult)
 
             neighborUnfreeImpls.foreach((u: UnfreeImpl) =>

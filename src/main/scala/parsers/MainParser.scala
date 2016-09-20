@@ -32,9 +32,10 @@ object MainParser {
   lazy val nakedImpl: P[Impl] = P(impl ~ End)
 
   lazy val unfreeImpl: P[UnfreeImpl] = P(implLhs ~ "<-" ~ affineBigONameCombo).map({ case (lhs, rhs) => UnfreeImpl(lhs, rhs) })
+  lazy val nakedUnfreeImpl: P[UnfreeImpl] = P(unfreeImpl ~ End)
 
   lazy val namedFunctionExpr: P[NamedFunctionExpr] = {
-    P(CharIn('a'to'z').rep(1).!.map(NamedFunctionExpr))
+    P(name.map(NamedFunctionExpr))
   }
 
   lazy val anonymousFunctionExpr: P[AnonymousFunctionExpr] = {
@@ -44,6 +45,7 @@ object MainParser {
   }
 
   lazy val affineBigONameCombo: P[AffineBigOCombo[MethodName]] = (factorInAbonc | bigOInAbonc).rep(1, sep="+").map(_.reduce(_.+(_)))
+  lazy val nakedAffineBigONameCombo: P[AffineBigOCombo[MethodName]] = P(affineBigONameCombo ~ End)
 
   lazy val factorInAbonc: P[AffineBigOCombo[MethodName]] = ((bigOLiteral ~ "*").? ~ name).map({ case ((mbBigO, mName)) =>
     AffineBigOCombo(ConstantTime, Map(MethodName(mName) -> mbBigO.getOrElse(ConstantTime)))

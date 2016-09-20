@@ -12,6 +12,11 @@ abstract class FunctionExpr {
     case NamedFunctionExpr(name) => conditions(name)
     case AnonymousFunctionExpr(defaultProperties, _) => defaultProperties
   }
+
+  def getNames: Set[String] = this match {
+    case NamedFunctionExpr(name) => Set(name)
+    case AnonymousFunctionExpr(props, args) => args.weights.keys.map(_.name).toSet
+  }
 }
 
 object UnderscoreFunctionExpr extends AnonymousFunctionExpr(Set(), AffineBigOCombo(ConstantTime, Map()))

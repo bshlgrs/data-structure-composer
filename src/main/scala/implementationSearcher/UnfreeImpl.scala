@@ -24,9 +24,12 @@ case class UnfreeImpl(lhs: ImplLhs,
       case _ => false
     }
 
+  // I feel dirty for writing this
   override def hashCode: Int = UnfreeImpl.hashCode() ^ lhs.hashCode() ^ rhs.hashCode()
 
-  assert(lhs.parameters.nonEmpty || rhs.weights.isEmpty)
+  assert(lhs.parameters.nonEmpty || rhs.weights.isEmpty, {
+    s"Error in $this: LHS parameters are ${lhs.parameters}, but weights are ${rhs.weights}"
+  })
 
   override def toString: String = {
     s"$lhs <- $rhs" + source.map("(from " + _ + ")").getOrElse("")
@@ -42,7 +45,7 @@ case class UnfreeImpl(lhs: ImplLhs,
       thisConditions subsetOf thoseConditions})
   }
 
-  def bindToContext(methodExpr: MethodExpr, implPredicateMap: ImplPredicateMap): Option[(ImplPredicateMap, AffineBigOCombo[MethodName])] = {
+  def bindToContext(methodExpr: MethodExpr, implLhs: ImplLhs, searchResult: SearchResult): Option[(ImplPredicateMap, AffineBigOCombo[MethodName])] = {
     assert(methodExpr.args.length == this.lhs.parameters.length)
 
     val conditionsAndRhses: List[Option[(ImplPredicateMap, Rhs)]] = methodExpr.args.zipWithIndex.map({case (f: FunctionExpr, idx) => f match {
@@ -61,18 +64,41 @@ case class UnfreeImpl(lhs: ImplLhs,
           None
       }
       case NamedFunctionExpr(name) => {
-        val relevantParamName = lhs.parameters(idx)
-        val weightOfParam = rhs.weights.getOrElse(MethodName(relevantParamName), {
-          println(s"$this, $methodExpr")
-          ???
-        })
+        val that = this
 
-        Some(
-          (
-            ImplPredicateMap(Map(name -> lhs.conditions.list(idx))),
-            AffineBigOCombo[MethodName](ConstantTime, Map(MethodName(name) -> weightOfParam))
-            )
-        )
+        // This name might be locally bound or globally bound.
+        // If it's locally bound:
+        if (implLhs.parameters.contains(name)) {
+          val relevantParamName = lhs.parameters(idx)
+          val weightOfParam = rhs.weights(MethodName(relevantParamName))
+
+          Some(
+            (
+              ImplPredicateMap(Map(name -> lhs.conditions.list(idx))),
+              AffineBigOCombo[MethodName](ConstantTime, Map(MethodName(name) -> weightOfParam))
+              )
+          )
+        } else {
+          val that = this
+          // Otherwise it's globally bound, so look for an implementation which has already been sorted.
+          searchResult.get(MethodName(name)) match {
+            case x: Set[UnfreeImpl] if x.size == 1 => {
+              val oneImplementation: UnfreeImpl = x.head
+
+              if (oneImplementation.lhs.parameters.isEmpty) {
+                Some((ImplPredicateMap.empty, oneImplementation.rhs))
+              } else {
+                ???
+              }
+            }
+            case x: Set[UnfreeImpl] if x.isEmpty => {
+              None
+            }
+            case x: Set[UnfreeImpl] if x.size > 1 => {
+              ???
+            }
+          }
+        }
       }
     }})
 
@@ -102,13 +128,13 @@ case class UnfreeImpl(lhs: ImplLhs,
 
 object UnfreeImpl {
   def apply(string: String): UnfreeImpl = {
-    MainParser.unfreeImpl.parse(string).get.value
+    MainParser.nakedUnfreeImpl.parse(string).get.value
   }
 
   type Rhs = AffineBigOCombo[MethodName]
 
   def rhs(string: String): Rhs = {
-    MainParser.affineBigONameCombo.parse(string).get.value
+    MainParser.nakedAffineBigONameCombo.parse(string).get.value
   }
 }
 

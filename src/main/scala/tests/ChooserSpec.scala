@@ -61,5 +61,19 @@ class ChooserSpec extends FunSpec {
 
       assert(res.impls(MethodName("y")).options.head == UnfreeImpl("y[g] if g.foo <- log(n) + g"))
     }
+
+    it("handles named functions in method expressions") {
+      val testLibrary = Set(
+        Impl("y[f] <- n * f"),
+        Impl("x <- y[k]"),
+        Impl("k <- 1")
+      )
+
+      val res = Chooser.getAllTimes(testLibrary)
+
+      print(res.toLongString)
+
+      assert(res.impls(MethodName("x")).options.head == UnfreeImpl("x <- 1"))
+    }
   }
 }
