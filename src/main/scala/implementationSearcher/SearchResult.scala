@@ -42,7 +42,7 @@ case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map())
   }
 
   def toLongString: String = {
-    "Search Result {\n" + impls.values.map(_.toLongString).mkString("\n") + "\n}"
+    "Search Result {\n" + impls.values.toList.sortBy(_.name.name).map(_.toLongString).mkString("\n") + "\n}"
   }
 
   def get(methodName: MethodName): Set[UnfreeImpl] = impls.get(methodName).map(_.options).getOrElse(Set())

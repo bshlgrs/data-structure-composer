@@ -13,9 +13,21 @@ import scala.io.Source
 object Chooser {
   lazy val libraryText = {
     Source.fromFile("data/implementations.txt")
-      .getLines().mkString("\n")
+      .getLines()
+      .mkString("\n")
   }
+
   lazy val autoImplLibrary = MainParser.impls.parse(libraryText).get.value.toSet
+
+  lazy val dataStructuresText = {
+    Source.fromFile("data/data_structures.txt")
+      .getLines()
+      .mkString("\n")
+  }
+
+  lazy val dataStructuresLibrary: Map[String, SimpleDataStructure] = {
+    MainParser.simpleDataStructureFile.parse(dataStructuresText).get.value.map((x) => x.name -> x).toMap
+  }
 
   // x[f] if x.foo <- 1
   // y[g] <- x[g]
@@ -28,7 +40,6 @@ object Chooser {
 //  )
 
   def getAllTimes(impls: Set[Impl]): SearchResult = {
-    impls.foreach(println(_))
     val queue = mutable.PriorityQueue[(BigOLiteral, UnfreeImpl)]()(Ordering.by((x: (BigOLiteral, UnfreeImpl)) => x._1).reverse)
 
     queue ++= impls.flatMap(_.toUnfreeImpl).map((u: UnfreeImpl) => (u.cost, u)).toList
@@ -42,8 +53,8 @@ object Chooser {
 
       if (searchResult.isOtherImplUseful(unfreeImpl)) {
         searchResult = searchResult.addImpl(unfreeImpl)
-        println(searchResult.toLongString)
-        println(s"unfree impl is $unfreeImpl")
+//        println(searchResult.toLongString)
+//        println(s"unfree impl is $unfreeImpl")
 
         for (otherImpl <- impls) {
           // So we have a random impl. Let's see if the unfreeImpl we just settled on is useful for that impl.
@@ -76,7 +87,7 @@ object Chooser {
   }
 
   def main(args: Array[String]) {
-    println(getAllTimesForDataStructure(autoImplLibrary, DataStructureLibrary.ArrayList).toLongString)
+    println(getAllTimesForDataStructure(autoImplLibrary, dataStructuresLibrary("VectorList")).toLongString)
   }
 }
 

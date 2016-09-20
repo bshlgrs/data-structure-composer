@@ -77,7 +77,9 @@ object MainParser {
     })
   }
 
-  lazy val implRhs: P[AffineBigOCombo[MethodExpr]] = (factorInImplRhs | bigOAsImplRhs | backwardsFactorInImplRhs).rep(1, sep="+").map(_.reduce(_.+(_)))
+  lazy val implRhs: P[AffineBigOCombo[MethodExpr]] = {
+    (factorInImplRhs | bigOAsImplRhs | backwardsFactorInImplRhs).rep(1, sep="+").map(_.reduce(_.+(_)))
+  }
 
   lazy val methodExpr: P[MethodExpr] = P(name.! ~ ("[" ~ functionExpr.rep(1, sep=",") ~ "]").?).map({case ((x, mbFunctions)) =>
     MethodExpr(x, mbFunctions.map(_.toList).getOrElse(Nil))
@@ -89,6 +91,16 @@ object MainParser {
 
   lazy val implLine: P[Option[Impl]] = P(impl.map(Some(_)) | ("//" ~ CharsWhile(_ != '\n')).map((_) => None))
 
+  lazy val simpleDataStructure: P[SimpleDataStructure] = {
+    (name ~ "{" ~ "\n" ~ (" ".rep() ~ impl).rep(sep="\n") ~ "\n" ~ "}").map({case (n: String, impls: Seq[Impl]) =>
+      SimpleDataStructure(n, impls.toSet)
+    })
+  }
+
+  lazy val simpleDataStructureFile: P[Set[SimpleDataStructure]] = {
+    P("\n".rep() ~ simpleDataStructure.rep(sep="\n".rep()) ~ End).map(_.toSet)
+  }
+
   def main (args: Array[String]) {
 //    println(bigOLiteral.parse("1"))
 //    println(implLhs.parse("m[f]"))
@@ -96,9 +108,9 @@ object MainParser {
 //    println(anonymousFunctionExpr.parse("_[hello,world] <- n * hello + log(n)"))
 //    println(anonymousFunctionExpr.parse("_[hello,world] <- 1"))
 //
-//    println(methodExpr.parse("f[x,y,_]"))
-    println(impl.parse("each[f] <- getByIndex * n + n * f"))
-    println(P(implRhs ~ End).parse("getByIndex * n"))
+    println(simpleDataStructure.parse("Array {\ngetByIndex <- 1\n}\n").get)
+//    println(impl.parse("each[f] <- getByIndex * n + n * f"))
+//    println(P(implRhs ~ End).parse("getByIndex * n"))
 
   }
 }

@@ -1,0 +1,24 @@
+
+Array {
+    getByIndex <- 1
+    deleteAtIndex! <- n
+    deleteBetweenNodes! <- n
+    deleteAtEnd! <- 1
+    updateNode! <- 1
+}
+
+VectorList {
+    getByIndex <- 1
+    updateNode! <- 1
+    insertAtEnd! <- 1
+    deleteAtIndex! <- n
+    deleteBetweenNodes! <- n
+    deleteAtEnd! <- 1
+}
+
+Heap {
+    unorderedEach <- n
+    getMinimum <- 1
+    deleteNode! <- log(n)
+    insertAtIndex! <- 1
+}
