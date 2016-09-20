@@ -46,7 +46,8 @@ case class UnfreeImpl(lhs: ImplLhs,
   }
 
   def bindToContext(methodExpr: MethodExpr, implLhs: ImplLhs, searchResult: SearchResult): Option[(ImplPredicateMap, AffineBigOCombo[MethodName])] = {
-    assert(methodExpr.args.length == this.lhs.parameters.length)
+    assert(methodExpr.args.length == this.lhs.parameters.length,
+    s"Assertion failed: bindToContext called on $this with methodExpr $methodExpr.\nThese have a different number of args.")
 
     val conditionsAndRhses: List[Option[(ImplPredicateMap, Rhs)]] = methodExpr.args.zipWithIndex.map({case (f: FunctionExpr, idx) => f match {
       case AnonymousFunctionExpr(properties, fRhs) => {

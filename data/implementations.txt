@@ -35,7 +35,7 @@ deleteNodeWhichIsLast! <- deleteNode!
 deleteBetweenNodes! <- n * deleteNode! + n * getNext
 deleteAtIndex! <- deleteBetweenNodes!
 
-deleteFirstNodeWithValue! <- getFirstNodeWithValue + deleteNode!
+deleteFirstNodeWithValue! <- getFirstNodeWithValue[valueOrdering] + deleteNode!
 
 // updates
 updateFirstNode! <- getFirst + updateNodeWhichIsFirst!
