@@ -1,5 +1,8 @@
 package webapp
 
+import implementationSearcher.{SimpleDataStructure, Chooser, Impl}
+import parsers.MainParser
+
 import scala.scalajs.js.JSApp
 import org.scalajs.dom
 import dom.document
@@ -22,7 +25,10 @@ object WebApp extends JSApp {
   }
 
   @JSExport
-  def addClickedMessage(): Unit = {
-    appendPar(document.body, "You clicked the button!")
+  def makeChoices(implsString: String, dataStructuresString: String): List[(String, String)] = {
+    val impls: Set[Impl] = MainParser.impls.parse(implsString).get.value
+    val dataStructures: Set[SimpleDataStructure] = MainParser.simpleDataStructureFile.parse(dataStructuresString).get.value
+
+    dataStructures.map((x) => x -> Chooser.getAllTimesForDataStructure(impls, x).toLongString).toList.sortBy(_._1.name).map((x) => x._1.name -> x._2)
   }
 }

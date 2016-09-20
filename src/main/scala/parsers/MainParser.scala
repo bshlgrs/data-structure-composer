@@ -85,9 +85,9 @@ object MainParser {
     MethodExpr(x, mbFunctions.map(_.toList).getOrElse(Nil))
   })
 
-  lazy val justMethodExpr: P[MethodExpr] = P(methodExpr ~ End)
+  lazy val justMethodExpr: P[MethodExpr] = methodExpr ~ End
 
-  lazy val impls: P[List[Impl]] = P("\n".rep() ~ implLine.rep(1, sep="\n".rep) ~ End).map(_.toList.flatten)
+  lazy val impls: P[Set[Impl]] = P("\n".rep() ~ implLine.rep(1, sep="\n".rep) ~ End).map(_.toSet.flatten)
 
   lazy val implLine: P[Option[Impl]] = P(impl.map(Some(_)) | ("//" ~ CharsWhile(_ != '\n')).map((_) => None))
 
@@ -96,6 +96,8 @@ object MainParser {
       SimpleDataStructure(n, impls.toSet)
     })
   }
+
+  lazy val nakedSimpleDataStructure: P[SimpleDataStructure] = simpleDataStructure ~ End
 
   lazy val simpleDataStructureFile: P[Set[SimpleDataStructure]] = {
     P("\n".rep() ~ simpleDataStructure.rep(sep="\n".rep()) ~ End).map(_.toSet)
