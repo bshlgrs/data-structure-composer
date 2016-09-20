@@ -25,8 +25,8 @@ object Chooser {
       .mkString("\n")
   }
 
-  lazy val dataStructuresLibrary: Map[String, SimpleDataStructure] = {
-    MainParser.simpleDataStructureFile.parse(dataStructuresText).get.value.map((x) => x.name -> x).toMap
+  lazy val dataStructuresLibrary: Map[String, DataStructure] = {
+    MainParser.dataStructureFile.parse(dataStructuresText).get.value.map((x) => x.name -> x).toMap
   }
 
   // x[f] if x.foo <- 1
@@ -78,11 +78,11 @@ object Chooser {
     searchResult
   }
 
-  def getAllTimesForDataStructures(impls: Set[Impl], dataStructures: Set[SimpleDataStructure]) = {
+  def getAllTimesForDataStructures(impls: Set[Impl], dataStructures: Set[DataStructure]) = {
     getAllTimes(impls.union(dataStructures.flatMap(_.sourcedImpls)))
   }
 
-  def getAllTimesForDataStructure(impls: Set[Impl], dataStructure: SimpleDataStructure) = {
+  def getAllTimesForDataStructure(impls: Set[Impl], dataStructure: DataStructure) = {
     getAllTimes(impls.union(dataStructure.sourcedImpls))
   }
 

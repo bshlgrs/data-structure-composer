@@ -1,6 +1,6 @@
 package webapp
 
-import implementationSearcher.{SimpleDataStructure, Chooser, Impl}
+import implementationSearcher.{DataStructure, Chooser, Impl}
 import parsers.MainParser
 
 import scala.scalajs.js.JSApp
@@ -27,7 +27,7 @@ object WebApp extends JSApp {
   @JSExport
   def makeChoices(implsString: String, dataStructuresString: String): List[(String, String)] = {
     val impls: Set[Impl] = MainParser.impls.parse(implsString).get.value
-    val dataStructures: Set[SimpleDataStructure] = MainParser.simpleDataStructureFile.parse(dataStructuresString).get.value
+    val dataStructures: Set[DataStructure] = MainParser.dataStructureFile.parse(dataStructuresString).get.value
 
     dataStructures.map((x) => x -> Chooser.getAllTimesForDataStructure(impls, x).toLongString).toList.sortBy(_._1.name).map((x) => x._1.name -> x._2)
   }

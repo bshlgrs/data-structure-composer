@@ -11,6 +11,14 @@ case class SimpleDataStructure(name: String, impls: Set[Impl]) {
   }
 }
 
+case class DataStructure(lhs: ImplLhs, impls: Set[Impl]) {
+  def name: String = lhs.name.name
+
+  def sourcedImpls: Set[Impl] = {
+    impls.map((x) => Impl(x.lhs, x.rhs, Some(DataStructureSource(name))))
+  }
+}
+
 object DataStructureLibrary {
   val ArrayList = SimpleDataStructure("ArrayList", Set(
     Impl("getByIndex <- 1"),

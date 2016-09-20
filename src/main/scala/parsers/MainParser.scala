@@ -91,16 +91,16 @@ object MainParser {
 
   lazy val implLine: P[Option[Impl]] = P(impl.map(Some(_)) | ("//" ~ CharsWhile(_ != '\n')).map((_) => None))
 
-  lazy val simpleDataStructure: P[SimpleDataStructure] = {
-    (name ~ "{" ~ "\n" ~ (" ".rep() ~ impl).rep(sep="\n") ~ "\n" ~ "}").map({case (n: String, impls: Seq[Impl]) =>
-      SimpleDataStructure(n, impls.toSet)
+  lazy val dataStructure: P[DataStructure] = {
+    (implLhs ~ "{" ~ "\n" ~ (" ".rep() ~ impl).rep(sep="\n") ~ "\n" ~ "}").map({case (l: ImplLhs, impls: Seq[Impl]) =>
+      DataStructure(l, impls.toSet)
     })
   }
 
-  lazy val nakedSimpleDataStructure: P[SimpleDataStructure] = simpleDataStructure ~ End
+  lazy val nakedDataStructure: P[DataStructure] = dataStructure ~ End
 
-  lazy val simpleDataStructureFile: P[Set[SimpleDataStructure]] = {
-    P("\n".rep() ~ simpleDataStructure.rep(sep="\n".rep()) ~ End).map(_.toSet)
+  lazy val dataStructureFile: P[Set[DataStructure]] = {
+    P("\n".rep() ~ dataStructure.rep(sep="\n".rep()) ~ End).map(_.toSet)
   }
 
   def main (args: Array[String]) {
@@ -110,7 +110,7 @@ object MainParser {
 //    println(anonymousFunctionExpr.parse("_[hello,world] <- n * hello + log(n)"))
 //    println(anonymousFunctionExpr.parse("_[hello,world] <- 1"))
 //
-    println(simpleDataStructure.parse("Array {\ngetByIndex <- 1\n}\n").get)
+    println(dataStructure.parse("Array {\ngetByIndex <- 1\n}\n").get)
 //    println(impl.parse("each[f] <- getByIndex * n + n * f"))
 //    println(P(implRhs ~ End).parse("getByIndex * n"))
 
