@@ -134,7 +134,12 @@ There might be some trickiness in making it easy for users to find all those met
 - Handle combining data structures
 - Handle parameterized data structures 
 - Parse ADT descriptions
-- Choose fastest data structure combination for an ADT
+- Choose fastest data structure combination for a simple ADT
+    - initially, this can be done without the ability to introspect on what data structure is doing the work
+    - then that introspection needs to be done.
+- Store the chains of logic for every implementation, so that you can see what everything's relying on.
+- generalize to parameterized ADTs.
+
 
 ### Things to include
  
