@@ -79,11 +79,11 @@ object Chooser {
   }
 
   def getAllTimesForDataStructures(impls: Set[Impl], dataStructures: Set[DataStructure]) = {
-    getAllTimes(impls.union(dataStructures.flatMap(_.sourcedImpls)))
+    getAllTimes(impls.union(dataStructures.flatMap(_.sourcedImpls).map(_.toImpl)))
   }
 
   def getAllTimesForDataStructure(impls: Set[Impl], dataStructure: DataStructure) = {
-    getAllTimes(impls.union(dataStructure.sourcedImpls))
+    getAllTimes(impls.union(dataStructure.sourcedImpls.map(_.toImpl)))
   }
 
   def main(args: Array[String]) {

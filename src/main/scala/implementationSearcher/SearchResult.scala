@@ -13,6 +13,10 @@ case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map())
     }
   }
 
+  def addImpls(impls: Set[UnfreeImpl]): SearchResult = {
+    impls.foldLeft(this)((s, u) => s.addImpl(u))
+  }
+
   def allImpls: Set[UnfreeImpl] = impls.values.flatMap(_.options).toSet
 
   def isOtherImplUseful(unfreeImpl: UnfreeImpl): Boolean = {
@@ -24,7 +28,6 @@ case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map())
   }
 
   // The more conditions on the MethodExpr, the better.
-
 
   // So I want to find all of the ways that I can implement `myMethod[f]` where I know `f.bar` to be true.
   // If I see `myMethod[g] if g.foo <- log(n)`, I want to return that.
@@ -48,4 +51,11 @@ case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map())
   def get(methodName: MethodName): Set[UnfreeImpl] = impls.get(methodName).map(_.options).getOrElse(Set())
   def get(name: String): Set[UnfreeImpl] = this.get(MethodName(name))
 
+}
+
+
+object SearchResult {
+  def fromSetOfUnfreeImpls(unfreeImpls: Set[UnfreeImpl]): SearchResult = {
+    SearchResult().addImpls(unfreeImpls)
+  }
 }

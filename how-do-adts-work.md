@@ -89,8 +89,73 @@ Now, run inference on their get methods.
 
 So we have a list of get methods. Now, for each data structure separately (optionally: only do this if their set methods take different amounts of time), figure out the best times for the mutating methods for that data structure. This is going to be a `Set[SearchResult]`. Now add all these results together, and you're done. :boom: :moneybag: :moneybag:
 
+#### Example with parameterization
+
+Screw concreteness:
+
+    Foo[x] {
+        a[x] <- log(n) + x
+        b <- 1
+    }
+    
+    Bar[y] {
+        c[y] <- n * y
+    }
+    
+    
+    a[z] <- n * b + n * z
+    c[w] <- n * a + n * w
+    
+
+Let's look at `Foo + Bar`:
+
+    
+    Foo + Bar {
+        a[x] <- log(n) + x
+        b <- 1
+        c[y] <- n * y
+    }
+    
+Combine this with the free impls, to get:
+
+    a[z] <- n * b + n * z    (1) (source: natural)
+    c[w] <- n * a[w] + n * w (2) (source: natural)
+    a[x] <- log(n) + x       (3) (source: Foo[x])
+    b <- 1                   (4) (source: Foo[x])
+    c[y] <- n * y            (5) (source: Bar[y])
+
+Search through all these and get
+
+    b <- 1                   (4) (source: Foo[x])
+    a[x] <- log(n) + x       (3) (source: Foo[x])
+    c[y] <- n * y            (5) (source: Bar[y])
+
+Now, we're basically done answering the question "how fast will everything go if you use a `Foo + Bar`?" But we haven't answered the question "What do we need to parameterize `Foo` and `Bar` on to get this amazing performance on a particular ADT?"
 
 
+#### Example with single data structure and parameterization
+
+    ds BST[x] {
+        getKthBy[x] <- log(n) 
+    }
+    
+    getFirstBy[x] <- getKthBy[x]
+    getSmallest <- getFirstBy[valueOrdering]
+    
+    valueOrdering <- 1
+
+    adt MyThing[f] {
+        getSmallest
+        getFirstBy[f]
+    }
+
+So we get our fastest impls
+
+    getKthBy[x] <- log(n) // (1) From BST[x]
+    getFirstBy[y] <- log(n) // (2) Using (1)
+    getSmallest <- 1  // (3) Using (2)
+
+Then we get the subset of these that matter to our ADT. Then we DFS up through the UnfreeImpls to see which usages of the BST there were. In this case we find that `getKthBy` used with both `f` and and `valueOrdering`. So the BST has to be on both of those.  
 
 #### data structure relevance detection
 

@@ -92,7 +92,7 @@ object MainParser {
   lazy val implLine: P[Option[Impl]] = P(impl.map(Some(_)) | ("//" ~ CharsWhile(_ != '\n')).map((_) => None))
 
   lazy val dataStructure: P[DataStructure] = {
-    (implLhs ~ "{" ~ "\n" ~ (" ".rep() ~ impl).rep(sep="\n") ~ "\n" ~ "}").map({case (l: ImplLhs, impls: Seq[Impl]) =>
+    (implLhs ~ "{" ~ "\n" ~ (" ".rep() ~ unfreeImpl).rep(sep="\n") ~ "\n" ~ "}").map({case (l: ImplLhs, impls: Seq[Impl]) =>
       DataStructure(l, impls.toSet)
     })
   }

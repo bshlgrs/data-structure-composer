@@ -124,6 +124,8 @@ case class UnfreeImpl(lhs: ImplLhs,
       source
     )
   }
+
+  def toImpl: Impl = Impl(lhs, rhs.mapKeys((x) => MethodExpr(x, Nil)))
 }
 
 object UnfreeImpl {

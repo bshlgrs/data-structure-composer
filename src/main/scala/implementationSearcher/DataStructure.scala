@@ -5,36 +5,51 @@ import shared.ConstantTime
 /**
   * Created by buck on 7/26/16.
   */
-case class SimpleDataStructure(name: String, impls: Set[Impl]) {
-  def sourcedImpls: Set[Impl] = {
-    impls.map((x) => Impl(x.lhs, x.rhs, Some(DataStructureSource(name))))
+case class SimpleDataStructure(name: String, impls: Set[UnfreeImpl]) {
+  def sourcedImpls: Set[UnfreeImpl] = {
+    impls.map((x) => UnfreeImpl(x.lhs, x.rhs, Some(DataStructureSource(name))))
   }
 }
 
-case class DataStructure(lhs: ImplLhs, impls: Set[Impl]) {
+case class DataStructure(lhs: ImplLhs, impls: Set[UnfreeImpl]) {
   def name: String = lhs.name.name
 
-  def sourcedImpls: Set[Impl] = {
-    impls.map((x) => Impl(x.lhs, x.rhs, Some(DataStructureSource(name))))
+  def isSimple: Boolean = lhs.parameters.isEmpty
+
+  def sourcedImpls: Set[UnfreeImpl] = {
+    impls.map((x) => UnfreeImpl(x.lhs, x.rhs, Some(DataStructureSource(name))))
+  }
+
+  def searchResult: SearchResult = SearchResult.fromSetOfUnfreeImpls(impls)
+
+  def readMethods: Set[UnfreeImpl] = {
+    impls.filter(_.lhs.name.isMutating)
+  }
+}
+
+object DataStructure {
+  // todo: consider what happens when the data structures aren't simple
+  def combineReadMethods(dataStructures: Set[DataStructure]): SearchResult = {
+    SearchResult.fromSetOfUnfreeImpls(dataStructures.flatMap(_.sourcedImpls))
   }
 }
 
 object DataStructureLibrary {
   val ArrayList = SimpleDataStructure("ArrayList", Set(
-    Impl("getByIndex <- 1"),
-    Impl("insertAtEnd! <- 1"),
-    Impl("deleteLast! <- 1"),
-    Impl("updateNode! <- 1")
+    UnfreeImpl("getByIndex <- 1"),
+    UnfreeImpl("insertAtEnd! <- 1"),
+    UnfreeImpl("deleteLast! <- 1"),
+    UnfreeImpl("updateNode! <- 1")
   ))
 
   val ReadOnlyLinkedList = SimpleDataStructure("ReadOnlyLinkedList", Set(
-    Impl(ImplLhs("getFirst"), AffineBigOCombo(ConstantTime, Map())),
-    Impl(ImplLhs("getNext"), AffineBigOCombo(ConstantTime, Map()))
+    UnfreeImpl(ImplLhs("getFirst"), AffineBigOCombo(ConstantTime, Map())),
+    UnfreeImpl(ImplLhs("getNext"), AffineBigOCombo(ConstantTime, Map()))
   ))
 
   val SumMemoizer = SimpleDataStructure("SumMemoizer", Set(
-    Impl(ImplLhs("getSum"), AffineBigOCombo(ConstantTime, Map())),
-    Impl(ImplLhs("insertNode"), AffineBigOCombo(ConstantTime, Map()))
+    UnfreeImpl(ImplLhs("getSum"), AffineBigOCombo(ConstantTime, Map())),
+    UnfreeImpl(ImplLhs("insertNode"), AffineBigOCombo(ConstantTime, Map()))
   ))
 
   val library = Map(
