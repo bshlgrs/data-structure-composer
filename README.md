@@ -12,7 +12,8 @@ adt MinAndMaxSet {
   getMaximum
   deleteMinimum!
   deleteMaximum!
-  insertAtEnd!
+  contains
+  insertAnywhere!
   deleteByValue!
 }
 ```
@@ -103,37 +104,23 @@ HighestNumberMemoizer {
 }
 ```
 
-----
-
-## Steps to victory
-
-- Implement selection of methods from multiple data structures
-- Make a parser.
-- Make a UI. This involves setting up ScalaJS.
-    - I can do the UI in Javascript or ScalaJS.
+but can also do other things...
 
 ----
 
-Things to do after this:
+## Todo list:
 
-- **Classes.** There's a sense in which arrays are naturally an ordered collection, and BSTs are a sorted collection, and hash maps are a dictionary.
-- **Data views.** A list BST is just a BST sorted on insertion order. And you can make views like a histogram view, which can itself be represented by any data structure.
-- **More columns.** To some extent, this project looks a lot like implementing a very particular kind of database. Instead of having my lists be pretty much lists of scalars, I could make it work more elegantly for them to look like rows in a database.
-- **Code generation.** Generating actual code would be pretty fun.
+- fix the SingleMethodImplOptions
+- Write Scalacheck tests to test that my parser can invert my toString methods
+- Handle combining data structures
+- Handle parameterized data structures 
+- Parse ADT descriptions
+- Choose fastest data structure combination for an ADT
 
-----------
+## Other crazy notes
 
-### Notes on paramaterization
-
-```
-reduce[f] if f.commutative <- unorderedEach[_ <- f]
-```
-
-implies "If you have an implementation which, for all `g`, can implement `unorderedEach[g]`, you can implement `\forall f if f.commutative: reduce[f]` with the previous implementation applied to `_`.
-
-```
-maximum <- reduce[_{commutative} <- 1]
-```
-
-imples "If you have an implementation which, for all `g` which are commutative, can implement `reduce[g]`, you can implement `maximum` with the previous implementation applied to `_`. 
+- It might be nice to have higher-order data structures. example?
+- My code assumes everything is an ordered list. Is there an elegant way of handling multiple different types (and conversions between them)?
+- Do I have to do anything fancy to get things like `union` or `intersection` to work?
+- The frontend might let you select between methods in multiple languages.
 

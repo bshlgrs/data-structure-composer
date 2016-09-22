@@ -16,13 +16,6 @@ VectorList {
     deleteAtEnd! <- 1
 }
 
-Heap {
-    unorderedEach <- n
-    getMinimum <- 1
-    deleteNode! <- log(n)
-    insertAtIndex! <- 1
-}
-
 RedBlackOrderStatisticTreeList {
     getByIndex <- log(n)
     updateNode! <- 1
@@ -33,4 +26,31 @@ RedBlackOrderStatisticTreeList {
     insertAtStart! <- 1
     deleteNode! <- log(n)
     deleteBetweenNodes! <- log(n)
+}
+
+Heap {
+    unorderedEach <- n
+    getMinimum <- 1
+    deleteNode! <- log(n)
+    updateNode! <- log(n)
+    insertAtIndex! <- 1
+}
+
+// ordered by f, memoizing reductions on g
+OrderedRedBlackTree[f, g] {
+    unorderedEach <- n
+    getNext <- 1
+    getPrev <- 1
+    getFirst <- 1
+    getLast <- 1
+    updateNode! <- 1 + g
+    getFirstBy[f] <- 1
+    getLastBy[f] <- 1
+    getKthBy[f] <- log(n)
+    insertAtIndex! <- log(n) + g
+    getFirstNodeWithValue[f] <- log(n)
+    deleteNode! <- 1 + g
+    countBetweenBy[f] <- log(n)
+    twoSidedValueRangeQuery[g] <- g * log(n)
+    oneSidedValueRangeQuery[g] <- g * log(n)
 }

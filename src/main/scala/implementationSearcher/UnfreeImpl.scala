@@ -124,7 +124,6 @@ case class UnfreeImpl(lhs: ImplLhs,
       source
     )
   }
-
 }
 
 object UnfreeImpl {
@@ -138,7 +137,7 @@ object UnfreeImpl {
     MainParser.nakedAffineBigONameCombo.parse(string).get.value
   }
 }
-
+//
 //object UnfreeImplDominance extends DominanceFunction[UnfreeImpl] {
 //  def apply(x: UnfreeImpl, y: UnfreeImpl): Dominance = {
 //    if (x.lhs.name != y.lhs.name) {
@@ -146,7 +145,7 @@ object UnfreeImpl {
 //    } else {
 //      val generalityDominance = y.lhs.dominance(x.lhs)
 //      val timeDominance = Dominance.fromSeqOfOrderedThings(
-//        y.normalizedParameterCosts.zip(x.normalizedParameterCosts))
+//      y.normalizedParameterCosts.zip(x.normalizedParameterCosts))
 //      generalityDominance.infimum(timeDominance)
 //    }
 //  }
