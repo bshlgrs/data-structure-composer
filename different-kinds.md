@@ -1,5 +1,7 @@
 # Different kinds of algorithm problems
 
+different kinds of related problems in this space
+
 ## Compose data structures to support a given API quickly
 
 lots, eg
