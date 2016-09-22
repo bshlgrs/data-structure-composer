@@ -89,5 +89,17 @@ object Chooser {
   def main(args: Array[String]) {
     println(getAllTimesForDataStructure(autoImplLibrary, dataStructuresLibrary("VectorList")).toLongString)
   }
+
+  def getRelevantTimesForDataStructures(impls: Set[Impl], structures: Set[DataStructure], adt: AbstractDataType): Map[MethodName, BigOLiteral] = {
+    ???
+  }
+
+  def bestDataStructureCombosForAdt(impls: Set[Impl],
+                                    structures: Set[DataStructure],
+                                    adt: AbstractDataType): Set[(Set[DataStructure], Map[MethodName, BigOLiteral])] = {
+
+    // actually this needs to get the dominance frontier :/
+    structures.subsets().map((x) => x -> getRelevantTimesForDataStructures(impls, x, adt)).toSet
+  }
 }
 

@@ -23,6 +23,10 @@ case class DataStructure(lhs: ImplLhs, impls: Set[UnfreeImpl]) {
   def searchResult: SearchResult = SearchResult.fromSetOfUnfreeImpls(impls)
 
   def readMethods: Set[UnfreeImpl] = {
+    impls.filterNot(_.lhs.name.isMutating)
+  }
+
+  def writeMethods: Set[UnfreeImpl] = {
     impls.filter(_.lhs.name.isMutating)
   }
 }
