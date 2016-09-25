@@ -54,8 +54,12 @@ case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map())
   def get(name: String): Set[UnfreeImpl] = this.get(MethodName(name))
 
   def product(other: SearchResult): SearchResult = {
-    SearchResult(this.impls.map({ case ((methodName, singleMethodImplOptions)) =>
-      methodName -> singleMethodImplOptions.product(other.impls(methodName))
+    SearchResult(this.impls.flatMap({ case ((methodName, singleMethodImplOptions)) =>
+      if (other.impls.contains(methodName)) {
+        Some(methodName -> singleMethodImplOptions.product(other.impls(methodName)))
+      } else {
+        Nil
+      }
     }))
   }
 

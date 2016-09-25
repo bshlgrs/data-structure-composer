@@ -78,10 +78,6 @@ object Chooser {
     searchResult
   }
 
-  def getAllTimesForDataStructures(impls: Set[Impl], dataStructures: Set[DataStructure]) = {
-    getAllTimes(impls.union(dataStructures.flatMap(_.sourcedImpls).map(_.toImpl)))
-  }
-
   def getAllTimesForDataStructure(impls: Set[Impl], dataStructure: DataStructure) = {
     getAllTimes(impls.union(dataStructure.sourcedImpls.map(_.toImpl)))
   }
@@ -91,16 +87,17 @@ object Chooser {
   }
 
   def getRelevantTimesForDataStructures(impls: Set[Impl],
-                                        structures: Set[DataStructure]): Map[MethodName, AffineBigOCombo[MethodName]] = {
+                                        structures: Set[DataStructure]): SearchResult = {
     val allProvidedReadImplementations: Set[UnfreeImpl] = structures.flatMap(_.readMethods)
 
     val bestReadImplementations: SearchResult = getAllTimes(allProvidedReadImplementations.map(_.toImpl) ++ impls)
 
-    val allWriteImplementations: Set[SearchResult] = structures.map((s) => getAllTimes((s.writeMethods ++ bestReadImplementations.allImpls).map(_.toImpl)))
+    val allWriteImplementations: Set[SearchResult] = structures.map((s) =>
+      getAllTimes((s.writeMethods ++ bestReadImplementations.allImpls).map(_.toImpl) ++ impls))
 
     val combinedWriteImplementations: SearchResult = allWriteImplementations.reduceOption(_.product(_)).getOrElse(SearchResult())
 
-    bestReadImplementations.addImpls(combinedWriteImplementations.allImpls).bestFullyGeneralTimes
+    bestReadImplementations.addImpls(combinedWriteImplementations.allImpls)
   }
 
   def bestDataStructureCombosForAdt(impls: Set[Impl],
@@ -108,7 +105,7 @@ object Chooser {
                                     adt: AbstractDataType): Set[(Set[DataStructure], Map[MethodName, AffineBigOCombo[MethodName]])] = {
 
     // actually this needs to get the dominance frontier :/
-    structures.subsets().map((x) => x -> getRelevantTimesForDataStructures(impls, x)).toSet
+    structures.subsets().map((x) => x -> getRelevantTimesForDataStructures(impls, x).bestFullyGeneralTimes).toSet
   }
 }
 
