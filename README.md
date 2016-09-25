@@ -129,10 +129,14 @@ There might be some trickiness in making it easy for users to find all those met
 
 ## Todo list:
 
-- fix the SingleMethodImplOptions
-- Write Scalacheck tests to test that my parser can invert my toString methods
-- Handle combining data structures
+immediate: 
+
+- implement dominance frontiers
 - Handle parameterized data structures 
+
+then:
+
+- Write Scalacheck tests to test that my parser can invert my toString methods
 - Parse ADT descriptions
 - Choose fastest data structure combination for a simple ADT
     - initially, this can be done without the ability to introspect on what data structure is doing the work
