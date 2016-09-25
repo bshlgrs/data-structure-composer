@@ -1,7 +1,7 @@
 package implementationSearcher
 
 import parsers.MainParser
-import shared.{ConstantTime, BigOLiteral}
+import shared.{ConstantTime, BigOLiteral, Utils}
 
 /**
   * Created by buck on 7/31/16.
@@ -45,72 +45,27 @@ case class UnfreeImpl(lhs: ImplLhs,
       thisConditions subsetOf thoseConditions})
   }
 
-  def bindToContext(methodExpr: MethodExpr, implLhs: ImplLhs, searchResult: SearchResult): Option[(ImplPredicateMap, AffineBigOCombo[MethodName])] = {
+  def bindToContext(methodExpr: MethodExpr, implLhs: ImplLhs, searchResult: SearchResult): Set[(ImplPredicateMap, AffineBigOCombo[MethodName])] = {
     assert(methodExpr.args.length == this.lhs.parameters.length,
-    s"Assertion failed: bindToContext called on $this with methodExpr $methodExpr.\nThese have a different number of args.")
+    s"Assertion failed: bindToContext called on $this with methodExpr $methodExpr.\n" +
+      s"These have a different number of args: ${this.lhs.parameters} vs ${methodExpr.args}.")
 
-    val conditionsAndRhses: List[Option[(ImplPredicateMap, Rhs)]] = methodExpr.args.zipWithIndex.map({case (f: FunctionExpr, idx) => f match {
-      case AnonymousFunctionExpr(properties, fRhs) => {
-        // If the anonymous function has the necessary properties, then add no conditions and continue
-        if (lhs.conditions.list(idx).subsetOf(properties)) {
-          val costOfParamInMethodExprNames = fRhs
+    val conditionsAndRhses: List[Set[(ImplPredicateMap, Rhs)]] = methodExpr.args.zipWithIndex.map({case (f: FunctionExpr, idx) =>
+      val relevantParamName = lhs.parameters(idx)
+      val weightOfParam = rhs.weights(MethodName(relevantParamName))
+      f.getConditionsAndCosts(lhs.conditions.list(idx), implLhs, searchResult, weightOfParam)
+    })
 
-          val relevantParamName = lhs.parameters(idx)
-          val weightOfParam = rhs.weights(MethodName(relevantParamName))
+    val combinationsOfImpls: Set[List[(ImplPredicateMap, Rhs)]] = Utils.cartesianProducts(conditionsAndRhses)
 
-          val cost = costOfParamInMethodExprNames * weightOfParam
 
-          Some((ImplPredicateMap.empty, cost))
-        } else
-          None
-      }
-      case NamedFunctionExpr(name) => {
-        val that = this
-
-        // This name might be locally bound or globally bound.
-        // If it's locally bound:
-        if (implLhs.parameters.contains(name)) {
-          val relevantParamName = lhs.parameters(idx)
-          val weightOfParam = rhs.weights(MethodName(relevantParamName))
-
-          Some(
-            (
-              ImplPredicateMap(Map(name -> lhs.conditions.list(idx))),
-              AffineBigOCombo[MethodName](ConstantTime, Map(MethodName(name) -> weightOfParam))
-              )
-          )
-        } else {
-          val that = this
-          // Otherwise it's globally bound, so look for an implementation which has already been sorted.
-          searchResult.get(MethodName(name)) match {
-            case x: Set[UnfreeImpl] if x.size == 1 => {
-              val oneImplementation: UnfreeImpl = x.head
-
-              if (oneImplementation.lhs.parameters.isEmpty) {
-                Some((ImplPredicateMap.empty, oneImplementation.rhs))
-              } else {
-                ???
-              }
-            }
-            case x: Set[UnfreeImpl] if x.isEmpty => {
-              None
-            }
-            case x: Set[UnfreeImpl] if x.size > 1 => {
-              ???
-            }
-          }
-        }
-      }
-    }})
-
-    if (conditionsAndRhses contains None)
-      None
-    else if (conditionsAndRhses.isEmpty) {
-      Some(ImplPredicateMap.empty, this.rhs)
-    } else {
-      val (conditionsList, rhsList) = conditionsAndRhses.flatten.unzip
-
-      Some(conditionsList.reduce(_.and(_)) -> (rhsList.reduce(_ + _) + rhs.bias))
+    for {
+      conditionsAndRhses <- combinationsOfImpls
+    } yield {
+      val (conditionsList, rhsList) = conditionsAndRhses.unzip
+      val finalConditionsMap = conditionsList.reduceOption(_.and(_)).getOrElse(ImplPredicateMap.empty)
+      val finalRhs = rhsList.reduceOption(_ + _).getOrElse(rhs) + rhs.bias
+      finalConditionsMap -> finalRhs
     }
   }
 

@@ -90,16 +90,25 @@ object Chooser {
     println(getAllTimesForDataStructure(autoImplLibrary, dataStructuresLibrary("VectorList")).toLongString)
   }
 
-  def getRelevantTimesForDataStructures(impls: Set[Impl], structures: Set[DataStructure], adt: AbstractDataType): Map[MethodName, BigOLiteral] = {
-    ???
+  def getRelevantTimesForDataStructures(impls: Set[Impl],
+                                        structures: Set[DataStructure]): Map[MethodName, AffineBigOCombo[MethodName]] = {
+    val allProvidedReadImplementations: Set[UnfreeImpl] = structures.flatMap(_.readMethods)
+
+    val bestReadImplementations: SearchResult = getAllTimes(allProvidedReadImplementations.map(_.toImpl) ++ impls)
+
+    val allWriteImplementations: Set[SearchResult] = structures.map((s) => getAllTimes((s.writeMethods ++ bestReadImplementations.allImpls).map(_.toImpl)))
+
+    val combinedWriteImplementations: SearchResult = allWriteImplementations.reduceOption(_.product(_)).getOrElse(SearchResult())
+
+    bestReadImplementations.addImpls(combinedWriteImplementations.allImpls).bestFullyGeneralTimes
   }
 
   def bestDataStructureCombosForAdt(impls: Set[Impl],
                                     structures: Set[DataStructure],
-                                    adt: AbstractDataType): Set[(Set[DataStructure], Map[MethodName, BigOLiteral])] = {
+                                    adt: AbstractDataType): Set[(Set[DataStructure], Map[MethodName, AffineBigOCombo[MethodName]])] = {
 
     // actually this needs to get the dominance frontier :/
-    structures.subsets().map((x) => x -> getRelevantTimesForDataStructures(impls, x, adt)).toSet
+    structures.subsets().map((x) => x -> getRelevantTimesForDataStructures(impls, x)).toSet
   }
 }
 

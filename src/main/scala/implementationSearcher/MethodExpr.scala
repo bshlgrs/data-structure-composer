@@ -24,7 +24,10 @@ case class MethodExpr(name: MethodName, args: List[FunctionExpr]) {
 }
 
 object MethodExpr {
-  def apply(name: String, args: List[FunctionExpr] = Nil): MethodExpr = MethodExpr(MethodName(name), args)
+  def apply(name: String, args: List[FunctionExpr] = Nil): MethodExpr = {
+
+    MethodExpr(MethodName(name), args)
+  }
 
   def parse(string: String): MethodExpr = {
     MainParser.justMethodExpr.parse(string).get.value

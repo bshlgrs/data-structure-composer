@@ -19,5 +19,10 @@ case class ImplPredicateList(list: List[Set[FunctionProperty]]) {
   def isEmpty: Boolean = list.forall(_.isEmpty)
 }
 
+object ImplPredicateList {
+  def empty(i: Int) = ImplPredicateList(List.fill(i)(Set()))
+
+}
+
 
 case class ImplPredicate(parameterIdx: Int, property: String)

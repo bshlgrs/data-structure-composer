@@ -1,5 +1,6 @@
 package implementationSearcher
 
+import parsers.MainParser
 import shared.ConstantTime
 
 /**
@@ -36,6 +37,8 @@ object DataStructure {
   def combineReadMethods(dataStructures: Set[DataStructure]): SearchResult = {
     SearchResult.fromSetOfUnfreeImpls(dataStructures.flatMap(_.sourcedImpls))
   }
+
+  def apply(string: String): DataStructure = MainParser.nakedDataStructure.parse(string).get.value
 }
 
 object DataStructureLibrary {

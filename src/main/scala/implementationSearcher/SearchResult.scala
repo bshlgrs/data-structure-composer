@@ -1,5 +1,7 @@
 package implementationSearcher
 
+import shared.BigOLiteral
+
 
 /**
   * Created by buck on 9/10/16.
@@ -51,6 +53,15 @@ case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map())
   def get(methodName: MethodName): Set[UnfreeImpl] = impls.get(methodName).map(_.options).getOrElse(Set())
   def get(name: String): Set[UnfreeImpl] = this.get(MethodName(name))
 
+  def product(other: SearchResult): SearchResult = {
+    SearchResult(this.impls.map({ case ((methodName, singleMethodImplOptions)) =>
+      methodName -> singleMethodImplOptions.product(other.impls(methodName))
+    }))
+  }
+
+  def bestFullyGeneralTimes: Map[MethodName, AffineBigOCombo[MethodName]] = {
+    impls.mapValues((x) => x.bestFullyGeneralTime).filter(_._2.isDefined).mapValues(_.get)
+  }
 }
 
 

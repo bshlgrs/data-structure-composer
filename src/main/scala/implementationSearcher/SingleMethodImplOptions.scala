@@ -55,9 +55,9 @@ case class SingleMethodImplOptions(options: Set[UnfreeImpl]) {
 
   def toLongString: String = {
     val startLhs = options.head.lhs
-    s"  ${ImplLhs(startLhs.name.name, startLhs.parameters).toString} {\n" + options.toList.map((unfreeImpl) => {
+    s"  ${ImplLhs(startLhs.name.name, startLhs.parameters).toString} { " + options.toList.map((unfreeImpl) => {
       s"    (${unfreeImpl.lhs.conditions.toNiceString(startLhs.parameters)}) <- ${unfreeImpl.rhs}"
-    }).mkString("\n") + "\n  }"
+    }).mkString("\n") + "  }"
   }
 
   def sum(other: SingleMethodImplOptions): SingleMethodImplOptions = {
@@ -76,6 +76,10 @@ case class SingleMethodImplOptions(options: Set[UnfreeImpl]) {
       val rhs = x.rhs + y.rhs
       UnfreeImpl(lhs, rhs, x.source)
     })
+  }
+
+  def bestFullyGeneralTime: Option[AffineBigOCombo[MethodName]] = {
+    this.bestImplementationForConditions(ImplPredicateList.empty(options.head.lhs.parameters.length)).map(_.rhs)
   }
 }
 
