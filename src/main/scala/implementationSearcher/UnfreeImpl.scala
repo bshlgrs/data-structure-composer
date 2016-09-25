@@ -51,9 +51,13 @@ case class UnfreeImpl(lhs: ImplLhs,
       s"These have a different number of args: ${this.lhs.parameters} vs ${methodExpr.args}.")
 
     val conditionsAndRhses: List[Set[(ImplPredicateMap, Rhs)]] = methodExpr.args.zipWithIndex.map({case (f: FunctionExpr, idx) =>
+      val that = this
       val relevantParamName = lhs.parameters(idx)
-      val weightOfParam = rhs.weights(MethodName(relevantParamName))
-      f.getConditionsAndCosts(lhs.conditions.list(idx), implLhs, searchResult, weightOfParam)
+      rhs.weights.get(MethodName(relevantParamName)) match {
+        case None => Set((ImplPredicateMap.empty, AffineBigOCombo[MethodName](ConstantTime, Map())))
+        case Some(weightOfParam) =>
+          f.getConditionsAndCosts(lhs.conditions.list(idx), implLhs, searchResult).map((x) => (x._1, x._2 * weightOfParam))
+      }
     })
 
     val combinationsOfImpls: Set[List[(ImplPredicateMap, Rhs)]] = Utils.cartesianProducts(conditionsAndRhses)

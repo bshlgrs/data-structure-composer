@@ -19,7 +19,7 @@ abstract class FunctionExpr {
     case AnonymousFunctionExpr(props, args) => args.weights.keys.map(_.name).toSet
   }
 
-  def getConditionsAndCosts(conditions: Set[String], implLhs: ImplLhs, searchResult: SearchResult, weightOfParam: BigOLiteral): Set[(ImplPredicateMap, Rhs)] = this match {
+  def getConditionsAndCosts(conditions: Set[String], implLhs: ImplLhs, searchResult: SearchResult): Set[(ImplPredicateMap, Rhs)] = this match {
     case AnonymousFunctionExpr(properties, fRhs) => {
       // If the anonymous function has the necessary properties, then add no conditions and continue
       if (conditions.subsetOf(properties)) {
@@ -30,7 +30,7 @@ abstract class FunctionExpr {
           val alreadyChosenImpls = searchResult.get(name)
           if (alreadyChosenImpls.nonEmpty) {
             assert(alreadyChosenImpls.forall(_.lhs.parameters.isEmpty))
-            alreadyChosenImpls.filter(_.lhs.conditions.isEmpty).map(_.rhs * weight)
+            alreadyChosenImpls.filter(_.lhs.conditions.isEmpty).map(_.rhs)
           }
           // Otherwise, maybe it's a locally bound variable. So check whether it's in implLhs.parameters.
           else if (implLhs.parameters.contains(name.name)) {
@@ -48,7 +48,7 @@ abstract class FunctionExpr {
 
         costOptions.map((x) => {
           val overallCost = x.reduceOption(_ + _).getOrElse(AffineBigOCombo[MethodName](ConstantTime, Map()))
-          ImplPredicateMap.empty -> (overallCost * weightOfParam)
+          ImplPredicateMap.empty -> (overallCost)
         })
       } else
         Set()
@@ -62,12 +62,14 @@ abstract class FunctionExpr {
         Set(
           (
             ImplPredicateMap(Map(name -> conditions)),
-            AffineBigOCombo[MethodName](ConstantTime, Map(MethodName(name) -> weightOfParam))
+            AffineBigOCombo[MethodName](ConstantTime, Map(MethodName(name) -> ConstantTime))
           )
         )
       } else {
         val that = this
         // Otherwise it's globally bound, so look for an implementation which has already been sorted.
+
+        // Currently I am not allowing higher-order methods here. So there can only be one implementation.
         searchResult.get(MethodName(name)) match {
           case x: Set[UnfreeImpl] if x.size == 1 =>
             val oneImplementation: UnfreeImpl = x.head
@@ -80,6 +82,7 @@ abstract class FunctionExpr {
           case x: Set[UnfreeImpl] if x.isEmpty =>
             Set()
           case x: Set[UnfreeImpl] if x.size > 1 =>
+            // One day I will extend this code to allow higher-order methods; at that point I'll fill in this part of the code.
             ???
         }
       }
@@ -88,10 +91,11 @@ abstract class FunctionExpr {
 }
 
 object UnderscoreFunctionExpr extends AnonymousFunctionExpr(Set(), AffineBigOCombo(ConstantTime, Map()))
+
 case class NamedFunctionExpr(name: String) extends FunctionExpr {
   override def toString = name
 }
-// todo: check that time gets propagated correctly
+
 case class AnonymousFunctionExpr(properties: Set[String], cost: AffineBigOCombo[MethodName] = AffineBigOCombo(ConstantTime, Map())) extends FunctionExpr {
   override def toString = s"_{${properties.mkString(",")}} <- $cost"
 }

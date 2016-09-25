@@ -6,7 +6,7 @@ import shared.BigOLiteral
 /**
   * Created by buck on 9/10/16.
   */
-case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map()) {
+case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map(), freeVariables: Set[MethodName] = Set()) {
   def addImpl(impl: UnfreeImpl): SearchResult = {
     if (impls.contains(impl.lhs.name)) {
       SearchResult(impls.updated(impl.lhs.name, impls(impl.lhs.name).add(impl)))
