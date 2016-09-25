@@ -57,7 +57,7 @@ object MainParser {
 
   lazy val bigOLiteral: P[BigOLiteral] = {
     "1".!.map((_) => ConstantTime) |
-      "nlogn".!.map((_) => BigOLiteral(1,1)) |
+      "nlogn".!.map((_) => PolyAndLogTime(1,1)) |
       "n".!.map((_) => LinearTime) |
       "log(n)".!.map((_) => LogTime)
   }

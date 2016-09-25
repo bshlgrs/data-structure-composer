@@ -2,7 +2,7 @@ package implementationSearcher
 
 import implementationSearcher.ImplLhs.FunctionProperty
 import implementationSearcher.UnfreeImpl.Rhs
-import shared.{BigOLiteral, ConstantTime, Utils}
+import shared.{ZeroTime, BigOLiteral, ConstantTime, Utils}
 
 /**
   * Created by buck on 7/31/16.
@@ -34,7 +34,7 @@ abstract class FunctionExpr {
           }
           // Otherwise, maybe it's a locally bound variable. So check whether it's in implLhs.parameters.
           else if (implLhs.parameters.contains(name.name)) {
-            Set(AffineBigOCombo(ConstantTime, Map(name -> weight)))
+            Set(AffineBigOCombo(ZeroTime, Map(name -> weight)))
           }
           // Otherwise, just assume that it's a globally defined function which has not been defined.
           // So this anonymous method cannot be executed.
@@ -48,7 +48,7 @@ abstract class FunctionExpr {
 
         costOptions.map((x) => {
           val overallCost = x.reduceOption(_ + _).getOrElse(AffineBigOCombo[MethodName](ConstantTime, Map()))
-          ImplPredicateMap.empty -> (overallCost)
+          ImplPredicateMap.empty -> overallCost
         })
       } else
         Set()
@@ -62,7 +62,7 @@ abstract class FunctionExpr {
         Set(
           (
             ImplPredicateMap(Map(name -> conditions)),
-            AffineBigOCombo[MethodName](ConstantTime, Map(MethodName(name) -> ConstantTime))
+            AffineBigOCombo[MethodName](ZeroTime, Map(MethodName(name) -> ConstantTime))
           )
         )
       } else {

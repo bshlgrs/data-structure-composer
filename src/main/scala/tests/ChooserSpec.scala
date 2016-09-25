@@ -73,7 +73,7 @@ class ChooserSpec extends FunSpec {
 
       println(res.toLongString)
 
-      assert(res.impls(MethodName("x")).options.head == UnfreeImpl("x <- 1"))
+      assert(res.impls(MethodName("x")).options.head == UnfreeImpl("x <- n"))
     }
 
     it("handles anonymous functions from underscore") {
@@ -170,6 +170,14 @@ class ChooserSpec extends FunSpec {
       assert(res.get("getSmallest") == Set(UnfreeImpl("getSmallest <- 1")))
       assert(res.get("getFirst") == Set(UnfreeImpl("getFirst <- n")))
       assert(res.get("updateNode!") == Set(UnfreeImpl("updateNode! <- log(n)")))
+    }
+
+    it("can do linked-list + generic heap") {
+      val res = Chooser.getRelevantTimesForDataStructures(impls, Set(linkedList, genericHeap))
+
+      assert(res.get("getFirst") == Set(UnfreeImpl("getFirst <- 1")))
+      assert(res.get("insertAnywhere!") == Set(UnfreeImpl("insertAnywhere! <- log(n)")))
+      assert(res.get("getSmallest") == Set(UnfreeImpl("getSmallest <- 1")))
     }
   }
 }

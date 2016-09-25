@@ -1,6 +1,6 @@
 package implementationSearcher
 
-import shared.{ConstantTime, BigOLiteral}
+import shared.{ZeroTime, ConstantTime, BigOLiteral}
 
 /**
   * Created by buck on 9/18/16.
@@ -9,7 +9,7 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
   def +(other: AffineBigOCombo[A]): AffineBigOCombo[A] = {
     val combinedCosts = weights.foldLeft(other.weights) {
       case (currCosts: Map[_, BigOLiteral], (methodExpr, bigOLiteral: BigOLiteral)) => {
-        currCosts + (methodExpr -> (currCosts.getOrElse(methodExpr, ConstantTime) + bigOLiteral))
+        currCosts + (methodExpr -> (currCosts.getOrElse(methodExpr, ZeroTime) + bigOLiteral))
       }
     }
     AffineBigOCombo(this.bias + other.bias, combinedCosts)
@@ -24,12 +24,13 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
   }
 
   def addPair(key: A, value: BigOLiteral): AffineBigOCombo[A] = {
-    this.copy(weights = weights.updated(key, this.weights.getOrElse(key, ConstantTime) + value))
+    this.copy(weights = weights.updated(key, this.weights.getOrElse(key, ZeroTime) + value))
   }
 
   override def toString: String = {
     lazy val variableCostString = weights
       .toList
+      .filter(_._2 != ZeroTime)
       .map({ case (m, c: BigOLiteral) => if (c == ConstantTime) m.toString else s"${c.toShortString} * $m"})
       .mkString(" + ")
 

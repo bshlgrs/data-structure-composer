@@ -62,7 +62,6 @@ case class UnfreeImpl(lhs: ImplLhs,
 
     val combinationsOfImpls: Set[List[(ImplPredicateMap, Rhs)]] = Utils.cartesianProducts(conditionsAndRhses)
 
-
     for {
       conditionsAndRhses <- combinationsOfImpls
     } yield {
