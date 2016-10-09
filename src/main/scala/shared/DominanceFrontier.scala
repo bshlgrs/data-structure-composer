@@ -27,9 +27,9 @@ class DominanceFrontier[A: PartialOrdering](val items: Set[A]) {
 }
 
 object DominanceFrontier {
-  def fromSet[A <: PartialOrdering[A]](set: Set[A]): DominanceFrontier[A] = {
+  def fromSet[A: PartialOrdering](set: Set[A]): DominanceFrontier[A] = {
     set.foldLeft(empty[A])((frontier, item) => frontier.add(item))
   }
 
-  def empty[A <: PartialOrdering[A]] = new DominanceFrontier[A](Set[A]())
+  def empty[A: PartialOrdering] = new DominanceFrontier[A](Set[A]())
 }

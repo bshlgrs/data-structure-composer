@@ -14,6 +14,7 @@ case class UnfreeImpl(lhs: ImplLhs,
                       rhs: AffineBigOCombo[MethodName],
                       source: Option[ImplSource] = None) {
 
+  assert(rhs.keys.subsetOf(lhs.parameters.toSet.map(MethodName)))
 
   import UnfreeImpl._
 

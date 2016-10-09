@@ -65,13 +65,13 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
 }
 
 object AffineBigOCombo {
-//  implicit object AffineBigOPartialOrdering extends shared.PartialOrdering[AffineBigOCombo[_]] {
-//    def partialCompare[A](x: AffineBigOCombo[A], y: AffineBigOCombo[A]): DominanceRelationship = {
-//      PartialOrdering.fromSetOfDominanceRelationships(
-//        (x.keys ++ y.keys).map((key) =>
-//          DominanceRelationship.fromTotalOrdering(y.get(key), x.get(key))
-//        )
-//      )
-//    }
-//  }
+  trait AffineBigOPartialOrdering[A] extends shared.PartialOrdering[AffineBigOCombo[A]] {
+    def partialCompare(x: AffineBigOCombo[A], y: AffineBigOCombo[A]): DominanceRelationship = {
+      PartialOrdering.fromSetOfDominanceRelationships(
+        (x.keys ++ y.keys).map((key) =>
+          DominanceRelationship.fromTotalOrdering(y.get(key), x.get(key))
+        )
+      )
+    }
+  }
 }

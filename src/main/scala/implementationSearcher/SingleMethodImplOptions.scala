@@ -73,8 +73,8 @@ case class SingleMethodImplOptions(options: DominanceFrontier[UnfreeImpl]) {
 }
 
 object SingleMethodImplOptions {
-  import UnfreeImpl._
   def fromSet(set: Set[UnfreeImpl]): SingleMethodImplOptions = {
-    SingleMethodImplOptions(DominanceFrontier.fromSet[UnfreeImpl](set))
+    SingleMethodImplOptions(DominanceFrontier.fromSet(set))
   }
+
 }
