@@ -14,11 +14,12 @@ class UnfreeImplSpec extends FunSpec {
 
     val emptyLhs = ImplLhs("whatever")
     val emptySearchResults = SearchResult(Map())
+    val emptyScope = Scope(Map(), emptySearchResults)
 
     it("does simple constant time test") {
       val unfreeImpl = UnfreeImpl("f <- 1")
       val Some((conditions, rhs)) =
-        unfreeImpl.bindToContext(MethodExpr.parse("f"), emptyLhs, emptySearchResults).headOption
+        unfreeImpl.bindToContext(MethodExpr.parse("f"), emptyScope).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == UnfreeImpl.rhs("1"))
@@ -27,7 +28,7 @@ class UnfreeImplSpec extends FunSpec {
     it("does simple linear time test") {
       val unfreeImpl = UnfreeImpl("f <- n")
       val Some((conditions, rhs)) =
-        unfreeImpl.bindToContext(MethodExpr.parse("f"), emptyLhs, emptySearchResults).headOption
+        unfreeImpl.bindToContext(MethodExpr.parse("f"), emptyScope).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == UnfreeImpl.rhs("n"))
@@ -36,7 +37,7 @@ class UnfreeImplSpec extends FunSpec {
     it("correctly passes parameters through") {
       val unfreeImpl = UnfreeImpl("f[x] <- n * x")
       val Some((conditions, rhs)) =
-        unfreeImpl.bindToContext(MethodExpr.parse("f[y]"), ImplLhs("what", List("y")), emptySearchResults).headOption
+        unfreeImpl.bindToContext(MethodExpr.parse("f[y]"), Scope(Map("y" -> Set()), emptySearchResults)).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == UnfreeImpl.rhs("n * y"))
@@ -45,7 +46,7 @@ class UnfreeImplSpec extends FunSpec {
     it("correctly deals with inapplicable anonymous functions") {
       val unfreeImpl = UnfreeImpl("f[x] <- x")
       val Some((conditions, rhs)) =
-        unfreeImpl.bindToContext(MethodExpr.parse("f[_]"), emptyLhs, emptySearchResults).headOption
+        unfreeImpl.bindToContext(MethodExpr.parse("f[_]"), emptyScope).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == UnfreeImpl.rhs("1"))
@@ -54,7 +55,7 @@ class UnfreeImplSpec extends FunSpec {
     it("correctly deals with applicable anonymous functions") {
       val unfreeImpl = UnfreeImpl("f[x] if x.foo <- x")
       val Some((conditions, rhs)) =
-        unfreeImpl.bindToContext(MethodExpr.parse("f[_{foo}]"), emptyLhs, emptySearchResults).headOption
+        unfreeImpl.bindToContext(MethodExpr.parse("f[_{foo}]"), emptyScope).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == UnfreeImpl.rhs("1"))
@@ -63,7 +64,7 @@ class UnfreeImplSpec extends FunSpec {
     it("returns sums") {
       val unfreeImpl = UnfreeImpl("f[x] <- x + log(n)")
       val Some((conditions, rhs)) =
-        unfreeImpl.bindToContext(MethodExpr.parse("g[y]"), ImplLhs("what", List("y")), emptySearchResults).headOption
+        unfreeImpl.bindToContext(MethodExpr.parse("g[y]"), Scope(Map("y" -> Set()), emptySearchResults)).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == UnfreeImpl.rhs("y + log(n)"))
@@ -71,14 +72,14 @@ class UnfreeImplSpec extends FunSpec {
 
     it("notices when anonymous functions don't match the impl conditions") {
       val unfreeImpl = UnfreeImpl("f[x] if x.foo <- x")
-      val res = unfreeImpl.bindToContext(MethodExpr.parse("f[_]"), emptyLhs, emptySearchResults).headOption
+      val res = unfreeImpl.bindToContext(MethodExpr.parse("f[_]"), emptyScope).headOption
 
       assert(res.isEmpty)
     }
 
     it("reports impl conditions for named args") {
       val unfreeImpl = UnfreeImpl("f[x] if x.foo <- x")
-      val Some((conditions, rhs)) = unfreeImpl.bindToContext(MethodExpr.parse("f[y]"), ImplLhs("what", List("y")), emptySearchResults).headOption
+      val Some((conditions, rhs)) = unfreeImpl.bindToContext(MethodExpr.parse("f[y]"), Scope(Map("y" -> Set()), emptySearchResults)).headOption
 
       assert(conditions == ImplPredicateMap(Map("y" -> Set("foo"))))
       assert(rhs == UnfreeImpl.rhs("y"))
@@ -86,7 +87,7 @@ class UnfreeImplSpec extends FunSpec {
 
     it ("doesn't screw up an obvious thing (regression test)") {
       val unfreeImpl = UnfreeImpl("getFirstBy[f]  <- n * f + n")
-      val Some((conditions, rhs)) = unfreeImpl.bindToContext(MethodExpr.parse("getFirstBy[y]"), ImplLhs("what", List("y")), emptySearchResults).headOption
+      val Some((conditions, rhs)) = unfreeImpl.bindToContext(MethodExpr.parse("getFirstBy[y]"), Scope(Map("y" -> Set()), emptySearchResults)).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == UnfreeImpl.rhs("n * y + n"))
@@ -96,8 +97,7 @@ class UnfreeImplSpec extends FunSpec {
       val unfreeImpl = UnfreeImpl("y[f] <- n * f")
       val Some((conditions, rhs)) = unfreeImpl.bindToContext(
         MethodExpr.parse("y[_ <- k]"),
-        ImplLhs("what", Nil),
-        SearchResult.fromSetOfUnfreeImpls(Set(UnfreeImpl("k <- 1")))
+        Scope(Map("y" -> Set()), SearchResult.fromSetOfUnfreeImpls(Set(UnfreeImpl("k <- 1"))))
       ).headOption
 
       assert(conditions.isEmpty)

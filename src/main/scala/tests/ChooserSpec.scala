@@ -8,11 +8,7 @@ import implementationSearcher._
 import org.scalatest.FunSpec
 
 class ChooserSpec extends FunSpec {
-
   describe("Search") {
-//    it("correctly infers times in the simple case") {
-//    }
-
     it("does simple things") {
       val testLibrary = Set(
         Impl("x <- n"),
@@ -57,8 +53,6 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimes(testLibrary)
 
-      println(res.toLongString)
-
       assert(res.impls(MethodName("y")).options.head == UnfreeImpl("y[g] if g.foo <- log(n) + g"))
     }
 
@@ -70,8 +64,6 @@ class ChooserSpec extends FunSpec {
       )
 
       val res = Chooser.getAllTimes(testLibrary)
-
-      println(res.toLongString)
 
       assert(res.impls(MethodName("x")).options.head == UnfreeImpl("x <- n"))
     }
@@ -91,93 +83,8 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimes(testLibrary)
 
-      println(res.toLongString)
-
       assert(res.impls(MethodName("x")).options.head == UnfreeImpl("x <- n"))
     }
   }
 
-  describe("data structure analysis") {
-    val impls = Set(
-      Impl("getByIndex <- getFirst + n * getNext"),
-      Impl("getByIndex <- unorderedEach[_]"),
-      Impl("getFirst <- getByIndex"),
-      Impl("unorderedEach[f] <- getFirst + n * getNext + n * f"),
-      Impl("getSmallest <- getSmallestBy[valueOrdering]"),
-      Impl("getSmallestBy[f] <- unorderedEach[_ <- f]"),
-      Impl("insertAtIndex! <- getByIndex + insertAfterNode!"),
-      Impl("insertAnywhere! <- insertAfterNode! + getFirst"),
-      Impl("insertAnywhere! <- insertAtIndex!"),
-      Impl("valueOrdering <- 1")
-    )
-
-    val linkedList = DataStructure(
-      """LinkedList {
-        |    getFirst <- 1
-        |    getNext <- 1
-        |    updateNode! <- 1
-        |    insertAfterNode! <- 1
-        |}""".stripMargin)
-
-    val heap = DataStructure(
-      """Heap {
-        |    getSmallest <- 1
-        |    updateNode! <- log(n)
-        |    insertAtIndex! <- log(n)
-        |    unorderedEach[f] <- n + n * f
-        |}""".stripMargin)
-
-    val genericHeap = DataStructure(
-      """Heap[f] {
-        |    getSmallestBy[f] <- 1
-        |    updateNode! <- log(n)
-        |    insertAtIndex! <- log(n)
-        |    unorderedEach[g] <- n + n * g
-        |}""".stripMargin)
-
-
-    it("can do a linked list") {
-      val res = Chooser.getAllTimesForDataStructure(impls, linkedList)
-
-      assert(res.get("getByIndex") == Set(UnfreeImpl("getByIndex <- n")))
-      assert(res.get("getFirst") == Set(UnfreeImpl("getFirst <- 1")))
-      assert(res.get("getSmallest") == Set(UnfreeImpl("getSmallest <- n")))
-      assert(res.get("getNext") == Set(UnfreeImpl("getNext <- 1")))
-      assert(res.get("updateNode!") == Set(UnfreeImpl("updateNode! <- 1")))
-    }
-
-    it("can do a heap") {
-      val res = Chooser.getAllTimesForDataStructure(impls, heap)
-
-      assert(res.get("getByIndex") == Set(UnfreeImpl("getByIndex <- n")))
-      assert(res.get("getSmallest") == Set(UnfreeImpl("getSmallest <- 1")))
-      assert(res.get("getFirst") == Set(UnfreeImpl("getFirst <- n")))
-      assert(res.get("updateNode!") == Set(UnfreeImpl("updateNode! <- log(n)")))
-    }
-
-    it("can do linked-list + heap") {
-      val res = Chooser.getRelevantTimesForDataStructures(impls, Set(linkedList, heap))
-
-      assert(res.get("getFirst") == Set(UnfreeImpl("getFirst <- 1")))
-      assert(res.get("insertAnywhere!") == Set(UnfreeImpl("insertAnywhere! <- log(n)")))
-      assert(res.get("getSmallest") == Set(UnfreeImpl("getSmallest <- 1")))
-    }
-
-    it("can do a generic heap") {
-      val res = Chooser.getAllTimesForDataStructure(impls, genericHeap)
-
-      assert(res.get("getByIndex") == Set(UnfreeImpl("getByIndex <- n")))
-      assert(res.get("getSmallest") == Set(UnfreeImpl("getSmallest <- 1")))
-      assert(res.get("getFirst") == Set(UnfreeImpl("getFirst <- n")))
-      assert(res.get("updateNode!") == Set(UnfreeImpl("updateNode! <- log(n)")))
-    }
-
-    it("can do linked-list + generic heap") {
-      val res = Chooser.getRelevantTimesForDataStructures(impls, Set(linkedList, genericHeap))
-
-      assert(res.get("getFirst") == Set(UnfreeImpl("getFirst <- 1")))
-      assert(res.get("insertAnywhere!") == Set(UnfreeImpl("insertAnywhere! <- log(n)")))
-      assert(res.get("getSmallest") == Set(UnfreeImpl("getSmallest <- 1")))
-    }
-  }
 }

@@ -1,6 +1,8 @@
 package implementationSearcher
 
-import shared.{ZeroTime, ConstantTime, BigOLiteral}
+import shared._
+
+import scala.PartialOrdering
 
 /**
   * Created by buck on 9/18/16.
@@ -27,6 +29,10 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
     this.copy(weights = weights.updated(key, this.weights.getOrElse(key, ZeroTime) + value))
   }
 
+  def get(key: A): BigOLiteral = {
+    weights.getOrElse(key, ZeroTime)
+  }
+
   override def toString: String = {
     lazy val variableCostString = weights
       .toList
@@ -46,4 +52,26 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
     weights.keys.foldLeft(AffineBigOCombo[B](this.bias, Map()))(
       (combo, key) => combo.addPair(f(key), weights(key)))
   }
+
+  def keys: Set[A] = weights.keys.toSet
+
+  def partialCompare(other: AffineBigOCombo[A]): DominanceRelationship = {
+    PartialOrdering.fromSetOfDominanceRelationships(
+      (this.keys ++ other.keys).map((key) =>
+        DominanceRelationship.fromTotalOrdering(this.get(key), other.get(key))
+      )
+    )
+  }
+}
+
+object AffineBigOCombo {
+//  implicit object AffineBigOPartialOrdering extends shared.PartialOrdering[AffineBigOCombo[_]] {
+//    def partialCompare[A](x: AffineBigOCombo[A], y: AffineBigOCombo[A]): DominanceRelationship = {
+//      PartialOrdering.fromSetOfDominanceRelationships(
+//        (x.keys ++ y.keys).map((key) =>
+//          DominanceRelationship.fromTotalOrdering(y.get(key), x.get(key))
+//        )
+//      )
+//    }
+//  }
 }

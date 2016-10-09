@@ -43,9 +43,9 @@ case class SingleMethodImplOptions(options: Set[UnfreeImpl]) {
   }
 
   // More impl conditions means that this function returns something better
-  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, implLhs: ImplLhs, searchResult: SearchResult): Set[(UnfreeImpl, ImplPredicateMap, AffineBigOCombo[MethodName])] =
+  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, scope: Scope): Set[(UnfreeImpl, ImplPredicateMap, AffineBigOCombo[MethodName])] =
     options.flatMap({ (option) =>
-      option.bindToContext(methodExpr, implLhs, searchResult).map((x) => (option, x._1, x._2))
+      option.bindToContext(methodExpr, scope).map((x) => (option, x._1, x._2))
     })
 
   // More impl conditions means that this function returns something better

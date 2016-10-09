@@ -10,17 +10,10 @@ import parsers.MainParser
 case class MethodExpr(name: MethodName, args: List[FunctionExpr]) {
   override def toString: String = {
     val argsString = if (args.isEmpty) "" else s"[${args.map(_.toString).mkString(", ")}]"
-    return name.name + argsString
+    name.name + argsString
   }
 
   def getNames: Set[String] = Set(name.name) ++ args.flatMap(_.getNames)
-
-//  // this should probably return a dominance frontier :'(
-//  def getFastestRelevantImplementationIfAny(impls: Set[UnfreeImpl]): Option[UnfreeImpl] = {
-//    /// THIS IS FUCKED UP
-//    // I should actually return a dominance frontier.
-//    impls.filter((x) => canBeImplementedBy(x.lhs)).toList.sortBy(_.minCost).headOption
-//  }
 }
 
 object MethodExpr {

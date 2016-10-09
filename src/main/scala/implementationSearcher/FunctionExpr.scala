@@ -19,7 +19,7 @@ abstract class FunctionExpr {
     case AnonymousFunctionExpr(props, args) => args.weights.keys.map(_.name).toSet
   }
 
-  def getConditionsAndCosts(conditions: Set[String], implLhs: ImplLhs, searchResult: SearchResult): Set[(ImplPredicateMap, Rhs)] = this match {
+  def getConditionsAndCosts(conditions: Set[String], scope: Scope): Set[(ImplPredicateMap, Rhs)] = this match {
     case AnonymousFunctionExpr(properties, fRhs) => {
       // If the anonymous function has the necessary properties, then add no conditions and continue
       if (conditions.subsetOf(properties)) {
@@ -27,13 +27,13 @@ abstract class FunctionExpr {
           // Suppose that this FunctionExpr is _ <- n * f.
 
           // Maybe f is a globally defined function. So look for it in the searchResult:
-          val alreadyChosenImpls = searchResult.get(name)
+          val alreadyChosenImpls = scope.globals.get(name)
           if (alreadyChosenImpls.nonEmpty) {
             assert(alreadyChosenImpls.forall(_.lhs.parameters.isEmpty))
             alreadyChosenImpls.filter(_.lhs.conditions.isEmpty).map(_.rhs)
           }
           // Otherwise, maybe it's a locally bound variable. So check whether it's in implLhs.parameters.
-          else if (implLhs.parameters.contains(name.name)) {
+          else if (scope.locals.contains(name.name)) {
             Set(AffineBigOCombo(ZeroTime, Map(name -> weight)))
           }
           // Otherwise, just assume that it's a globally defined function which has not been defined.
@@ -58,7 +58,7 @@ abstract class FunctionExpr {
 
       // This name might be locally bound or globally bound.
       // If it's locally bound:
-      if (implLhs.parameters.contains(name)) {
+      if (scope.locals.contains(name)) {
         Set(
           (
             ImplPredicateMap(Map(name -> conditions)),
@@ -70,7 +70,7 @@ abstract class FunctionExpr {
         // Otherwise it's globally bound, so look for an implementation which has already been sorted.
 
         // Currently I am not allowing higher-order methods here. So there can only be one implementation.
-        searchResult.get(MethodName(name)) match {
+        scope.globals.get(MethodName(name)) match {
           case x: Set[UnfreeImpl] if x.size == 1 =>
             val oneImplementation: UnfreeImpl = x.head
 

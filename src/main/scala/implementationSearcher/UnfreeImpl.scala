@@ -1,7 +1,7 @@
 package implementationSearcher
 
 import parsers.MainParser
-import shared.{ConstantTime, BigOLiteral, Utils}
+import shared._
 
 /**
   * Created by buck on 7/31/16.
@@ -13,6 +13,7 @@ import shared.{ConstantTime, BigOLiteral, Utils}
 case class UnfreeImpl(lhs: ImplLhs,
                       rhs: AffineBigOCombo[MethodName],
                       source: Option[ImplSource] = None) {
+
 
   import UnfreeImpl._
 
@@ -45,7 +46,7 @@ case class UnfreeImpl(lhs: ImplLhs,
       thisConditions subsetOf thoseConditions})
   }
 
-  def bindToContext(methodExpr: MethodExpr, implLhs: ImplLhs, searchResult: SearchResult): Set[(ImplPredicateMap, AffineBigOCombo[MethodName])] = {
+  def bindToContext(methodExpr: MethodExpr, scope: Scope): Set[(ImplPredicateMap, AffineBigOCombo[MethodName])] = {
     assert(methodExpr.args.length == this.lhs.parameters.length,
     s"Assertion failed: bindToContext called on $this with methodExpr $methodExpr.\n" +
       s"These have a different number of args: ${this.lhs.parameters} vs ${methodExpr.args}.")
@@ -56,7 +57,7 @@ case class UnfreeImpl(lhs: ImplLhs,
       rhs.weights.get(MethodName(relevantParamName)) match {
         case None => Set((ImplPredicateMap.empty, AffineBigOCombo[MethodName](ConstantTime, Map())))
         case Some(weightOfParam) =>
-          f.getConditionsAndCosts(lhs.conditions.list(idx), implLhs, searchResult).map((x) => (x._1, x._2 * weightOfParam))
+          f.getConditionsAndCosts(lhs.conditions.list(idx), scope).map((x) => (x._1, x._2 * weightOfParam))
       }
     })
 
@@ -96,9 +97,22 @@ object UnfreeImpl {
   def rhs(string: String): Rhs = {
     MainParser.nakedAffineBigONameCombo.parse(string).get.value
   }
+
+  implicit object UnfreeImplPartialOrdering extends PartialOrdering[UnfreeImpl] {
+    def partialCompare(x: UnfreeImpl, y: UnfreeImpl): DominanceRelationship = {
+      if (x.lhs.name != y.lhs.name) {
+        NeitherDominates
+      } else {
+        val alphaConvertedY = y.alphaConvert(x.lhs.parameters)
+        val generalityDominance = implicitly[PartialOrdering[ImplLhs]].partialCompare(x.lhs, y.lhs)
+        val timeDominance = x.rhs.partialCompare(alphaConvertedY.rhs)
+        generalityDominance.infimum(timeDominance.flip)
+      }
+    }
+  }
 }
-//
-//object UnfreeImplDominance extends DominanceFunction[UnfreeImpl] {
+
+//object UnfreeImplDominance extends PartialOrdering[UnfreeImpl] {
 //  def apply(x: UnfreeImpl, y: UnfreeImpl): Dominance = {
 //    if (x.lhs.name != y.lhs.name) {
 //      Neither
@@ -110,3 +124,4 @@ object UnfreeImpl {
 //    }
 //  }
 //}
+

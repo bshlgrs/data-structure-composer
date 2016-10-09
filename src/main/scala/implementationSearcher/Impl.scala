@@ -21,12 +21,13 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: Option[I
   }
 
   def bindToAllOptions(searchResult: SearchResult): Set[UnfreeImpl] = {
+    val scope = Scope(lhs.implPredicateMap.map, searchResult)
     unboundCosts.toList match {
       case Nil => Set(this.toUnfreeImpl.get)
       case (methodExpr, methodCostWeight) :: other => {
         val otherwiseSubbedImpls = this.copy(rhs = AffineBigOCombo(this.rhs.bias, other.toMap ++ boundCosts)).bindToAllOptions(searchResult)
 
-        val optionsAndConditions = searchResult.implsWhichMatchMethodExpr(methodExpr, lhs, searchResult)
+        val optionsAndConditions = searchResult.implsWhichMatchMethodExpr(methodExpr, scope)
 
         val options: Set[UnfreeImpl] = searchResult.get(methodExpr.name)
 

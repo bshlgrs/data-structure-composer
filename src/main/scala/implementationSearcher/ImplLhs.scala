@@ -1,6 +1,7 @@
 package implementationSearcher
 
 import implementationSearcher.ImplLhs.FunctionProperty
+import shared.{DominanceRelationship, PartialOrdering}
 
 /**
   * Created by buck on 7/25/16.
@@ -52,5 +53,15 @@ object ImplLhs {
   }
 
   type FunctionProperty = String
+
+  implicit object ImplLhsPartialOrdering extends PartialOrdering[ImplLhs] {
+    def partialCompare(x: ImplLhs, y: ImplLhs): DominanceRelationship = {
+      assert(x.name == y.name)
+
+      PartialOrdering.fromSetOfDominanceRelationships(
+        x.conditions.list.zip(y.conditions.list).map({case (xCond, yCond) => PartialOrdering.fromSetsOfProperties(xCond, yCond) })
+      )
+    }
+  }
 }
 
