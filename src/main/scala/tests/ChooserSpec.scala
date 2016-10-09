@@ -53,7 +53,7 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimes(testLibrary)
 
-      assert(res.impls(MethodName("y")).options.head == UnfreeImpl("y[g] if g.foo <- log(n) + g"))
+      assert(res.impls(MethodName("y")).impls.head == UnfreeImpl("y[g] if g.foo <- log(n) + g"))
     }
 
     it("handles named functions in method expressions") {
@@ -65,7 +65,7 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimes(testLibrary)
 
-      assert(res.impls(MethodName("x")).options.head == UnfreeImpl("x <- n"))
+      assert(res.impls(MethodName("x")).impls.head == UnfreeImpl("x <- n"))
     }
 
     it("handles anonymous functions from underscore") {
@@ -83,7 +83,7 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimes(testLibrary)
 
-      assert(res.impls(MethodName("x")).options.head == UnfreeImpl("x <- n"))
+      assert(res.impls(MethodName("x")).impls.head == UnfreeImpl("x <- n"))
     }
   }
 

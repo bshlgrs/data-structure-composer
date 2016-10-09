@@ -11,7 +11,7 @@ case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map(),
     if (impls.contains(impl.lhs.name)) {
       SearchResult(impls.updated(impl.lhs.name, impls(impl.lhs.name).add(impl)))
     } else {
-      SearchResult(impls ++ Map(impl.lhs.name -> SingleMethodImplOptions(Set(impl))))
+      SearchResult(impls ++ Map(impl.lhs.name -> SingleMethodImplOptions.fromSet(Set(impl))))
     }
   }
 
@@ -19,7 +19,7 @@ case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map(),
     impls.foldLeft(this)((s, u) => s.addImpl(u))
   }
 
-  def allImpls: Set[UnfreeImpl] = impls.values.flatMap(_.options).toSet
+  def allImpls: Set[UnfreeImpl] = impls.values.flatMap(_.impls).toSet
 
   def isOtherImplUseful(unfreeImpl: UnfreeImpl): Boolean = {
     if (impls.contains(unfreeImpl.lhs.name)) {
@@ -50,7 +50,7 @@ case class SearchResult(impls: Map[MethodName, SingleMethodImplOptions] = Map(),
     "Search Result {\n" + impls.values.toList.sortBy(_.name.name).map(_.toLongString).mkString("\n") + "\n}"
   }
 
-  def get(methodName: MethodName): Set[UnfreeImpl] = impls.get(methodName).map(_.options).getOrElse(Set())
+  def get(methodName: MethodName): Set[UnfreeImpl] = impls.get(methodName).map(_.impls).getOrElse(Set())
   def get(name: String): Set[UnfreeImpl] = this.get(MethodName(name))
 
   def product(other: SearchResult): SearchResult = {

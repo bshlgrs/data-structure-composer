@@ -104,4 +104,10 @@ class UnfreeImplSpec extends FunSpec {
       assert(rhs == UnfreeImpl.rhs("n"))
     }
   }
+
+  describe("ordering") {
+    it("knows a dominates b if they have the same LHS but ") {
+
+    }
+  }
 }
