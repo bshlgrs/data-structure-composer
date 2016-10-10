@@ -7,8 +7,12 @@ package tests
 import implementationSearcher._
 import org.scalatest.FunSpec
 import shared._
+import org.scalatest.prop.Checkers
+import org.scalacheck.Arbitrary._
+import org.scalacheck.Prop._
 
-class DominanceSpec extends FunSpec {
+
+class DominanceSpec extends FunSpec with Checkers {
   describe("Affine combos") {
     describe ("when they have no weights") {
       def Rhs(bias: BigOLiteral, weights: Map[String, BigOLiteral] = Map()) = {
@@ -27,6 +31,10 @@ class DominanceSpec extends FunSpec {
         assert(Rhs(ConstantTime).partialCompare(Rhs(LogTime)) == LeftStrictlyDominates)
       }
     }
+
+//    it ("also lists work") {
+//      check((a: List[Int], b: List[Int]) => a.size + b.size == (a ::: b).size)
+//    }
   }
 
   describe("ImplLhs") {
