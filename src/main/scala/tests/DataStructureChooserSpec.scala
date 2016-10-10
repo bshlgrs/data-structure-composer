@@ -6,7 +6,7 @@ package tests
 
 import implementationSearcher._
 import org.scalatest.FunSpec
-import shared.ConstantTime
+import shared._
 
 class DataStructureChooserSpec extends FunSpec {
   val impls = Set(
@@ -99,15 +99,55 @@ class DataStructureChooserSpec extends FunSpec {
   }
 
   describe("adt analysis") {
-    it("can choose the best option for a List adt") {
-      val listAdt = AbstractDataType(Set(MethodName("getFirst"), MethodName("getNext")))
-
-      val res = Chooser.allBestDataStructureCombosForAdt(impls, Set(linkedList, genericHeap), listAdt)
-
-      assert(res.items == Set(DataStructureChoice(
+    describe("List adt") {
+      val linkedListResult = DataStructureChoice(
         Set("LinkedList"),
         Map(MethodName("getFirst") -> AffineBigOCombo(ConstantTime, Map()),
-          MethodName("getNext") -> AffineBigOCombo(ConstantTime, Map())))))
+          MethodName("getNext") -> AffineBigOCombo(ConstantTime, Map())))
+
+      it("can choose the Pareto-optimal options for a List adt") {
+        val listAdt = AbstractDataType(Map(MethodName("getFirst") -> ConstantTime, MethodName("getNext") -> ConstantTime))
+
+        val res = Chooser.allParetoOptimalDataStructureCombosForAdt(impls, Set(linkedList, genericHeap), listAdt)
+
+        assert(res.items == Set(linkedListResult))
+      }
+
+      it("can choose the best options for a List adt") {
+        val listAdt = AbstractDataType(Map(MethodName("getFirst") -> ConstantTime, MethodName("getNext") -> ConstantTime))
+
+        val res = Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(impls, Set(linkedList, genericHeap), listAdt)
+
+        assert(res.items == Set(linkedListResult))
+      }
+    }
+
+    describe("priority queue ADT") {
+      val linkedListPQResult = DataStructureChoice(
+        Set("LinkedList"),
+        Map(MethodName("getSmallest") -> AffineBigOCombo(LinearTime, Map()),
+          MethodName("insertAnywhere!") -> AffineBigOCombo(ConstantTime, Map())))
+
+      val heapResult = DataStructureChoice(
+        Set("Heap"),
+        Map(MethodName("getSmallest") -> AffineBigOCombo(ConstantTime, Map()),
+          MethodName("insertAnywhere!") -> AffineBigOCombo(LogTime, Map())))
+
+      it("can choose the Pareto-optimal options for a PriorityQueue adt") {
+        val pQueueAdt = AbstractDataType(Map(MethodName("getSmallest") -> ConstantTime, MethodName("insertAnywhere!") -> ConstantTime))
+
+        val res = Chooser.allParetoOptimalDataStructureCombosForAdt(impls, Set(linkedList, genericHeap), pQueueAdt)
+
+        assert(res.items == Set(linkedListPQResult, heapResult))
+      }
+
+      it("can choose the best options for a PriorityQueue adt") {
+        val pQueueAdt = AbstractDataType(Map(MethodName("getSmallest") -> ConstantTime, MethodName("insertAnywhere!") -> ConstantTime))
+
+        val res = Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(impls, Set(linkedList, genericHeap), pQueueAdt)
+
+        assert(res.items == Set(heapResult))
+      }
     }
   }
 }

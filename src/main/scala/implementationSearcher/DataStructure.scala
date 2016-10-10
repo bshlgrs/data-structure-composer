@@ -39,7 +39,12 @@ object DataStructure {
 }
 
 case class DataStructureChoice(choices: Set[String], results: Map[MethodName, AffineBigOCombo[MethodName]]) {
+  def overallTimeForAdt(abstractDataType: AbstractDataType): BigOLiteral = {
+    assert(results.values.forall(_.weights.isEmpty))
 
+    abstractDataType.methods.keys.map((methodName) =>
+      abstractDataType.methods(methodName) * results(methodName).bias).reduce(_ + _)
+  }
 }
 
 object DataStructureChoice {

@@ -100,15 +100,25 @@ object Chooser {
     bestReadImplementations.addImpls(combinedWriteImplementations.allImpls)
   }
 
-  def allBestDataStructureCombosForAdt(impls: Set[Impl],
-                                       structures: Set[DataStructure],
-                                       adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
+  def allParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
+                                                structures: Set[DataStructure],
+                                                adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
     val results = structures.subsets().map((x) => x -> getRelevantTimesForDataStructures(impls, x).bestFullyGeneralTimes).toSet
 
     // A dominance frontier on choices, ranked by simplicity and also on the methods which the ADT cares about.
     DominanceFrontier.fromSet(results.map({ case (set: Set[DataStructure], map: Map[MethodName, AffineBigOCombo[MethodName]]) => {
       DataStructureChoice(set.map(_.name), map.filterKeys(adt.methods.contains))
     }}))
+  }
+
+  def allMinTotalCostParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
+                                                            structures: Set[DataStructure],
+                                                            adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
+    val frontier = allParetoOptimalDataStructureCombosForAdt(impls, structures, adt)
+
+    val bestTime = frontier.items.map(_.overallTimeForAdt(adt)).min
+
+    frontier.filter(_.overallTimeForAdt(adt) == bestTime)
   }
 }
 

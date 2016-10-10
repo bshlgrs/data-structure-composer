@@ -8,8 +8,8 @@ import implementationSearcher._
 import org.scalatest.FunSpec
 import shared._
 import org.scalatest.prop.Checkers
-import org.scalacheck.Arbitrary._
-import org.scalacheck.Prop._
+//import org.scalacheck.Arbitrary._
+//import org.scalacheck.Prop._
 
 
 class DominanceSpec extends FunSpec with Checkers {

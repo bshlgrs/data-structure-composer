@@ -32,6 +32,10 @@ class DominanceFrontier[A: PartialOrdering](val items: Set[A]) {
        |}
      """.stripMargin
   }
+
+  def filter(f: A => Boolean) = {
+    new DominanceFrontier[A](items.filter(f))
+  }
 }
 
 object DominanceFrontier {

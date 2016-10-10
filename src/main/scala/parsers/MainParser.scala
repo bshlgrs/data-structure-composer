@@ -105,6 +105,12 @@ object MainParser {
     P("\n".rep() ~ dataStructure.rep(sep="\n".rep()) ~ "\n".rep() ~ End).map(_.toSet)
   }
 
+  lazy val adt: P[AbstractDataType] = {
+    ("adt" ~ name ~ "{" ~ "\n" ~ (" ".rep() ~ unfreeImpl).rep(sep="\n") ~ "\n" ~ "}").map({case (l: String, adtImpls: Seq[UnfreeImpl]) =>
+      new AbstractDataType(adtImpls.map((x) => x.lhs.name -> x.rhs.bias).toMap)
+    })
+  }
+
   def main (args: Array[String]) {
 //    println(bigOLiteral.parse("1"))
 //    println(implLhs.parse("m[f]"))
