@@ -13,6 +13,7 @@ class DataStructureChooserSpec extends FunSpec {
     Impl("getByIndex <- getFirst + n * getNext"),
     Impl("getByIndex <- unorderedEach[_]"),
     Impl("getFirst <- getByIndex"),
+    Impl("getNext <- getByIndex"),
     Impl("unorderedEach[f] <- getFirst + n * getNext + n * f"),
     Impl("getSmallest <- getSmallestBy[valueOrdering]"),
     Impl("getSmallestBy[f] <- unorderedEach[_ <- f]"),
@@ -83,6 +84,8 @@ class DataStructureChooserSpec extends FunSpec {
         assert(res.get("getSmallest") == Set(UnfreeImpl("getSmallest <- 1")))
         assert(res.get("getFirst") == Set(UnfreeImpl("getFirst <- n")))
         assert(res.get("updateNode!") == Set(UnfreeImpl("updateNode! <- log(n)")))
+        assert(res.get("getByIndex") == Set(UnfreeImpl("getByIndex <- n")))
+        assert(res.get("getNext") == Set(UnfreeImpl("getNext <- n")))
       }
 
       it("can do linked-list + generic heap") {
@@ -99,12 +102,12 @@ class DataStructureChooserSpec extends FunSpec {
     it("can choose the best option for a List adt") {
       val listAdt = AbstractDataType(Set(MethodName("getFirst"), MethodName("getNext")))
 
-      val res = Chooser.allDataStructureCombosForAdt(impls, Set(linkedList, genericHeap), listAdt)
+      val res = Chooser.allBestDataStructureCombosForAdt(impls, Set(linkedList, genericHeap), listAdt)
 
-      assert(res(Set("LinkedList")) == Map(
-        MethodName("getFirst") -> AffineBigOCombo(ConstantTime, Map()),
-        MethodName("getNext") -> AffineBigOCombo(ConstantTime, Map()))
-      )
+      assert(res.items == Set(DataStructureChoice(
+        Set("LinkedList"),
+        Map(MethodName("getFirst") -> AffineBigOCombo(ConstantTime, Map()),
+          MethodName("getNext") -> AffineBigOCombo(ConstantTime, Map())))))
     }
   }
 }

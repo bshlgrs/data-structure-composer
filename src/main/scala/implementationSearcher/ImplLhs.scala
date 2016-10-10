@@ -1,6 +1,7 @@
 package implementationSearcher
 
 import implementationSearcher.ImplLhs.FunctionProperty
+import parsers.MainParser
 import shared.{DominanceRelationship, PartialOrdering}
 
 /**
@@ -52,15 +53,21 @@ object ImplLhs {
     ImplLhs(MethodName(name), parameters, conditions.getOrElse(ImplPredicateList(parameters.map((_) => Set[FunctionProperty]()))))
   }
 
+  def parse(string: String) = {
+    MainParser.nakedImplLhs.parse(string).get.value
+  }
+
   type FunctionProperty = String
 
+
+  // A dominates B if A can be used to implement B
   implicit object ImplLhsPartialOrdering extends PartialOrdering[ImplLhs] {
     def partialCompare(x: ImplLhs, y: ImplLhs): DominanceRelationship = {
       assert(x.name == y.name)
 
       PartialOrdering.fromSetOfDominanceRelationships(
         x.conditions.list.zip(y.conditions.list).map({case (xCond, yCond) => PartialOrdering.fromSetsOfProperties(xCond, yCond) })
-      )
+      ).flip
     }
   }
 }

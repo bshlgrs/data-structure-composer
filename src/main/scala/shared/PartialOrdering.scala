@@ -17,7 +17,7 @@ object PartialOrdering {
   }
 
   def fromSetOfDominanceRelationships(set: Iterable[DominanceRelationship]): DominanceRelationship = {
-    set.reduceOption(_.infimum(_)).getOrElse(NeitherDominates)
+    set.reduceOption(_.infimum(_)).getOrElse(BothDominate)
   }
 }
 

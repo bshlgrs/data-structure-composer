@@ -21,6 +21,13 @@ sealed abstract class DominanceRelationship {
     case x => x
   }
 
+  def orIfTied(other: DominanceRelationship): DominanceRelationship = (this, other) match {
+    case (BothDominate, _) => other
+    case (NeitherDominates, _) => NeitherDominates
+    case (LeftStrictlyDominates, _) => LeftStrictlyDominates
+    case (RightStrictlyDominates, _) => RightStrictlyDominates
+  }
+
   def leftDominates: Boolean = this == BothDominate || this == LeftStrictlyDominates
   def rightDominates: Boolean = this == BothDominate || this == RightStrictlyDominates
   def oneStrictlyDominates: Boolean = this == LeftStrictlyDominates || this == RightStrictlyDominates
@@ -43,9 +50,27 @@ object DominanceRelationship {
     if (lhs > rhs) {
       LeftStrictlyDominates
     } else if (lhs == rhs) {
-      NeitherDominates
+      BothDominate
     } else {
       RightStrictlyDominates
     }
   }
+
+  trait DominanceRelationshipFromTotalOrdering[A <: Ordered[A]] extends PartialOrdering[A] {
+    def partialCompare(x: A, y: A): DominanceRelationship = {
+      fromTotalOrdering(x, y)
+    }
+  }
 }
+
+
+
+//  trait AffineBigOPartialOrdering[A] extends shared.PartialOrdering[AffineBigOCombo[A]] {
+//    def partialCompare(x: AffineBigOCombo[A], y: AffineBigOCombo[A]): DominanceRelationship = {
+//      PartialOrdering.fromSetOfDominanceRelationships(
+//        (x.keys ++ y.keys).map((key) =>
+//          DominanceRelationship.fromTotalOrdering(y.get(key), x.get(key))
+//        )
+//      )
+//    }
+//  }

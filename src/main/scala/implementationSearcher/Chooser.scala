@@ -100,16 +100,15 @@ object Chooser {
     bestReadImplementations.addImpls(combinedWriteImplementations.allImpls)
   }
 
-  def allDataStructureCombosForAdt(impls: Set[Impl],
-                                   structures: Set[DataStructure],
-                                   adt: AbstractDataType): Map[Set[String], Map[MethodName, AffineBigOCombo[MethodName]]] = {
-
-    // actually this needs to get the dominance frontier :/
+  def allBestDataStructureCombosForAdt(impls: Set[Impl],
+                                       structures: Set[DataStructure],
+                                       adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
     val results = structures.subsets().map((x) => x -> getRelevantTimesForDataStructures(impls, x).bestFullyGeneralTimes).toSet
 
-    results.map({ case (set: Set[DataStructure], map: Map[MethodName, AffineBigOCombo[MethodName]]) => {
-      set.map(_.name) -> map.filterKeys(adt.methods.contains)
-    }}).toMap
+    // A dominance frontier on choices, ranked by simplicity and also on the methods which the ADT cares about.
+    DominanceFrontier.fromSet(results.map({ case (set: Set[DataStructure], map: Map[MethodName, AffineBigOCombo[MethodName]]) => {
+      DataStructureChoice(set.map(_.name), map.filterKeys(adt.methods.contains))
+    }}))
   }
 }
 

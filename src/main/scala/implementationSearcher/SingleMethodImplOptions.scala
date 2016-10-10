@@ -76,5 +76,4 @@ object SingleMethodImplOptions {
   def fromSet(set: Set[UnfreeImpl]): SingleMethodImplOptions = {
     SingleMethodImplOptions(DominanceFrontier.fromSet(set))
   }
-
 }

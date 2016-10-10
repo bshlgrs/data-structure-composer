@@ -105,9 +105,9 @@ object UnfreeImpl {
         NeitherDominates
       } else {
         val alphaConvertedY = y.alphaConvert(x.lhs.parameters)
-        val generalityDominance = implicitly[PartialOrdering[ImplLhs]].partialCompare(x.lhs, y.lhs)
+        val generalityDominance = implicitly[PartialOrdering[ImplLhs]].partialCompare(x.lhs, y.lhs).flip
         val timeDominance = x.rhs.partialCompare(alphaConvertedY.rhs)
-        generalityDominance.infimum(timeDominance.flip)
+        generalityDominance.infimum(timeDominance)
       }
     }
   }

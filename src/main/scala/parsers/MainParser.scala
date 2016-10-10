@@ -24,6 +24,8 @@ object MainParser {
     }
   })
 
+  lazy val nakedImplLhs: P[ImplLhs] = P(implLhs ~ End)
+
   lazy val implCondition: P[(String, String)] = P(name ~ "." ~ name)
   lazy val implConditions: P[ImplPredicateMap] = P(implCondition.rep(1, sep=",")).map((x) => ImplPredicateMap.fromListOfTuples(x.toList))
 

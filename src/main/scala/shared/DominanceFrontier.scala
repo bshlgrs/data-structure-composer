@@ -4,7 +4,7 @@ package shared
   * Created by buck on 10/8/16.
   */
 class DominanceFrontier[A: PartialOrdering](val items: Set[A]) {
-  assert(items.forall((x: A) => items.forall((y: A) => implicitly[PartialOrdering[A]].partialCompare(x, y) != BothDominate)))
+  assert(items.forall((x: A) => items.forall((y: A) => ! implicitly[PartialOrdering[A]].partialCompare(x, y).oneStrictlyDominates)))
 
   def add(newItem: A): DominanceFrontier[A] = {
     // find all the items not strictly dominated by newItem
@@ -23,6 +23,14 @@ class DominanceFrontier[A: PartialOrdering](val items: Set[A]) {
 
   def ++(other: DominanceFrontier[A]): DominanceFrontier[A] = {
     items.foldLeft(other)((frontier, item) => frontier.add(item))
+  }
+
+  override def toString: String = {
+    s"""
+       |DominanceFrontier {
+       |${items.map("   " + _.toString).mkString("\n")}
+       |}
+     """.stripMargin
   }
 }
 
