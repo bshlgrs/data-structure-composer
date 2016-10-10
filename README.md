@@ -131,22 +131,22 @@ There might be some trickiness in making it easy for users to find all those met
 
 immediate: 
 
-[ ] Handle parameterized data structures 
+- [ ] Handle parameterized data structures 
 
 then:
 
-[ ] Write Scalacheck tests to test that my parser can invert my toString methods
-[x] Parse ADT descriptions
-[x] Choose fastest data structure combination for a simple ADT
-    [x] initially, this can be done without the ability to introspect on what data structure is doing the work
-    [ ] then that introspection needs to be done.
-[ ] Store the chains of logic for every implementation, so that you can see what everything's relying on.
-[ ] generalize to parameterized ADTs.
+- [ ] Write Scalacheck tests to test that my parser can invert my toString methods
+- [x] Parse ADT descriptions
+- [x] Choose fastest data structure combination for a simple ADT
+  - [x] initially, this can be done without the ability to introspect on what data structure is doing the work
+  - [ ] then that introspection needs to be done.
+- [ ] Store the chains of logic for every implementation, so that you can see what everything's relying on.
+- [ ] generalize to parameterized ADTs.
 
 Interface things:
 
-[ ] Make a webpage
-[ ] Make a command line tool
+- [ ] Make a webpage
+- [ ] Make a command line tool
 
 ### Things to include
  
