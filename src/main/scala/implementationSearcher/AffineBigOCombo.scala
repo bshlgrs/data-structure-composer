@@ -62,6 +62,18 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
       ) ++ Set(DominanceRelationship.fromTotalOrdering(other.bias, this.bias))
     )
   }
+
+  def substituteAllVariables(map: Map[A, BigOLiteral]): BigOLiteral = {
+    weights.keys.map((key) => map(key)).foldLeft(bias)(_ + _)
+  }
+
+  def asConstant: Option[BigOLiteral] = {
+    if (weights.nonEmpty) {
+      None
+    } else {
+      Some(bias)
+    }
+  }
 }
 
 object AffineBigOCombo {

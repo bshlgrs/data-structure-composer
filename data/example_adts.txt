@@ -1,0 +1,23 @@
+adt Stack {
+    insertAtEnd!
+    removeNodeWhichIsAtEnd!
+    getByIndex
+    updateNode!
+}
+
+adt PriorityQueue[f <- log(n)] {
+    getSmallestBy[f]
+    deleteAtIndex!
+    insertAnywhere!
+}
+
+adt Iterable {
+    insertAnywhere! * n
+    unorderedEach[_]
+}
+
+adt MinOfHashesStack[f{idempotent, commutative, associative} <- 1]{
+    Stack
+    reduce[f]
+}
+

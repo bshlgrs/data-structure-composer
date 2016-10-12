@@ -8,7 +8,8 @@ import shared.BigOLiteral
   */
 
 // to make it more generalized, we should also have a list of parameters, and methods should be a Set[MethodExpr]
-case class AbstractDataType(methods: Map[MethodName, BigOLiteral]) {
+case class AbstractDataType(parameters: Map[MethodName, BigOLiteral],
+                            methods: Map[MethodExpr, BigOLiteral]) {
 
 }
 

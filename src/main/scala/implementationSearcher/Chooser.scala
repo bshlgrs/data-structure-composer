@@ -82,10 +82,6 @@ object Chooser {
     getAllTimes(impls.union(dataStructure.sourcedImpls.map(_.toImpl)))
   }
 
-  def main(args: Array[String]) {
-    println(getAllTimesForDataStructure(autoImplLibrary, dataStructuresLibrary("VectorList")).toLongString)
-  }
-
   def getRelevantTimesForDataStructures(impls: Set[Impl],
                                         structures: Set[DataStructure]): SearchResult = {
     val allProvidedReadImplementations: Set[UnfreeImpl] = structures.flatMap(_.readMethods)
@@ -103,12 +99,22 @@ object Chooser {
   def allParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
                                                 structures: Set[DataStructure],
                                                 adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
-    val results = structures.subsets().map((x) => x -> getRelevantTimesForDataStructures(impls, x).bestFullyGeneralTimes).toSet
+    val results = structures.subsets().map((x) => x -> getRelevantTimesForDataStructures(impls, x)).toSet
+
+    val choicesSet: Set[DataStructureChoice] = results.flatMap({ case (set: Set[DataStructure], sr: SearchResult) => {
+      val methods = adt.methods.keys.map((methodExpr: MethodExpr) => {
+        // TODO: let this be a proper dominance frontier
+        methodExpr -> sr.implsWhichMatchMethodExpr(methodExpr, Scope(Map(), sr)).headOption.map(_._3)
+      }).toMap
+
+      if (methods.forall(_._2.isDefined))
+        Set[DataStructureChoice](DataStructureChoice(set.map(_.name), methods.mapValues(_.get)))
+      else
+        Set[DataStructureChoice]()
+    }})
 
     // A dominance frontier on choices, ranked by simplicity and also on the methods which the ADT cares about.
-    DominanceFrontier.fromSet(results.map({ case (set: Set[DataStructure], map: Map[MethodName, AffineBigOCombo[MethodName]]) => {
-      DataStructureChoice(set.map(_.name), map.filterKeys(adt.methods.contains))
-    }}))
+    DominanceFrontier.fromSet(choicesSet)
   }
 
   def allMinTotalCostParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
