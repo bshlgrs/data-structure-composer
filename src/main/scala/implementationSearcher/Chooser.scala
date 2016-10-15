@@ -11,24 +11,6 @@ import scala.io.Source
   * Created by buck on 7/25/16.
   */
 object Chooser {
-  lazy val libraryText = {
-    Source.fromFile("data/implementations.txt")
-      .getLines()
-      .mkString("\n")
-  }
-
-  lazy val autoImplLibrary = MainParser.impls.parse(libraryText).get.value.toSet
-
-  lazy val dataStructuresText = {
-    Source.fromFile("data/data_structures.txt")
-      .getLines()
-      .mkString("\n")
-  }
-
-  lazy val dataStructuresLibrary: Map[String, DataStructure] = {
-    MainParser.dataStructureFile.parse(dataStructuresText).get.value.map((x) => x.name -> x).toMap
-  }
-
   // x[f] if x.foo <- 1
   // y[g] <- x[g]
   // should infer
@@ -117,6 +99,7 @@ object Chooser {
     DominanceFrontier.fromSet(choicesSet)
   }
 
+  // this is the ultimate method
   def allMinTotalCostParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
                                                             structures: Set[DataStructure],
                                                             adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {

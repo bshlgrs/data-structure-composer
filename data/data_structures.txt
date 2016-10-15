@@ -1,5 +1,6 @@
 
-Array {
+
+ds Array {
     getByIndex <- 1
     deleteAtIndex! <- n
     deleteBetweenNodes! <- n
@@ -7,7 +8,7 @@ Array {
     updateNode! <- 1
 }
 
-VectorList {
+ds VectorList {
     getByIndex <- 1
     updateNode! <- 1
     insertAtEnd! <- 1
@@ -16,19 +17,20 @@ VectorList {
     deleteAtEnd! <- 1
 }
 
-RedBlackOrderStatisticTreeList {
+ds RedBlackOrderStatisticTreeList {
     getByIndex <- log(n)
     updateNode! <- 1
     getNext <- 1
     getPrev <- 1
     insertAtEnd! <- 1
-    insertAfterNode!
+    insertAfterNode! <- 1
     insertAtStart! <- 1
     deleteNode! <- log(n)
     deleteBetweenNodes! <- log(n)
 }
 
-Heap {
+
+ds Heap {
     unorderedEach <- n
     getMinimum <- 1
     deleteNode! <- log(n)
@@ -36,8 +38,7 @@ Heap {
     insertAtIndex! <- 1
 }
 
-// ordered by f, memoizing reductions on g
-OrderedRedBlackTree[f, g] {
+ds OrderedRedBlackTree[f, g] {
     unorderedEach <- n
     getNext <- 1
     getPrev <- 1

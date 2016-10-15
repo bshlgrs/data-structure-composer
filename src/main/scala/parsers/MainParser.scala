@@ -34,6 +34,8 @@ object MainParser {
   lazy val nakedImpl: P[Impl] = P(impl ~ End)
 
   lazy val unfreeImpl: P[UnfreeImpl] = P(implLhs ~ "<-" ~ affineBigONameCombo).map({ case (lhs, rhs) => UnfreeImpl(lhs, rhs) })
+  lazy val unfreeImplTuple: P[(ImplLhs, AffineBigOCombo[MethodName])] = P(implLhs ~ "<-" ~ affineBigONameCombo)
+
   lazy val nakedUnfreeImpl: P[UnfreeImpl] = P(unfreeImpl ~ End)
 
   lazy val namedFunctionExpr: P[NamedFunctionExpr] = {
@@ -94,8 +96,11 @@ object MainParser {
   lazy val implLine: P[Option[Impl]] = P(impl.map(Some(_)) | ("//" ~ CharsWhile(_ != '\n')).map((_) => None))
 
   lazy val dataStructure: P[DataStructure] = {
-    ("ds" ~ implLhs ~ "{" ~ "\n" ~ (" ".rep() ~ unfreeImpl).rep(sep="\n") ~ "\n" ~ "}").map({case (l: ImplLhs, impls: Seq[UnfreeImpl]) =>
-      DataStructure(l, impls.toSet)
+    ("ds" ~/ implLhs ~/ "{" ~/ "\n".? ~ (" ".rep() ~ unfreeImplTuple).rep(sep=lineSep) ~ lineSep ~ "}").map({ case (l: ImplLhs, impls: Seq[(ImplLhs, AffineBigOCombo[MethodName])]) =>
+      val shell = DataStructureShell(l.name.name, l.parameters.toSet)
+      DataStructure(l, impls.toSet.map((x: (ImplLhs, AffineBigOCombo[MethodName])) =>
+        UnfreeImpl(x._1, x._2, Some(DataStructureSource(shell)))
+      ))
     })
   }
 
@@ -106,11 +111,15 @@ object MainParser {
   }
 
   lazy val adt: P[AbstractDataType] = {
-    ("adt" ~ name ~ "{" ~ "\n" ~ (" ".rep() ~ methodExpr ~ "->" ~ bigOLiteral).rep(sep="\n") ~ "\n" ~ "}").map({
+    ("adt" ~ name ~ "{" ~ "\n".? ~ (" ".rep() ~ methodExpr ~ "->" ~ bigOLiteral).rep(sep=lineSep) ~ lineSep ~ "}").map({
       case (l: String, adtImpls: Seq[(MethodExpr, BigOLiteral)]) =>
         new AbstractDataType(Map(), adtImpls.map({case ((mExpr, cost)) => mExpr -> cost}).toMap)
     })
   }
+
+  lazy val lineSep: P[Unit] = P("\n" | ";")
+
+  lazy val nakedAdt: P[AbstractDataType] = adt ~ End
 
   def main (args: Array[String]) {
 //    println(bigOLiteral.parse("1"))

@@ -31,20 +31,22 @@ class DataStructureChooserSpec extends FunSpec {
       |    insertAfterNode! <- 1
       |}""".stripMargin)
 
+
+  val genericHeap = DataStructure(
+    """ds GenericHeap[f] {
+      |    updateNode! <- log(n) + f
+      |    getSmallestBy[f] <- 1
+      |    insertAtIndex! <- log(n) + f
+      |    unorderedEach[g] <- n + n * g
+      |}""".stripMargin)
+
+
   val heap = DataStructure(
     """ds Heap {
       |    getSmallest <- 1
       |    updateNode! <- log(n)
       |    insertAtIndex! <- log(n)
       |    unorderedEach[f] <- n + n * f
-      |}""".stripMargin)
-
-  val genericHeap = DataStructure(
-    """ds Heap[f] {
-      |    getSmallestBy[f] <- 1
-      |    updateNode! <- log(n)
-      |    insertAtIndex! <- log(n)
-      |    unorderedEach[g] <- n + n * g
       |}""".stripMargin)
 
 

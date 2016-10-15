@@ -24,9 +24,8 @@ case class SingleMethodImplOptions(options: DominanceFrontier[UnfreeImpl]) {
 
   def isOtherImplUseful(unfreeImpl: UnfreeImpl): Boolean = {
     bestImplementationForConditions(unfreeImpl.lhs.conditions) match {
-      case Some(currentBest) => {
+      case Some(currentBest) =>
         currentBest.cost > unfreeImpl.cost
-      }
       case None => true
     }
   }

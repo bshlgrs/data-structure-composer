@@ -8,7 +8,7 @@ case class DataStructure(lhs: ImplLhs, impls: Set[UnfreeImpl]) {
   def isSimple: Boolean = lhs.parameters.isEmpty
 
   def sourcedImpls: Set[UnfreeImpl] = {
-    impls.map((x) => UnfreeImpl(x.lhs, x.rhs, Some(DataStructureSource(name))))
+    impls.map((x) => UnfreeImpl(x.lhs, x.rhs, Some(DataStructureSource(shell))))
   }
 
   def searchResult: SearchResult = SearchResult.fromSetOfUnfreeImpls(impls)
@@ -20,6 +20,12 @@ case class DataStructure(lhs: ImplLhs, impls: Set[UnfreeImpl]) {
   def writeMethods: Set[UnfreeImpl] = {
     impls.filter(_.lhs.name.isMutating)
   }
+
+  def shell = DataStructureShell(name, lhs.parameters.toSet)
+}
+
+case class DataStructureShell(name: String, parameters: Set[String]) {
+
 }
 
 object DataStructure {

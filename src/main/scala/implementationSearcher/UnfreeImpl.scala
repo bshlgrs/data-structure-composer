@@ -14,9 +14,15 @@ case class UnfreeImpl(lhs: ImplLhs,
                       rhs: AffineBigOCombo[MethodName],
                       source: Option[ImplSource] = None) {
 
-  assert(rhs.keys.subsetOf(lhs.parameters.toSet.map(MethodName)))
+  assert({
+    rhs.keys.subsetOf(parameters.map(MethodName))
+  },s"${rhs.keys.map(_.name)} was not a subset of $parameters in $this (from $source")
+
 
   import UnfreeImpl._
+
+  def parameters: Set[String] =
+    (lhs.parameters ++ source.map(_.parameters).getOrElse(Nil)).toSet
 
   def canEqual(a: Any) = a.isInstanceOf[UnfreeImpl]
 
@@ -29,7 +35,7 @@ case class UnfreeImpl(lhs: ImplLhs,
   // I feel dirty for writing this
   override def hashCode: Int = UnfreeImpl.hashCode() ^ lhs.hashCode() ^ rhs.hashCode()
 
-  assert(lhs.parameters.nonEmpty || rhs.weights.isEmpty, {
+  assert(parameters.nonEmpty || rhs.weights.isEmpty, {
     s"Error in $this: LHS parameters are ${lhs.parameters}, but weights are ${rhs.weights}"
   })
 
@@ -48,7 +54,7 @@ case class UnfreeImpl(lhs: ImplLhs,
   }
 
   def bindToContext(methodExpr: MethodExpr, scope: Scope): Set[(ImplPredicateMap, AffineBigOCombo[MethodName])] = {
-    assert(methodExpr.args.length == this.lhs.parameters.length,
+    assert(methodExpr.args.length == lhs.parameters.length,
     s"Assertion failed: bindToContext called on $this with methodExpr $methodExpr.\n" +
       s"These have a different number of args: ${this.lhs.parameters} vs ${methodExpr.args}.")
 
