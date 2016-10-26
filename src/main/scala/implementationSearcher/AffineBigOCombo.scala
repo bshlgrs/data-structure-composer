@@ -53,6 +53,10 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
       (combo, key) => combo.addPair(f(key), weights(key)))
   }
 
+  def filterKeys(p: A => Boolean): AffineBigOCombo[A] = {
+    this.copy(weights = weights.filterKeys(p))
+  }
+
   def keys: Set[A] = weights.keys.toSet
 
   def partialCompare(other: AffineBigOCombo[A]): DominanceRelationship = {

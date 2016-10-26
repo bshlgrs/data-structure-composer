@@ -7,52 +7,27 @@ import shared.{DominanceRelationship, PartialOrdering}
 /**
   * Created by buck on 7/25/16.
   */
-case class ImplLhs(name: MethodName, parameters: List[String], conditions: ImplPredicateList) {
-  assert(parameters.length == conditions.list.length, s"Impl for ${name.name} failed :/")
-
-  def addConditions(conditions: ImplPredicateList) = {
+case class ImplLhs(name: MethodName, conditions: ImplPredicateMap) {
+  def addConditions(conditions: ImplPredicateMap) = {
     this.copy(conditions = this.conditions.and(conditions))
   }
 
-  def addConditions(conditions: ImplPredicateMap) = {
-    this.copy(conditions = this.conditions.and(conditions.toList(parameters)))
-  }
 
   override def toString: String = {
-    val parametersString = parameters match {
-      case Nil => ""
-      case _ => s"[${parameters.mkString(", ")}]"
-    }
+    val conditionsString = if (conditions.isEmpty) "" else s"if ${conditions.toNiceString}"
 
-    val conditionsString = if (conditions.isEmpty) "" else s"if ${conditions.toNiceString(parameters)}"
-
-    s"${name.name}$parametersString $conditionsString"
+    s"${name.name} $conditionsString"
   }
 
   def isMutating: Boolean = name.name.endsWith("!")
 
-  def emptyPredicateList = ImplPredicateList(conditions.list.map((_) => Set[FunctionProperty]()))
 
-  def implPredicateMap: ImplPredicateMap = {
-    ImplPredicateMap(parameters.zip(conditions.list).toMap)
-  }
-
-  def propertiesForParameter(parameter: String): Set[FunctionProperty] = {
-    this.conditions.list(this.parameters.indexOf(parameter))
-  }
-
-  def alphaConvert(newParameterNames: List[String]): ImplLhs = {
-    ImplLhs(name, newParameterNames, conditions)
+  def propertiesForParameter(parameter: MethodName): Set[FunctionProperty] = {
+    this.conditions.get(parameter)
   }
 }
 
 object ImplLhs {
-  def apply(name: String,
-            parameters: List[String] = Nil,
-            conditions: Option[ImplPredicateList] = None): ImplLhs = {
-    ImplLhs(MethodName(name), parameters, conditions.getOrElse(ImplPredicateList(parameters.map((_) => Set[FunctionProperty]()))))
-  }
-
   def parse(string: String) = {
     MainParser.nakedImplLhs.parse(string).get.value
   }

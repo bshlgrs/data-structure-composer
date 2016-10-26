@@ -159,3 +159,17 @@ Interface things:
 - Do I have to do anything fancy to get things like `union` or `intersection` to work?
 - The frontend might let you select between methods in multiple languages.
 
+
+
+
+
+
+----------
+
+## Current tasks
+
+I need to turn UnfreeImpl into Impl. This is going to involve rewriting my tests, but they should all be true with the rewrite.
+
+Example todo items:
+
+- bindToContext in Impl
