@@ -1,6 +1,6 @@
 package implementationSearcher
 
-import shared.{DominanceFrontier, BigOLiteral}
+import shared._
 
 /**
   * Created by buck on 9/10/16.
@@ -8,8 +8,8 @@ import shared.{DominanceFrontier, BigOLiteral}
 case class SingleMethodImplSet(options: DominanceFrontier[UnnamedImpl]) {
   def impls = options.items
 
-  def bestImplementationForConditions(conditions: ImplPredicateMap): Option[Impl] = {
-    implsWhichMatchConditions(conditions).toList.sortBy(_.rhs).headOption
+  def bestImplsForConditions(conditions: ImplPredicateMap): DominanceFrontier[UnnamedImpl] = {
+    DominanceFrontier.fromSet(implsWhichMatchConditions(conditions).items)
   }
 
   def add(impl: UnnamedImpl): SingleMethodImplSet = {
@@ -21,13 +21,13 @@ case class SingleMethodImplSet(options: DominanceFrontier[UnnamedImpl]) {
   }
 
   // More impl conditions means that this function returns something better
-  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, scope: UnfreeImplSet): Set[Impl] =
+  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, scope: UnfreeImplSet): Set[UnnamedImpl] =
     options.items.flatMap({ (option: UnnamedImpl) =>
-      option.bindToContext(methodExpr, scope)
+      option.withName(methodExpr.name).bindToContext(methodExpr, scope)
     })
 
   // More impl conditions means that this function returns something better
-  def implsWhichMatchConditions(implPredicates: ImplPredicateMap): Set[Impl] = {
+  def implsWhichMatchConditions(implPredicates: ImplPredicateMap): DominanceFrontier[UnnamedImpl] = {
     options.filter(_.compatibleWithConditions(implPredicates))
   }
 
@@ -41,27 +41,24 @@ case class SingleMethodImplSet(options: DominanceFrontier[UnnamedImpl]) {
     SingleMethodImplSet(this.options ++ other.options)
   }
 
-  def product(other: SingleMethodImplSet): SingleMethodImplSet = {
-    assert(this.name == other.name)
-
+  def product(other: SingleMethodImplSet): SingleMethodImplSet =
     SingleMethodImplSet.fromSet(for {
       x <- this.impls
       y <- other.impls
     } yield {
-      val translatedY = y.alphaConvert(x.lhs.parameters)
-      val lhs = x.lhs.addConditions(y.lhs.conditions)
-      val rhs = x.rhs + y.rhs
-      Impl(lhs, rhs, x.source)
+      val lhs = x.predicates.and(y.predicates)
+      val rhs = x.cost + y.cost
+      UnnamedImpl(lhs, rhs)
     })
-  }
 
-  def bestFullyGeneralTime: Option[AffineBigOCombo[MethodName]] = {
-    this.bestImplementationForConditions(ImplPredicateList.empty(impls.head.lhs.parameters.length)).map(_.rhs)
-  }
+
+//  def bestFullyGeneralTime: Option[AffineBigOCombo[MethodName]] = {
+//    this.bestImplementationForConditions(ImplPredicateList.empty(impls.head.lhs.parameters.length)).map(_.rhs)
+//  }
 }
 
 object SingleMethodImplSet {
-  def fromSet(set: Set[Impl]): SingleMethodImplSet = {
+  def fromSet(set: Set[UnnamedImpl]): SingleMethodImplSet = {
     SingleMethodImplSet(DominanceFrontier.fromSet(set))
   }
 }

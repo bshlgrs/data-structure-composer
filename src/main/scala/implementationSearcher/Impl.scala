@@ -53,8 +53,8 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: Option[I
           optionImpl <- optionsAndConditions
         } yield {
           UnnamedImpl(
-            lhs.conditions.and(optionImpl.lhs.conditions),
-            unfreeImpl.cost + optionImpl.rhs * methodCostWeight)
+            lhs.conditions.and(optionImpl.predicates),
+            unfreeImpl.cost + optionImpl.cost * methodCostWeight)
         })
       }
     }
@@ -80,9 +80,11 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: Option[I
       val that = this
       val relevantParamName = parameters(idx)
       rhs.weights.get(MethodExpr(relevantParamName, Nil)) match {
-        case None => Set(UnnamedImpl(ImplPredicateMap.empty, AffineBigOCombo[MethodExpr](ConstantTime, Map())))
+        case None =>
+          Set(UnnamedImpl(ImplPredicateMap.empty, AffineBigOCombo[MethodExpr](ConstantTime, Map())))
         case Some(weightOfParam) =>
-          f.getConditionsAndCosts(lhs.conditions.get(parameters(idx)), scope, methodExpr.name).items.map((x: UnnamedImpl) => x.copy(cost = rhs * weightOfParam))
+          f.getConditionsAndCosts(lhs.conditions.get(parameters(idx)), scope, methodExpr.name)
+            .items.map((x: UnnamedImpl) => x.copy(cost = rhs * weightOfParam))
       }
     })
 
@@ -111,11 +113,13 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: Option[I
   }
 
   def getNames: Set[MethodName] = rhs.weights.keys.map(_.name).toSet
+
+  def unnamed = UnnamedImpl(lhs.conditions, rhs)
 }
 
 object Impl {
   def apply(string: String): Impl = {
-    MainParser.impl.parse(string).get.value
+    MainParser.impl.parse(string).get.value._1
   }
 
   type Rhs = AffineBigOCombo[MethodExpr]
@@ -129,9 +133,7 @@ object Impl {
       if (x.lhs.name != y.lhs.name) {
         NeitherDominates
       } else {
-        val generalityDominance = implicitly[PartialOrdering[ImplLhs]].partialCompare(x.lhs, y.lhs).flip
-        val timeDominance = x.rhs.partialCompare(y.rhs)
-        generalityDominance.infimum(timeDominance)
+        UnnamedImpl.UnnamedImplPartialOrdering.partialCompare(x.unnamed, y.unnamed)
       }
     }
   }

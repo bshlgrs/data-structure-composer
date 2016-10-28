@@ -3,8 +3,15 @@ package shared
 /**
   * Created by buck on 9/25/16.
   */
-trait PartialOrdering[A] {
+trait PartialOrdering[A] extends Ordering[A] {
   def partialCompare(lhs: A, rhs: A): DominanceRelationship
+
+  def compare(lhs: A, rhs: A) = partialCompare(lhs, rhs) match {
+    case LeftStrictlyDominates => -1
+    case RightStrictlyDominates => 1
+    case BothDominate => 0
+    case NeitherDominates => 0
+  }
 }
 
 object PartialOrdering {

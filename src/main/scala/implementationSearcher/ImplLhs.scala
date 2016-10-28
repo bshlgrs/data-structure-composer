@@ -1,8 +1,9 @@
 package implementationSearcher
 
 import implementationSearcher.ImplLhs.FunctionProperty
+import implementationSearcher.ImplPredicateMap.ImplPredicateMapPartialOrdering
 import parsers.MainParser
-import shared.{DominanceRelationship, PartialOrdering}
+import shared.{NeitherDominates, DominanceRelationship, PartialOrdering}
 
 /**
   * Created by buck on 7/25/16.
@@ -29,7 +30,7 @@ case class ImplLhs(name: MethodName, conditions: ImplPredicateMap) {
 
 object ImplLhs {
   def parse(string: String) = {
-    MainParser.nakedImplLhs.parse(string).get.value
+    MainParser.nakedImplLhs.parse(string).get.value._1
   }
 
   type FunctionProperty = String
@@ -38,11 +39,10 @@ object ImplLhs {
   // A dominates B if A can be used to implement B
   implicit object ImplLhsPartialOrdering extends PartialOrdering[ImplLhs] {
     def partialCompare(x: ImplLhs, y: ImplLhs): DominanceRelationship = {
-      assert(x.name == y.name)
-
-      PartialOrdering.fromSetOfDominanceRelationships(
-        x.conditions.list.zip(y.conditions.list).map({case (xCond, yCond) => PartialOrdering.fromSetsOfProperties(xCond, yCond) })
-      ).flip
+      if (x.name == y.name)
+        ImplPredicateMapPartialOrdering.partialCompare(x.conditions, y.conditions)
+      else
+        NeitherDominates
     }
   }
 }

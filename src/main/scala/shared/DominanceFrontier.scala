@@ -3,7 +3,7 @@ package shared
 /**
   * Created by buck on 10/8/16.
   */
-class DominanceFrontier[A: PartialOrdering](val items: Set[A]) {
+case class DominanceFrontier[A: PartialOrdering] private (items: Set[A]) {
   assert(items.forall((x: A) => items.forall((y: A) => ! implicitly[PartialOrdering[A]].partialCompare(x, y).oneStrictlyDominates)))
 
   def add(newItem: A): DominanceFrontier[A] = {

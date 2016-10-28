@@ -10,3 +10,7 @@ case class MethodName(name: String) {
 
   override def toString: String = name
 }
+
+object MethodName {
+  implicit def fromString(s: String): MethodName = MethodName(s)
+}

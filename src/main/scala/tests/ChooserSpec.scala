@@ -10,62 +10,62 @@ import org.scalatest.FunSpec
 class ChooserSpec extends FunSpec {
   describe("Search") {
     it("does simple things") {
-      val testLibrary = Set(
-        Impl("x <- n"),
-        Impl("y <- x"),
-        Impl("z <- y")
+      val (impls, decls) = ImplDeclaration.parseMany(
+        "x <- n",
+        "y <- x",
+        "z <- y"
       )
 
-      val res = Chooser.getAllTimes(testLibrary)
+      val res = Chooser.getAllTimes(impls, Set(), decls)
 
-      assert(res.get("x") == Set(UnfreeImpl("x <- n")))
-      assert(res.get("y") == Set(UnfreeImpl("y <- n")))
-      assert(res.get("z") == Set(UnfreeImpl("z <- n")))
+      assert(res.getNamed("x") == Set(Impl("x <- n")))
+      assert(res.getNamed("y") == Set(Impl("y <- n")))
+      assert(res.getNamed("z") == Set(Impl("z <- n")))
     }
 
     it("does simple parameterized things") {
-      val testLibrary = Set(
-        Impl("x[f] <- n * f"),
-        Impl("y <- x[_]")
+      val (impls, decls) = ImplDeclaration.parseMany(
+        "x[f] <- n * f",
+        "y <- x[_]"
       )
 
-      val res = Chooser.getAllTimes(testLibrary)
+      val res = Chooser.getAllTimes(impls, Set(), decls)
 
-      assert(res.get("y") == Set(UnfreeImpl("y <- n")))
+      assert(res.getNamed("y") == Set(Impl("y <- n")))
     }
 
     it("does more complex parameterized things") {
-      val testLibrary = Set(
-        Impl("x[g] <- n * g"),
-        Impl("y[f] <- x[f]")
+      val (impls, decls) = ImplDeclaration.parseMany(
+        "x[g] <- n * g",
+        "y[f] <- x[f]"
       )
 
-      val res = Chooser.getAllTimes(testLibrary)
+      val res = Chooser.getAllTimes(impls, Set(), decls)
 
-      assert(res.get("y") == Set(UnfreeImpl("y[f] <- n * f")))
+      assert(res.getNamed("y") == Set(Impl("y[f] <- n * f")))
     }
 
     it("correctly infers conditions") {
-      val testLibrary = Set(
-        Impl("x[f] if f.foo <- log(n) + f"),
-        Impl("y[g] <- x[g]")
+      val (impls, decls) = ImplDeclaration.parseMany(
+        "x[f] if f.foo <- log(n) + f",
+        "y[g] <- x[g]"
       )
 
-      val res = Chooser.getAllTimes(testLibrary)
+      val res = Chooser.getAllTimes(impls, Set(), decls)
 
-      assert(res.impls(MethodName("y")).impls.head == UnfreeImpl("y[g] if g.foo <- log(n) + g"))
+      assert(res.getNamed("y").head == Impl("y[g] if g.foo <- log(n) + g"))
     }
 
     it("handles named functions in method expressions") {
-      val testLibrary = Set(
-        Impl("y[f] <- n * f"),
-        Impl("x <- y[k]"),
-        Impl("k <- 1")
+      val (impls, decls) = ImplDeclaration.parseMany(
+        "y[f] <- n * f",
+        "x <- y[k]",
+        "k <- 1"
       )
 
-      val res = Chooser.getAllTimes(testLibrary)
+      val res = Chooser.getAllTimes(impls, Set(), decls)
 
-      assert(res.impls(MethodName("x")).impls.head == UnfreeImpl("x <- n"))
+      assert(res.getNamed(MethodName("x")).head == Impl("x <- n"))
     }
 
     it("handles anonymous functions from underscore") {
@@ -73,17 +73,17 @@ class ChooserSpec extends FunSpec {
 
       println(weirdAssImpl.getNames)
 
-      assert(weirdAssImpl.getNames == Set("y", "k"))
+      assert(weirdAssImpl.getNames == Set[MethodName]("y", "k"))
 
-      val testLibrary = Set(
-        Impl("y[f] <- n * f"),
-        weirdAssImpl,
-        Impl("k <- 1")
+      val (impls, decls) = ImplDeclaration.parseMany(
+        "y[f] <- n * f",
+        weirdAssImpl.toString(),
+        "k <- 1"
       )
 
-      val res = Chooser.getAllTimes(testLibrary)
+      val res = Chooser.getAllTimes(impls, Set(), decls)
 
-      assert(res.impls(MethodName("x")).impls.head == UnfreeImpl("x <- n"))
+      assert(res.getNamed(MethodName("x")).head == Impl("x <- n"))
     }
   }
 

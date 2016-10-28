@@ -39,7 +39,7 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   // If instead of `myMethod[f]` I was calling this with `myMethod[_{foo}]`:
   // If I see `myMethod[g] if g.foo <- log(n)`, I want to return that.
   // If I see `myMethod[g] if g.bar <- log(n**2)`, I want to not include that one. !!!
-  def implsWhichMatchMethodExpr(methodExpr: MethodExpr): Set[Impl] = {
+  def implsWhichMatchMethodExpr(methodExpr: MethodExpr): Set[UnnamedImpl] = {
     if (impls.contains(methodExpr.name)) {
       impls(methodExpr.name).implsWhichMatchMethodExpr(methodExpr, this)
     } else {
@@ -48,10 +48,12 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   }
 
   def toLongString: String = {
-    "Search Result {\n" + impls.toList.sortBy(_._1).map(_._2.toLongString).mkString("\n") + "\n}"
+    "Search Result {\n" + impls.toList.sortBy(_._1.name).map(_._2.toLongString).mkString("\n") + "\n}"
   }
 
   def get(methodName: MethodName): Set[UnnamedImpl] = impls.get(methodName).map(_.impls).getOrElse(Set())
+
+  def getNamed(methodName: MethodName): Set[Impl] = get(methodName).map(_.withName(methodName))
 
   def product(other: UnfreeImplSet): UnfreeImplSet = {
     UnfreeImplSet(this.impls.flatMap({ case ((methodName, singleMethodImplOptions)) =>
@@ -63,9 +65,9 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
     }), boundVariables ++ other.boundVariables, declarations ++ other.declarations)
   }
 
-  def bestFullyGeneralTimes: Map[MethodName, AffineBigOCombo[MethodName]] = {
-    impls.mapValues((x) => x.bestFullyGeneralTime).filter(_._2.isDefined).mapValues(_.get)
-  }
+//  def bestFullyGeneralTimes: Map[MethodName, AffineBigOCombo[MethodName]] = {
+//    impls.mapValues((x) => x.bestFullyGeneralTime).filter(_._2.isDefined).mapValues(_.get)
+//  }
 }
 
 

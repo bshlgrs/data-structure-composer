@@ -20,7 +20,8 @@ case class DataStructure(parameters: List[MethodName], conditions: ImplPredicate
 object DataStructure {
   // todo: consider what happens when the data structures aren't simple
   def combineReadMethods(dataStructures: Set[DataStructure]): UnfreeImplSet = {
-    UnfreeImplSet.fromSetOfUnfreeImpls(dataStructures.flatMap(_.sourcedImpls))
+//    UnfreeImplSet.fromSetOfUnfreeImpls(dataStructures.flatMap(_.sourcedImpls))
+    ???
   }
 
   def apply(string: String): DataStructure = MainParser.nakedDataStructure.parse(string).get.value

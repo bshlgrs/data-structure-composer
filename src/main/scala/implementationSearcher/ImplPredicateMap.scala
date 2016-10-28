@@ -1,21 +1,22 @@
 package implementationSearcher
 
 import implementationSearcher.ImplLhs.FunctionProperty
+import shared.{PartialOrdering, DominanceRelationship}
 
-case class ImplPredicateMap(map: Map[MethodName, Set[FunctionProperty]]) {
+case class ImplPredicateMap private(map: Map[MethodName, Set[FunctionProperty]], extraneous: Unit) {
   def and(other: ImplPredicateMap): ImplPredicateMap = {
     ImplPredicateMap(
       (map.keys ++ other.map.keys).map((parameterName: MethodName) =>
         parameterName -> map.getOrElse(parameterName, Set()).union(other.map.getOrElse(parameterName, Set()))
-      ).toMap
+      ).toMap,
+      ()
     )
   }
-
 
   def isEmpty: Boolean = map.values.forall(_.isEmpty)
 
   // todo: unsafe
-  def get(name: MethodName): Set[FunctionProperty] = map(name)
+  def get(name: MethodName): Set[FunctionProperty] = map.getOrElse(name, Set())
 
   def toNiceString: String =
     map.flatMap({ case (name: MethodName, y: Set[FunctionProperty]) => y.map((z) => s"${name.name}.$z") }).mkString(", ")
@@ -30,8 +31,22 @@ object ImplPredicateMap {
 
     val map2: Map[MethodName, Set[FunctionProperty]] = map1.mapValues(_.map(_._2))
 
-    ImplPredicateMap(map2)
+    ImplPredicateMap(map2, ())
   }
 
-  def empty: ImplPredicateMap = ImplPredicateMap(Map())
+  def empty: ImplPredicateMap = ImplPredicateMap(Map(), ())
+
+  def apply(map: Map[MethodName, Set[FunctionProperty]]): ImplPredicateMap = {
+    ImplPredicateMap(map.filterKeys((key) => map(key).nonEmpty), ())
+  }
+
+  // A dominates B if A can be used to implement B
+  implicit object ImplPredicateMapPartialOrdering extends PartialOrdering[ImplPredicateMap] {
+    def partialCompare(x: ImplPredicateMap, y: ImplPredicateMap): DominanceRelationship = {
+      PartialOrdering.fromSetOfDominanceRelationships(
+        (x.map.keys ++ y.map.keys).map({case (methodName: MethodName) =>
+          PartialOrdering.fromSetsOfProperties(x.get(methodName), y.get(methodName)) })
+      ).flip
+    }
+  }
 }
