@@ -68,24 +68,29 @@ object Chooser {
     unfreeImplSet
   }
 
-//  def getAllTimesForDataStructure(impls: Set[Impl], dataStructure: DataStructure) = {
-//    getAllTimes(impls.union(dataStructure.sourcedImpls.map(_.toImpl)))
-//  }
-//
-//  def getRelevantTimesForDataStructures(impls: Set[Impl],
-//                                        structures: Set[DataStructure]): UnfreeImplSet = {
-//    val allProvidedReadImplementations: Set[UnfreeImpl] = structures.flatMap(_.readMethods)
-//
-//    val bestReadImplementations: UnfreeImplSet = getAllTimes(allProvidedReadImplementations.map(_.toImpl) ++ impls)
-//
-//    val allWriteImplementations: Set[UnfreeImplSet] = structures.map((s) =>
-//      getAllTimes((s.writeMethods ++ bestReadImplementations.allImpls).map(_.toImpl) ++ impls))
-//
-//    val combinedWriteImplementations: UnfreeImplSet = allWriteImplementations.reduceOption(_.product(_)).getOrElse(UnfreeImplSet())
-//
-//    bestReadImplementations.addImpls(combinedWriteImplementations.allImpls)
-//  }
-//
+  def getAllTimesForDataStructure(impls: Set[Impl], dataStructure: DataStructure, declarations: Map[MethodName, ImplDeclaration]) = {
+    // todo: consider conditions
+    getAllTimes(impls.union(dataStructure.impls), dataStructure.parameters.toSet, declarations)
+  }
+
+
+  def getRelevantTimesForDataStructures(impls: Set[Impl],
+                                        structures: Set[DataStructure],
+                                       decls: Map[MethodName, ImplDeclaration]): UnfreeImplSet = {
+    val allProvidedReadImplementations: Set[Impl] = structures.flatMap(_.readMethods)
+    val allFreeVariables = structures.flatMap(_.parameters)
+
+    val bestReadImplementations: UnfreeImplSet = getAllTimes(allProvidedReadImplementations ++ impls, allFreeVariables, decls)
+
+    val allWriteImplementations: Set[UnfreeImplSet] = structures.map((s) =>
+      getAllTimes(s.writeMethods ++ bestReadImplementations.allImpls ++ impls, s.parameters.toSet, decls))
+
+    val combinedWriteImplementations: UnfreeImplSet = allWriteImplementations.reduceOption(_.product(_)).getOrElse(UnfreeImplSet(Map(), allFreeVariables, decls))
+
+    bestReadImplementations.addImpls(combinedWriteImplementations.allImpls)
+  }
+
+  //
 //  def allParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
 //                                                structures: Set[DataStructure],
 //                                                adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {

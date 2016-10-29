@@ -14,6 +14,10 @@ case class DataStructure(parameters: List[MethodName], conditions: ImplPredicate
   def writeMethods: Set[Impl] = {
     impls.filter(_.lhs.name.isMutating)
   }
+
+  def namedParameters(sourceName: String): Set[BoundMethodName] = {
+    parameters.map((x) => BoundMethodName(x.name, sourceName)).toSet
+  }
 }
 
 
