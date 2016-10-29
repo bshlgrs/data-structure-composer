@@ -87,7 +87,12 @@ case class NamedFunctionExpr(name: MethodName) extends FunctionExpr {
 }
 
 case class AnonymousFunctionExpr(properties: Set[String], cost: AffineBigOCombo[MethodName] = AffineBigOCombo(ConstantTime, Map())) extends FunctionExpr {
-  override def toString = s"_{${properties.mkString(",")}} <- $cost"
+  override def toString = {
+    if (properties.isEmpty)
+      s"_ <- $cost"
+    else
+      s"_{${properties.mkString(",")}} <- $cost"
+  }
 
   def getConditionsAndCosts(conditions: Set[String], unfreeImplSet: UnfreeImplSet, list: ParameterList): DominanceFrontier[UnnamedImpl] = {
     // If the anonymous function has the necessary properties, then add no conditions and continue

@@ -68,13 +68,14 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimes(impls, Set(), decls)
 
-      assert(res.getNamed(MethodName("x")).head == Impl("x <- n"))
+      println(res)
+      assert(res.getNamed(MethodName("x")) == Set(Impl("x <- n")))
     }
 
     it("handles anonymous functions from underscore") {
       val weirdAssImpl = Impl("x <- y[_ <- k]")
 
-      println(weirdAssImpl.getNames)
+      println(weirdAssImpl.toString)
 
       assert(weirdAssImpl.getNames == Set[MethodName]("y", "k"))
 
@@ -86,7 +87,7 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimes(impls, Set(), decls)
 
-      assert(res.getNamed(MethodName("x")).head == Impl("x <- n"))
+      assert(res.getNamed(MethodName("x")) == Set(Impl("x <- n")))
     }
   }
 

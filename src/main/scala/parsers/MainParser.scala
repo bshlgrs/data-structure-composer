@@ -46,7 +46,7 @@ object MainParser {
   }
 
   lazy val anonymousFunctionExpr: P[AnonymousFunctionExpr] = {
-    P("_" ~ ("{" ~/ name.!.rep(1, sep=",") ~ "}").? ~ ("<-" ~ affineBigONameCombo).?).map({case ((mbConditions, mbAbonc)) =>
+    P("_" ~ ("{" ~/ name.!.rep(sep=",") ~ "}").? ~ ("<-" ~ affineBigONameCombo).?).map({case ((mbConditions, mbAbonc)) =>
       AnonymousFunctionExpr(mbConditions.map(_.toSet).getOrElse(Set()), mbAbonc.getOrElse(AffineBigOCombo(ConstantTime, Map())))
     })
   }

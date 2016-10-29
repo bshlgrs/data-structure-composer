@@ -22,7 +22,7 @@ object Chooser {
 //  )
 
   def getAllTimes(impls: Set[Impl], freeVariables: Set[MethodName], declarations: Map[MethodName, ImplDeclaration]): UnfreeImplSet = {
-    val queue = mutable.PriorityQueue[Impl]()(Ordering.by((x: (Impl)) => x).reverse)
+    val queue = mutable.Set[Impl]()
 
     var unfreeImplSet = UnfreeImplSet(Map(), freeVariables, declarations)
 
@@ -31,8 +31,12 @@ object Chooser {
     def queuePlusSelected: List[Impl] = queue.toList ++ unfreeImplSet.allImpls
 
     while (queue.nonEmpty) {
-      val unfreeImpl: Impl = queue.dequeue()
-      println(s"just dequeued $unfreeImpl, queue is $queue")
+      println(s"queue is $queue")
+
+      val unfreeImpl: Impl = queue.minBy(_.rhs.minCost)
+      queue.remove(unfreeImpl)
+
+      println(s"just dequeued $unfreeImpl, with min cost ${unfreeImpl.rhs.minCost}")
 
       if (unfreeImplSet.isOtherImplUseful(unfreeImpl)) {
         unfreeImplSet = unfreeImplSet.addImpl(unfreeImpl)
