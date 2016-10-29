@@ -44,7 +44,8 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimes(impls, Set(), decls)
 
-      assert(res.getNamed("y") == Set(Impl("y[f] <- n * f")))
+      val expected = Impl(ImplLhs("y", ImplPredicateMap(Map(MethodName("f") -> Set()))), Impl.rhs("n * f"))
+      assert(res.getNamed("y") == Set(expected))
     }
 
     it("correctly infers conditions") {
