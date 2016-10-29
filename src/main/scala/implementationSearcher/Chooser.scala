@@ -31,22 +31,15 @@ object Chooser {
     def queuePlusSelected: List[Impl] = queue.toList ++ unfreeImplSet.allImpls
 
     while (queue.nonEmpty) {
-      println(s"queue is $queue")
-
       val unfreeImpl: Impl = queue.minBy(_.rhs.minCost)
+      println(unfreeImpl, queue)
       queue.remove(unfreeImpl)
-
-      println(s"just dequeued $unfreeImpl, with min cost ${unfreeImpl.rhs.minCost}")
 
       if (unfreeImplSet.isOtherImplUseful(unfreeImpl)) {
         unfreeImplSet = unfreeImplSet.addImpl(unfreeImpl)
-//        println(unfreeImplSet.toLongString)
-//        println(s"unfree impl is $unfreeImpl")
-
         for (otherImpl <- impls) {
           // So we have a random impl. Let's see if the unfreeImpl we just settled on is useful for that impl.
           // It's only useful if unfreeImpl's methodName is used by the rhs of the otherImpl (this condition is weaker than it could be)
-
 
           val otherImplMethodsUsed = otherImpl.getNames
 

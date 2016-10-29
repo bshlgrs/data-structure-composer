@@ -89,8 +89,6 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
       }
     })
 
-    println(s"conditionsAndRhses is $conditionsAndRhses")
-
     val combinationsOfImpls: Set[List[UnnamedImpl]] = Utils.cartesianProducts(conditionsAndRhses)
 
     for {

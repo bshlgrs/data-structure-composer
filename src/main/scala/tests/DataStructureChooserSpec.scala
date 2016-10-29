@@ -25,8 +25,9 @@ class DataStructureChooserSpec extends FunSpec {
     )
 
     impls1 -> (decls1 ++ ImplDeclaration.parseManyFromLhses(
-      "insertAfterNode!")
-      )
+      "insertAfterNode!",
+      "updateNode!"
+    ))
   }
 
   val linkedList = DataStructure(
@@ -39,11 +40,11 @@ class DataStructureChooserSpec extends FunSpec {
 
 
   val genericHeap = DataStructure(
-    """ds GenericHeap[f] {
-      |    updateNode! <- log(n) + f
+    """ds GenericHeap[g] {
+      |    updateNode! <- log(n) + g
       |    getSmallestBy[f] <- 1
-      |    insertAtIndex! <- log(n) + f
-      |    unorderedEach[g] <- n + n * g
+      |    insertAtIndex! <- log(n) + g
+      |    unorderedEach[f] <- n + n * f
       |}""".stripMargin)
 
 
@@ -85,18 +86,24 @@ class DataStructureChooserSpec extends FunSpec {
         assert(res.getNamed("insertAnywhere!") == Set(Impl("insertAnywhere! <- log(n)")))
         assert(res.getNamed("getSmallest") == Set(Impl("getSmallest <- 1")))
       }
-//
-//      it("can do a generic heap") {
-//        val res = Chooser.getAllTimesForDataStructure(impls, genericHeap)
-//
-//        assert(res.get("getByIndex") == Set(UnfreeImpl("getByIndex <- n")))
-//        assert(res.get("getSmallest") == Set(UnfreeImpl("getSmallest <- 1")))
-//        assert(res.get("getFirst") == Set(UnfreeImpl("getFirst <- n")))
-//        assert(res.get("updateNode!") == Set(UnfreeImpl("updateNode! <- log(n)")))
-//        assert(res.get("getByIndex") == Set(UnfreeImpl("getByIndex <- n")))
-//        assert(res.get("getNext") == Set(UnfreeImpl("getNext <- n")))
-//      }
-//
+
+      describe("doing a generic heap") {
+        val res = Chooser.getAllTimesForDataStructure(impls, genericHeap, decls)
+
+        println(res.impls)
+        it("succeeds at the read methods") {
+          assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
+          assert(res.getNamed("getSmallest") == Set(Impl("getSmallest <- 1")))
+          assert(res.getNamed("getFirst") == Set(Impl("getFirst <- n")))
+          assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
+          assert(res.getNamed("getNext") == Set(Impl("getNext <- n")))
+        }
+
+        it("succeeds at the write methods") {
+          assert(res.getNamed("updateNode!") == Set(Impl("updateNode! <- g + log(n)")))
+        }
+      }
+
 //      it("can do linked-list + generic heap") {
 //        val res = Chooser.getRelevantTimesForDataStructures(impls, Set(linkedList, genericHeap))
 //
