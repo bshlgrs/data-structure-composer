@@ -57,7 +57,7 @@ class ImplSpec extends FunSpec {
         impl.bindToContext(MethodExpr.parse("f[_]"), emptySearchResults).headOption
 
       assert(conditions.isEmpty)
-      assert(rhs == Impl.rhs("1"))
+      assert(rhs == Impl.rhs("n"))
     }
 
     it("correctly deals with applicable anonymous functions") {
@@ -66,7 +66,7 @@ class ImplSpec extends FunSpec {
         impl.bindToContext(MethodExpr.parse("f[_{foo}]"), emptySearchResults).headOption
 
       assert(conditions.isEmpty)
-      assert(rhs == Impl.rhs("1"))
+      assert(rhs == Impl.rhs("n"))
     }
 
     it("returns sums") {

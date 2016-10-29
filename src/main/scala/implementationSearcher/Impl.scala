@@ -67,9 +67,9 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: Option[I
   // and you want to bind it to f[y]
 
   // you get back `if y.foo <- y`
-  def bindToContext(methodExpr: MethodExpr, scope: UnfreeImplSet): Set[UnnamedImpl] = {
+  def bindToContext(methodExpr: MethodExpr, unfreeImplSet: UnfreeImplSet): Set[UnnamedImpl] = {
 
-    val parameters = scope.declarations(lhs.name).parameters
+    val parameters = unfreeImplSet.declarations(lhs.name).parameters
 
     assert(methodExpr.args.length == parameters.length,
       s"Assertion failed: bindToContext called on $this with methodExpr $methodExpr.\n" +
@@ -83,7 +83,7 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: Option[I
         case None =>
           Set(UnnamedImpl(ImplPredicateMap.empty, AffineBigOCombo[MethodExpr](ConstantTime, Map())))
         case Some(weightOfParam) =>
-          f.getConditionsAndCosts(lhs.conditions.get(parameters(idx)), scope, methodExpr.name)
+          f.getConditionsAndCosts(lhs.conditions.get(parameters(idx)), unfreeImplSet, parameters.toSet)
             .items.map((x: UnnamedImpl) => x.copy(cost = rhs * weightOfParam))
       }
     })

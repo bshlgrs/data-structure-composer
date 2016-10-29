@@ -36,7 +36,7 @@ abstract class FunctionExpr {
   }
 
   // All the different combinations of costs and required method conditions that you could get by implementing this FunctionExpr
-  def getConditionsAndCosts(conditions: Set[String], unfreeImplSet: UnfreeImplSet, methodName: MethodName): DominanceFrontier[UnnamedImpl]
+  def getConditionsAndCosts(conditions: Set[String], unfreeImplSet: UnfreeImplSet, locals: Set[MethodName]): DominanceFrontier[UnnamedImpl]
 }
 
 object UnderscoreFunctionExpr extends AnonymousFunctionExpr(Set(), AffineBigOCombo(ConstantTime, Map()))
@@ -44,8 +44,7 @@ object UnderscoreFunctionExpr extends AnonymousFunctionExpr(Set(), AffineBigOCom
 case class NamedFunctionExpr(name: MethodName) extends FunctionExpr {
   override def toString = name.name
 
-  def getConditionsAndCosts(conditions: Set[FunctionProperty], unfreeImplSet: UnfreeImplSet, methodName: MethodName): DominanceFrontier[UnnamedImpl] = {
-    val locals = unfreeImplSet.declarations(methodName).parameters
+  def getConditionsAndCosts(conditions: Set[FunctionProperty], unfreeImplSet: UnfreeImplSet, locals: Set[MethodName]): DominanceFrontier[UnnamedImpl] = {
     val that = this
 
     // This name might be locally bound or globally bound.
@@ -83,7 +82,7 @@ case class NamedFunctionExpr(name: MethodName) extends FunctionExpr {
 case class AnonymousFunctionExpr(properties: Set[String], cost: AffineBigOCombo[MethodName] = AffineBigOCombo(ConstantTime, Map())) extends FunctionExpr {
   override def toString = s"_{${properties.mkString(",")}} <- $cost"
 
-  def getConditionsAndCosts(conditions: Set[String], unfreeImplSet: UnfreeImplSet, methodName: MethodName): DominanceFrontier[UnnamedImpl] = {
+  def getConditionsAndCosts(conditions: Set[String], unfreeImplSet: UnfreeImplSet, locals: Set[MethodName]): DominanceFrontier[UnnamedImpl] = {
     // If the anonymous function has the necessary properties, then add no conditions and continue
     if (conditions.subsetOf(properties)) {
       val costsOfParamsInMethodExprNames: List[Set[Rhs]] = cost.weights.map({case (name, weight) => {
@@ -96,7 +95,7 @@ case class AnonymousFunctionExpr(properties: Set[String], cost: AffineBigOCombo[
           alreadyChosenImpls.filter(_.predicates.isEmpty).map(_.cost)
         }
         // Otherwise, maybe it's a locally bound variable. So check whether it's in implLhs.parameters.
-        else if (unfreeImplSet.declarations(methodName).parameters.contains(name)) {
+        else if (locals.contains(name)) {
           Set(AffineBigOCombo(ZeroTime, Map(MethodExpr(name, Nil) -> weight)))
         }
         // Otherwise, just assume that it's a globally defined function which has not been defined.
