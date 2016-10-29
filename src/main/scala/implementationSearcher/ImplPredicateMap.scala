@@ -3,13 +3,12 @@ package implementationSearcher
 import implementationSearcher.ImplLhs.FunctionProperty
 import shared.{PartialOrdering, DominanceRelationship}
 
-case class ImplPredicateMap private(map: Map[MethodName, Set[FunctionProperty]], extraneous: Unit) {
+case class ImplPredicateMap(map: Map[MethodName, Set[FunctionProperty]]) {
   def and(other: ImplPredicateMap): ImplPredicateMap = {
     ImplPredicateMap(
       (map.keys ++ other.map.keys).map((parameterName: MethodName) =>
         parameterName -> map.getOrElse(parameterName, Set()).union(other.map.getOrElse(parameterName, Set()))
-      ).toMap,
-      ()
+      ).toMap
     )
   }
 
@@ -31,14 +30,10 @@ object ImplPredicateMap {
 
     val map2: Map[MethodName, Set[FunctionProperty]] = map1.mapValues(_.map(_._2))
 
-    ImplPredicateMap(map2, ())
+    ImplPredicateMap(map2)
   }
 
-  def empty: ImplPredicateMap = ImplPredicateMap(Map(), ())
-
-  def apply(map: Map[MethodName, Set[FunctionProperty]]): ImplPredicateMap = {
-    ImplPredicateMap(map.filterKeys((key) => map(key).nonEmpty), ())
-  }
+  def empty: ImplPredicateMap = ImplPredicateMap(Map())
 
   // A dominates B if A can be used to implement B
   implicit object ImplPredicateMapPartialOrdering extends PartialOrdering[ImplPredicateMap] {

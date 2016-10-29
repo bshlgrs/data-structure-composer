@@ -36,7 +36,7 @@ abstract class FunctionExpr {
   }
 
   // All the different combinations of costs and required method conditions that you could get by implementing this FunctionExpr
-  def getConditionsAndCosts(conditions: Set[String], unfreeImplSet: UnfreeImplSet, locals: Set[MethodName]): DominanceFrontier[UnnamedImpl]
+  def getConditionsAndCosts(conditions: Set[String], unfreeImplSet: UnfreeImplSet, list: ParameterList): DominanceFrontier[UnnamedImpl]
 }
 
 object UnderscoreFunctionExpr extends AnonymousFunctionExpr(Set(), AffineBigOCombo(ConstantTime, Map()))
@@ -44,12 +44,13 @@ object UnderscoreFunctionExpr extends AnonymousFunctionExpr(Set(), AffineBigOCom
 case class NamedFunctionExpr(name: MethodName) extends FunctionExpr {
   override def toString = name.name
 
-  def getConditionsAndCosts(conditions: Set[FunctionProperty], unfreeImplSet: UnfreeImplSet, locals: Set[MethodName]): DominanceFrontier[UnnamedImpl] = {
+  def getConditionsAndCosts(conditions: Set[FunctionProperty], unfreeImplSet: UnfreeImplSet, list: ParameterList): DominanceFrontier[UnnamedImpl] = {
     val that = this
-
+    println(s"name is $name, list is $list")
     // This name might be locally bound or globally bound.
     // If it's locally bound:
-    if (locals.contains(name)) {
+    if (list.contains(name)) {
+      println("locally bound")
       DominanceFrontier.fromSet(Set(
         UnnamedImpl(
           ImplPredicateMap(Map(name -> conditions)),
@@ -57,6 +58,7 @@ case class NamedFunctionExpr(name: MethodName) extends FunctionExpr {
       ))
     } else {
       val that = this
+      println("globally bound")
       // Otherwise it's globally bound, so look for an implementation which has already been sorted.
 
       // Currently I am not allowing higher-order methods here. So there can only be one implementation.
@@ -65,12 +67,17 @@ case class NamedFunctionExpr(name: MethodName) extends FunctionExpr {
           val oneImplementation: UnnamedImpl = x.head
 
           if (oneImplementation.predicates.isEmpty) {
+            println("found")
             DominanceFrontier.fromSet(Set(oneImplementation))
           } else {
             ???
           }
-        case x: Set[UnnamedImpl] if x.isEmpty =>
+        case x: Set[UnnamedImpl] if x.isEmpty => {
+          println("not found")
           DominanceFrontier.empty[UnnamedImpl]
+        }
+
+
         case x: Set[UnnamedImpl] if x.size > 1 =>
           // One day I will extend this code to allow higher-order methods; at that point I'll fill in this part of the code.
           ???
@@ -82,7 +89,7 @@ case class NamedFunctionExpr(name: MethodName) extends FunctionExpr {
 case class AnonymousFunctionExpr(properties: Set[String], cost: AffineBigOCombo[MethodName] = AffineBigOCombo(ConstantTime, Map())) extends FunctionExpr {
   override def toString = s"_{${properties.mkString(",")}} <- $cost"
 
-  def getConditionsAndCosts(conditions: Set[String], unfreeImplSet: UnfreeImplSet, locals: Set[MethodName]): DominanceFrontier[UnnamedImpl] = {
+  def getConditionsAndCosts(conditions: Set[String], unfreeImplSet: UnfreeImplSet, list: ParameterList): DominanceFrontier[UnnamedImpl] = {
     // If the anonymous function has the necessary properties, then add no conditions and continue
     if (conditions.subsetOf(properties)) {
       val costsOfParamsInMethodExprNames: List[Set[Rhs]] = cost.weights.map({case (name, weight) => {
@@ -95,7 +102,7 @@ case class AnonymousFunctionExpr(properties: Set[String], cost: AffineBigOCombo[
           alreadyChosenImpls.filter(_.predicates.isEmpty).map(_.cost)
         }
         // Otherwise, maybe it's a locally bound variable. So check whether it's in implLhs.parameters.
-        else if (locals.contains(name)) {
+        else if (list.contains(name)) {
           Set(AffineBigOCombo(ZeroTime, Map(MethodExpr(name, Nil) -> weight)))
         }
         // Otherwise, just assume that it's a globally defined function which has not been defined.

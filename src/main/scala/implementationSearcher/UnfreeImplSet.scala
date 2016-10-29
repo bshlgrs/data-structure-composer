@@ -39,9 +39,9 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   // If instead of `myMethod[f]` I was calling this with `myMethod[_{foo}]`:
   // If I see `myMethod[g] if g.foo <- log(n)`, I want to return that.
   // If I see `myMethod[g] if g.bar <- log(n**2)`, I want to not include that one. !!!
-  def implsWhichMatchMethodExpr(methodExpr: MethodExpr): Set[UnnamedImpl] = {
+  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, list: ParameterList): Set[UnnamedImpl] = {
     if (impls.contains(methodExpr.name)) {
-      impls(methodExpr.name).implsWhichMatchMethodExpr(methodExpr, this)
+      impls(methodExpr.name).implsWhichMatchMethodExpr(methodExpr, this, list)
     } else {
       Set()
     }

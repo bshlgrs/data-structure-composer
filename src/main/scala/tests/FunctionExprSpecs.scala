@@ -25,9 +25,11 @@ class FunctionExprSpecs extends FunSpec {
         )
       )
 
-      val conditionsAndCosts = NamedFunctionExpr("y").getConditionsAndCosts(Set(), scope, Set("y"))
+      val conditionsAndCosts = NamedFunctionExpr("y").getConditionsAndCosts(Set(), scope,
+        ParameterList.easy("y"))
+
       val expectedUnnamedImpl = UnnamedImpl(
-        ImplPredicateMap.empty,
+        ImplPredicateMap(Map(MethodName("y") -> Set())),
         AffineBigOCombo[MethodExpr](ZeroTime,
           Map(MethodExpr.parse("y") -> ConstantTime)
         )

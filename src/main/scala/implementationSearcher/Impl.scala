@@ -1,5 +1,6 @@
 package implementationSearcher
 
+import implementationSearcher.ImplLhs._
 import parsers.MainParser
 import shared._
 
@@ -46,7 +47,9 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: Option[I
       case (methodExpr, methodCostWeight) :: other => {
         val otherwiseSubbedImpls = this.copy(rhs = rhs.filterKeys(_ != methodExpr)).bindToAllOptions(searchResult)
 
-        val optionsAndConditions = searchResult.implsWhichMatchMethodExpr(methodExpr)
+        val optionsAndConditions =
+          searchResult.implsWhichMatchMethodExpr(methodExpr,
+            ParameterList(lhs.conditions, searchResult.declarations(lhs.name).parameters))
 
         DominanceFrontier.fromSet(for {
           unfreeImpl <- otherwiseSubbedImpls.items
@@ -64,10 +67,10 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: Option[I
 
   // f[x] if x.foo <- x
 
-  // and you want to bind it to f[y]
+  // and you want to bind it to f[y], in a context where the parameter list has y in it
 
   // you get back `if y.foo <- y`
-  def bindToContext(methodExpr: MethodExpr, unfreeImplSet: UnfreeImplSet): Set[UnnamedImpl] = {
+  def bindToContext(methodExpr: MethodExpr, unfreeImplSet: UnfreeImplSet, list: ParameterList): Set[UnnamedImpl] = {
 
     val parameters = unfreeImplSet.declarations(lhs.name).parameters
 
@@ -83,10 +86,12 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: Option[I
         case None =>
           Set(UnnamedImpl(ImplPredicateMap.empty, AffineBigOCombo[MethodExpr](ConstantTime, Map())))
         case Some(weightOfParam) =>
-          f.getConditionsAndCosts(lhs.conditions.get(parameters(idx)), unfreeImplSet, parameters.toSet)
-            .items.map((x: UnnamedImpl) => x.copy(cost = rhs * weightOfParam))
+          f.getConditionsAndCosts(lhs.conditions.get(parameters(idx)), unfreeImplSet, list)
+            .items.map((x: UnnamedImpl) => x.copy(cost = x.cost * weightOfParam))
       }
     })
+
+    println(s"conditionsAndRhses is $conditionsAndRhses")
 
     val combinationsOfImpls: Set[List[UnnamedImpl]] = Utils.cartesianProducts(conditionsAndRhses)
 
