@@ -57,7 +57,7 @@ class ImplSpec extends FunSpec {
         impl.bindToContext(MethodExpr.parse("f[_]"), basicUnfreeImplSet, ParameterList.empty).headOption
 
       assert(conditions.isEmpty)
-      assert(rhs == Impl.rhs("n"))
+      assert(rhs == Impl.rhs("1"))
     }
 
     it("correctly deals with applicable anonymous functions") {
@@ -66,7 +66,7 @@ class ImplSpec extends FunSpec {
         impl.bindToContext(MethodExpr.parse("f[_{foo}]"), basicUnfreeImplSet, ParameterList.empty).headOption
 
       assert(conditions.isEmpty)
-      assert(rhs == Impl.rhs("n"))
+      assert(rhs == Impl.rhs("1"))
     }
 
     it("returns sums") {
@@ -106,11 +106,11 @@ class ImplSpec extends FunSpec {
       val Some(UnnamedImpl(conditions, rhs)) = impl.bindToContext(
         MethodExpr.parse("y[_ <- k]"),
         basicUnfreeImplSet,
-        ParameterList.easy("y")
+        ParameterList.easy("k")
       ).headOption
 
       assert(conditions.isEmpty)
-      assert(rhs == Impl.rhs("n"))
+      assert(rhs == Impl.rhs("n * k"))
     }
   }
 }

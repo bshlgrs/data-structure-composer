@@ -24,14 +24,15 @@ object Chooser {
   def getAllTimes(impls: Set[Impl], freeVariables: Set[MethodName], declarations: Map[MethodName, ImplDeclaration]): UnfreeImplSet = {
     val queue = mutable.PriorityQueue[Impl]()(Ordering.by((x: (Impl)) => x).reverse)
 
-    queue ++= impls
-
     var unfreeImplSet = UnfreeImplSet(Map(), freeVariables, declarations)
+
+    queue ++= impls.filter(_.unboundCostTuples(unfreeImplSet).isEmpty)
 
     def queuePlusSelected: List[Impl] = queue.toList ++ unfreeImplSet.allImpls
 
     while (queue.nonEmpty) {
       val unfreeImpl: Impl = queue.dequeue()
+      println(s"just dequeued $unfreeImpl, queue is $queue")
 
       if (unfreeImplSet.isOtherImplUseful(unfreeImpl)) {
         unfreeImplSet = unfreeImplSet.addImpl(unfreeImpl)
@@ -50,7 +51,9 @@ object Chooser {
 
             neighborUnfreeImpls.items.foreach((u: UnnamedImpl) =>
               if (unfreeImplSet.isOtherImplUseful(u.withName(otherImpl.lhs.name))) {
-                queue += u.withName(otherImpl.lhs.name)
+                val impl = u.withName(otherImpl.lhs.name)
+                assert(impl.unboundCostTuples(unfreeImplSet).isEmpty)
+                queue += impl
               }
             )
           }

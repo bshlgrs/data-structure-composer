@@ -18,6 +18,8 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimes(impls, Set(), decls)
 
+      println(res)
+
       assert(res.getNamed("x") == Set(Impl("x <- n")))
       assert(res.getNamed("y") == Set(Impl("y <- n")))
       assert(res.getNamed("z") == Set(Impl("z <- n")))

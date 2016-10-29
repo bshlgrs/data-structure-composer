@@ -32,7 +32,7 @@ object MainParser {
   lazy val implConditions: P[ImplPredicateMap] = P(implCondition.rep(1, sep=",")).map((x) => ImplPredicateMap.fromListOfTuples(x.toList))
 
   lazy val impl: P[(Impl, ImplDeclaration)] = P(implLhs ~ "<-" ~ implRhs ~ Index).map({ case (lhs, decl, rhs, index) =>
-    Impl(lhs, rhs, Some(StringSource(s"from $index"))) -> decl })
+    Impl(lhs, rhs) -> decl })
 
   lazy val nakedImpl: P[(Impl, ImplDeclaration)] = P(impl ~ End)
 

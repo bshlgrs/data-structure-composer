@@ -17,15 +17,13 @@ getMinimum <- getLastBy[valueOrdering]
 deleteMinimumBy![f] <- getMinimumBy[f] + deleteNode!
 
   */
-case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: Option[ImplSource] = None) {
-  import Impl._
-
+case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
   override def toString: String = {
-    s"$lhs <- $rhs " + source.map("(from " + _ + ")").getOrElse("")
+    s"$lhs <- $rhs"
   }
 
   def addConditions(conditions: ImplPredicateMap): Impl = {
-    Impl(lhs.addConditions(conditions), rhs, source)
+    Impl(lhs.addConditions(conditions), rhs)
   }
 
   // Suppose you have an implementation, like
