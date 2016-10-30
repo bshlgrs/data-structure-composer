@@ -90,7 +90,6 @@ class DataStructureChooserSpec extends FunSpec {
       describe("doing a generic heap") {
         val res = Chooser.getAllTimesForDataStructure(impls, genericHeap, decls)
 
-        println(res.impls)
         it("succeeds at the read methods") {
           assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
           assert(res.getNamed("getSmallest") == Set(Impl("getSmallest <- 1")))

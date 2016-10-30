@@ -46,11 +46,9 @@ case class NamedFunctionExpr(name: MethodName) extends FunctionExpr {
 
   def getConditionsAndCosts(conditions: Set[FunctionProperty], unfreeImplSet: UnfreeImplSet, list: ParameterList): DominanceFrontier[UnnamedImpl] = {
     val that = this
-    println(s"name is $name, list is $list")
     // This name might be locally bound or globally bound.
     // If it's locally bound:
     if (list.contains(name)) {
-      println("locally bound")
       DominanceFrontier.fromSet(Set(
         UnnamedImpl(
           ImplPredicateMap(Map(name -> conditions)),
@@ -58,7 +56,6 @@ case class NamedFunctionExpr(name: MethodName) extends FunctionExpr {
       ))
     } else {
       val that = this
-      println("globally bound")
       // Otherwise it's globally bound, so look for an implementation which has already been sorted.
 
       // Currently I am not allowing higher-order methods here. So there can only be one implementation.
@@ -67,13 +64,11 @@ case class NamedFunctionExpr(name: MethodName) extends FunctionExpr {
           val oneImplementation: UnnamedImpl = x.head
 
           if (oneImplementation.predicates.isEmpty) {
-            println("found")
             DominanceFrontier.fromSet(Set(oneImplementation))
           } else {
             ???
           }
         case x: Set[UnnamedImpl] if x.isEmpty => {
-          println("not found")
           DominanceFrontier.empty[UnnamedImpl]
         }
 

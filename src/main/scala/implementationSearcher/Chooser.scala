@@ -32,7 +32,6 @@ object Chooser {
 
     while (queue.nonEmpty) {
       val unfreeImpl: Impl = queue.minBy(_.rhs.minCost)
-      println(unfreeImpl, queue)
       queue.remove(unfreeImpl)
 
       if (unfreeImplSet.isOtherImplUseful(unfreeImpl)) {
