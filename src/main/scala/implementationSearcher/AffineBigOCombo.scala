@@ -68,7 +68,8 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
   }
 
   def substituteAllVariables(map: Map[A, BigOLiteral]): BigOLiteral = {
-    weights.keys.map((key) => map(key)).foldLeft(bias)(_ + _)
+    // defaulting to constant time is actually not very legit here
+    weights.keys.map((key) => map.getOrElse(key, ConstantTime)).foldLeft(bias)(_ + _)
   }
 
   def asConstant: Option[BigOLiteral] = {

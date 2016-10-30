@@ -10,7 +10,6 @@ import scala.PartialOrdering
 
 case class DataStructureChoice(choices: Set[String], results: Map[MethodExpr, AffineBigOCombo[MethodName]]) {
   def overallTimeForAdt(abstractDataType: AbstractDataType): BigOLiteral = {
-    assert(results.values.forall(_.weights.isEmpty))
     assert(results.keys.forall(_.args.isEmpty))
 
     abstractDataType.methods.keys.map((methodName) =>
