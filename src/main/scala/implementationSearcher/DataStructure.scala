@@ -2,36 +2,30 @@ package implementationSearcher
 
 import parsers.MainParser
 
-case class DataStructure(lhs: ImplLhs, impls: Set[UnfreeImpl]) {
-  def name: String = lhs.name.name
+case class DataStructure(parameters: List[MethodName], conditions: ImplPredicateMap, impls: Set[Impl]) {
+  def isSimple: Boolean = parameters.isEmpty
 
-  def isSimple: Boolean = lhs.parameters.isEmpty
+//  def searchResult: UnfreeImplSet = UnfreeImplSet.fromSetOfUnfreeImpls(impls)
 
-  def sourcedImpls: Set[UnfreeImpl] = {
-    impls.map((x) => UnfreeImpl(x.lhs, x.rhs, Some(DataStructureSource(shell))))
-  }
-
-  def searchResult: SearchResult = SearchResult.fromSetOfUnfreeImpls(impls)
-
-  def readMethods: Set[UnfreeImpl] = {
+  def readMethods: Set[Impl] = {
     impls.filterNot(_.lhs.name.isMutating)
   }
 
-  def writeMethods: Set[UnfreeImpl] = {
+  def writeMethods: Set[Impl] = {
     impls.filter(_.lhs.name.isMutating)
   }
 
-  def shell = DataStructureShell(name, lhs.parameters.toSet)
+  def namedParameters(sourceName: String): Set[BoundMethodName] = {
+    parameters.map((x) => BoundMethodName(x.name, sourceName)).toSet
+  }
 }
 
-case class DataStructureShell(name: String, parameters: Set[String]) {
-
-}
 
 object DataStructure {
   // todo: consider what happens when the data structures aren't simple
-  def combineReadMethods(dataStructures: Set[DataStructure]): SearchResult = {
-    SearchResult.fromSetOfUnfreeImpls(dataStructures.flatMap(_.sourcedImpls))
+  def combineReadMethods(dataStructures: Set[DataStructure]): UnfreeImplSet = {
+//    UnfreeImplSet.fromSetOfUnfreeImpls(dataStructures.flatMap(_.sourcedImpls))
+    ???
   }
 
   def apply(string: String): DataStructure = MainParser.nakedDataStructure.parse(string).get.value

@@ -17,33 +17,36 @@ object MainParser {
 
   lazy val name: P[String] = P(!bigOLiteral ~ (CharIn('a'to'z','A'to'Z').rep(1) ~ "!".?).!)
 
-  lazy val implLhs: P[ImplLhs] = P(name ~ ("[" ~ name.rep(1, sep=",") ~ "]").? ~ ("if " ~ implConditions).?).map({
+  lazy val implLhs: P[(ImplLhs, ImplDeclaration)] = P(methodName ~ ("[" ~ methodName.rep(1, sep=",") ~ "]").? ~ ("if " ~ implConditions).?).map({
     case (funcName, mbParameters, mbConditions) => {
-      val parameters = mbParameters.map(_.toList).getOrElse(Nil)
-      ImplLhs(funcName, parameters, mbConditions.map(_.toList(parameters)))
+      val parameters = mbParameters.getOrElse(Nil).toList
+      ImplLhs(funcName, mbConditions.getOrElse(ImplPredicateMap.empty)) -> ImplDeclaration(parameters)
     }
   })
 
-  lazy val nakedImplLhs: P[ImplLhs] = P(implLhs ~ End)
+  lazy val methodName: P[MethodName] = P(name.map((x: String) => MethodName(x)))
+
+  lazy val nakedImplLhs: P[(ImplLhs, ImplDeclaration)] = P(implLhs ~ End)
 
   lazy val implCondition: P[(String, String)] = P(name ~ "." ~ name)
   lazy val implConditions: P[ImplPredicateMap] = P(implCondition.rep(1, sep=",")).map((x) => ImplPredicateMap.fromListOfTuples(x.toList))
 
-  lazy val impl: P[Impl] = P(implLhs ~ "<-" ~ implRhs ~ Index).map({ case (lhs, rhs, index) => Impl(lhs, rhs, Some(StringSource(s"from $index"))) })
+  lazy val impl: P[(Impl, ImplDeclaration)] = P(implLhs ~ "<-" ~ implRhs ~ Index).map({ case (lhs, decl, rhs, index) =>
+    Impl(lhs, rhs) -> decl })
 
-  lazy val nakedImpl: P[Impl] = P(impl ~ End)
+  lazy val nakedImpl: P[(Impl, ImplDeclaration)] = P(impl ~ End)
 
-  lazy val unfreeImpl: P[UnfreeImpl] = P(implLhs ~ "<-" ~ affineBigONameCombo).map({ case (lhs, rhs) => UnfreeImpl(lhs, rhs) })
-  lazy val unfreeImplTuple: P[(ImplLhs, AffineBigOCombo[MethodName])] = P(implLhs ~ "<-" ~ affineBigONameCombo)
+//  lazy val unfreeImpl: P[UnfreeImpl] = P(implLhs ~ "<-" ~ affineBigONameCombo).map({ case (lhs, rhs) => UnfreeImpl(lhs, rhs) })
+//  lazy val unfreeImplTuple: P[(ImplLhs, AffineBigOCombo[MethodName])] = P(implLhs ~ "<-" ~ affineBigONameCombo)
 
-  lazy val nakedUnfreeImpl: P[UnfreeImpl] = P(unfreeImpl ~ End)
+//  lazy val nakedUnfreeImpl: P[UnfreeImpl] = P(unfreeImpl ~ End)
 
   lazy val namedFunctionExpr: P[NamedFunctionExpr] = {
-    P(name.map(NamedFunctionExpr))
+    P(name.map((x) => NamedFunctionExpr(MethodName(x))))
   }
 
   lazy val anonymousFunctionExpr: P[AnonymousFunctionExpr] = {
-    P("_" ~ ("{" ~/ name.!.rep(1, sep=",") ~ "}").? ~ ("<-" ~ affineBigONameCombo).?).map({case ((mbConditions, mbAbonc)) =>
+    P("_" ~ ("{" ~/ name.!.rep(sep=",") ~ "}").? ~ ("<-" ~ affineBigONameCombo).?).map({case ((mbConditions, mbAbonc)) =>
       AnonymousFunctionExpr(mbConditions.map(_.toSet).getOrElse(Set()), mbAbonc.getOrElse(AffineBigOCombo(ConstantTime, Map())))
     })
   }
@@ -91,16 +94,14 @@ object MainParser {
 
   lazy val justMethodExpr: P[MethodExpr] = methodExpr ~ End
 
-  lazy val impls: P[Set[Impl]] = P("\n".rep() ~ implLine.rep(1, sep="\n".rep) ~ "\n".rep() ~ End).map(_.toSet.flatten)
+  lazy val impls: P[Set[(Impl, ImplDeclaration)]] = P("\n".rep() ~ implLine.rep(1, sep="\n".rep) ~ "\n".rep() ~ End).map(_.toSet.flatten)
 
-  lazy val implLine: P[Option[Impl]] = P(impl.map(Some(_)) | ("//" ~ CharsWhile(_ != '\n')).map((_) => None))
+  lazy val implLine: P[Option[(Impl, ImplDeclaration)]] = P(impl.map(Some(_)) | ("//" ~ CharsWhile(_ != '\n')).map((_) => None))
 
   lazy val dataStructure: P[DataStructure] = {
-    ("ds" ~/ implLhs ~/ "{" ~/ "\n".? ~ (" ".rep() ~ unfreeImplTuple).rep(sep=lineSep) ~ lineSep ~ "}").map({ case (l: ImplLhs, impls: Seq[(ImplLhs, AffineBigOCombo[MethodName])]) =>
-      val shell = DataStructureShell(l.name.name, l.parameters.toSet)
-      DataStructure(l, impls.toSet.map((x: (ImplLhs, AffineBigOCombo[MethodName])) =>
-        UnfreeImpl(x._1, x._2, Some(DataStructureSource(shell)))
-      ))
+    ("ds" ~/ implLhs ~/ "{" ~/ "\n".? ~ (" ".rep() ~ impl).rep(sep=lineSep) ~ lineSep ~ "}").map({
+      case (l: ImplLhs, d: ImplDeclaration, impls: Seq[(Impl, ImplDeclaration)]) =>
+        DataStructure(d.parameters, l.conditions, impls.toSet.map((x: (Impl, ImplDeclaration)) => x._1))
     })
   }
 

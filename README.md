@@ -62,14 +62,14 @@ getByIndex <- getFirst + n * getNext
 
 An array would use the first two lines to define getFirst and getNext in terms of getByIndex, and a linked list would use the third line to define getByIndex in terms of getFirst and getNext.
 
-This kind of fine-grained description of how different data structures work allows you to automatically make complex deductions about the speed of various operations. It's much more complicated and non-homogenous than the traditional way of describing different data structures. This makes it much more general and powerful. 
+This kind of fine-grained description of how different data structures work allows you to automatically make complex deductions about the speed of various operations. It's much more complicated and non-homogenous than the traditional way of describing different data structures. This makes it much more general and powerful.
 
 Take a look at the [Big O Cheatsheet](http://bigocheatsheet.com/) quickly. It conflates all kinds of totally different things. For example, it gives you a single time column for "insertion", by which I assume it means insertion at an arbitrary index. If you break down insertion into finding the relevant node and then putting something after it, then you notice that the time complexities are quite different. Insertion of an arbitrary element into an array takes O(n) time, and that's because it's slow to insert something next to a node, not because it's slow to find the node. Insertion into a linked list takes O(n), but that's because finding the node was slow initially. This is all well known and obvious.
 
 Here's a less-known case. AVL trees and red-black trees. Normally, insertion time is said to be O(log n) on average for both of them. This is true, but only because both of them require O(log n) time to find any particular node. It turns out that once you've found where you want to insert a node, red-black trees support amortized O(1) insertion (because their rebalancing is amortized O(1)), while AVL trees only support O(log n) ([see page 165 here](http://people.mpi-inf.mpg.de/~mehlhorn/ftp/Toolbox/SortedSequences.pdf)).
 
 This matters, for example, when you're considering implementing an ordered collection with a red-black tree vs AVL tree. Inserting a sequence of length k into the middle of the list only takes O(log n + k) in a red-black tree, but O(k log n) in an AVL tree.
- 
+
 So I define a bunch of different data structures in terms of these different methods, and after defining a few basic operations, my software can infer how long all the other operations will take.
 
 ### Composed data structures
@@ -129,9 +129,9 @@ There might be some trickiness in making it easy for users to find all those met
 
 ## Todo list:
 
-immediate: 
+immediate:
 
-- [ ] Handle parameterized data structures 
+- [ ] Handle parameterized data structures
 
 then:
 
@@ -149,8 +149,8 @@ Interface things:
 - [ ] Make a command line tool
 
 ### Things to include
- 
-- min stack memoizer 
+
+- min stack memoizer
 
 ## Other crazy notes
 
@@ -158,4 +158,23 @@ Interface things:
 - My code assumes everything is an ordered list. Is there an elegant way of handling multiple different types (and conversions between them)?
 - Do I have to do anything fancy to get things like `union` or `intersection` to work?
 - The frontend might let you select between methods in multiple languages.
+
+
+
+
+
+
+----------
+
+## Current tasks
+
+I need to turn UnfreeImpl into Impl. This is going to involve rewriting my tests, but they should all be true with the rewrite.
+
+Example todo items:
+
+- bindToContext in Impl
+
+## more things
+
+https://dzone.com/articles/introduction-probabilistic-0
 

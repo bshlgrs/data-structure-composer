@@ -1,7 +1,9 @@
 package implementationSearcher
 
+import implementationSearcher.ImplLhs._
 import parsers.MainParser
-import shared.BigOLiteral
+import shared._
+
 
 /**
   * Created by buck on 7/25/16.
@@ -15,68 +17,125 @@ getMinimum <- getLastBy[valueOrdering]
 deleteMinimumBy![f] <- getMinimumBy[f] + deleteNode!
 
   */
-case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: Option[ImplSource] = None) {
+case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
   override def toString: String = {
-    s"$lhs <- $rhs " + source.map("(from " + _ + ")").getOrElse("")
+    s"$lhs <- $rhs"
   }
 
-  def bindToAllOptions(searchResult: SearchResult): Set[UnfreeImpl] = {
-    val scope = Scope(lhs.implPredicateMap.map, searchResult)
-    unboundCosts.toList match {
-      case Nil => Set(this.toUnfreeImpl.get)
+  def addConditions(conditions: ImplPredicateMap): Impl = {
+    Impl(lhs.addConditions(conditions), rhs)
+  }
+
+  // Suppose you have an implementation, like
+
+  // f[x] <- g[x]
+
+  // and you have implementations
+
+  // g[y] <- y * n
+  // g[y] if y.foo <- y * log(n)
+
+  // This method returns
+
+  // f[x] <- x * n
+  // f[x] if x.foo <- x * log(n)
+  def bindToAllOptions(searchResult: UnfreeImplSet): DominanceFrontier[UnnamedImpl] =
+    unboundCostTuples(searchResult) match {
+      case Nil => DominanceFrontier.fromSet(Set(this.copy(rhs = this.boundCost(searchResult))))
       case (methodExpr, methodCostWeight) :: other => {
-        val otherwiseSubbedImpls = this.copy(rhs = AffineBigOCombo(this.rhs.bias, other.toMap ++ boundCosts)).bindToAllOptions(searchResult)
+        val otherwiseSubbedImpls = this.copy(rhs = rhs.filterKeys(_ != methodExpr)).bindToAllOptions(searchResult)
 
-        val optionsAndConditions = searchResult.implsWhichMatchMethodExpr(methodExpr, scope)
+        val optionsAndConditions =
+          searchResult.implsWhichMatchMethodExpr(methodExpr,
+            ParameterList(lhs.conditions, searchResult.declarations(lhs.name).parameters))
 
-        val options: Set[UnfreeImpl] = searchResult.get(methodExpr.name)
-
-        for {
-          unfreeImpl <- otherwiseSubbedImpls
-          (option, conditions, optionRhs) <- optionsAndConditions
+        DominanceFrontier.fromSet(for {
+          unfreeImpl <- otherwiseSubbedImpls.items
+          optionImpl <- optionsAndConditions
         } yield {
-          UnfreeImpl(
-            lhs.addConditions(conditions),
-            unfreeImpl.rhs + optionRhs * methodCostWeight,
-            source)
-        }
+          UnnamedImpl(
+            lhs.conditions.and(optionImpl.predicates),
+            unfreeImpl.cost + optionImpl.cost * methodCostWeight)
+        })
       }
     }
 
+
+  // Suppose you have the impl
+
+  // f[x] if x.foo <- x
+
+  // and you want to bind it to f[y], in a context where the parameter list has y in it
+
+  // you get back `if y.foo <- y`
+  def bindToContext(methodExpr: MethodExpr, unfreeImplSet: UnfreeImplSet, list: ParameterList): Set[UnnamedImpl] = {
+
+    val parameters = unfreeImplSet.declarations(lhs.name).parameters
+
+    assert(methodExpr.args.length == parameters.length,
+      s"Assertion failed: bindToContext called on $this with methodExpr $methodExpr.\n" +
+        s"These have a different number of args: $parameters vs ${methodExpr.args}.")
+
+
+    val conditionsAndRhses: List[Set[UnnamedImpl]] = methodExpr.args.zipWithIndex.map({case (f: FunctionExpr, idx) =>
+      val that = this
+      val relevantParamName = parameters(idx)
+      rhs.weights.get(MethodExpr(relevantParamName, Nil)) match {
+        case None =>
+          Set(UnnamedImpl(ImplPredicateMap.empty, AffineBigOCombo[MethodExpr](ConstantTime, Map())))
+        case Some(weightOfParam) =>
+          f.getConditionsAndCosts(lhs.conditions.get(parameters(idx)), unfreeImplSet, list)
+            .items.map((x: UnnamedImpl) => x.copy(cost = x.cost * weightOfParam))
+      }
+    })
+
+    val combinationsOfImpls: Set[List[UnnamedImpl]] = Utils.cartesianProducts(conditionsAndRhses)
+
+    for {
+      conditionsAndRhses <- combinationsOfImpls
+    } yield {
+      val (conditionsList, rhsList) = conditionsAndRhses.map((x) => x.predicates -> x.cost).unzip
+      val finalConditionsMap = conditionsList.reduceOption(_.and(_)).getOrElse(ImplPredicateMap.empty)
+      val finalRhs = rhsList.reduceOption(_ + _).getOrElse(rhs) + rhs.bias
+      UnnamedImpl(finalConditionsMap, finalRhs)
+    }
   }
 
-  def getNames: Set[String] = {
-    rhs.weights.keys.flatMap(_.getNames).toSet -- lhs.parameters.toSet
+  def unboundCostTuples(unfreeImplSet: UnfreeImplSet): List[(MethodExpr, BigOLiteral)] = {
+    rhs.filterKeys(!this.isMethodExprBound(unfreeImplSet, _)).weights.toList
   }
 
-  def unboundCosts: Map[MethodExpr, BigOLiteral] = {
-    rhs.weights.filterKeys((x) => !lhs.parameters.contains(x.name.name))
+  def boundCost(unfreeImplSet: UnfreeImplSet): AffineBigOCombo[MethodExpr] = {
+    rhs.filterKeys(this.isMethodExprBound(unfreeImplSet, _))
   }
 
-  def boundCosts: Map[MethodExpr, BigOLiteral] = {
-    rhs.weights.filterKeys((x) => lhs.parameters.contains(x.name.name))
+  private def isMethodExprBound(unfreeImplSet: UnfreeImplSet, methodExpr: MethodExpr): Boolean = {
+    (unfreeImplSet.boundVariables ++ unfreeImplSet.declarations(this.lhs.name).parameters).contains(methodExpr.name)
   }
 
-  def toUnfreeImpl: Option[UnfreeImpl] = {
-    if (unboundCosts.isEmpty)
-      Some(UnfreeImpl(lhs, rhs.copy(weights = rhs.weights.map({ case ((m: MethodExpr, c: BigOLiteral)) => m.name -> c})), source))
-    else
-      None
-  }
+  def getNames: Set[MethodName] = rhs.weights.keys.flatMap(_.getNames).toSet
 
-  def addConditions(conditions: ImplPredicateList): Impl = {
-    Impl(lhs.addConditions(conditions), rhs, source)
-  }
+  def unnamed = UnnamedImpl(lhs.conditions, rhs)
 }
 
 object Impl {
   def apply(string: String): Impl = {
-    MainParser.impl.parse(string).get.value
+    MainParser.impl.parse(string).get.value._1
   }
 
   type Rhs = AffineBigOCombo[MethodExpr]
 
   def rhs(string: String): Rhs = {
     MainParser.implRhs.parse(string).get.value
+  }
+
+  implicit object ImplPartialOrdering extends PartialOrdering[Impl] {
+    def partialCompare(x: Impl, y: Impl): DominanceRelationship = {
+      if (x.lhs.name != y.lhs.name) {
+        NeitherDominates
+      } else {
+        UnnamedImpl.UnnamedImplPartialOrdering.partialCompare(x.unnamed, y.unnamed)
+      }
+    }
   }
 }

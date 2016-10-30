@@ -21,16 +21,16 @@ object DataStructureChooserCli {
       .mkString("\n")
   }
 
-  lazy val dataStructuresLibrary: Map[String, DataStructure] = {
-    MainParser.dataStructureFile.parse(dataStructuresText).get.value.map((x) => x.name -> x).toMap
-  }
+//  lazy val dataStructuresLibrary: Map[String, DataStructure] = {
+//    MainParser.dataStructureFile.parse(dataStructuresText).get.value.map((x) => x.name -> x).toMap
+//  }
 
-  def main(args: Array[String]) {
-    val adt = MainParser.nakedAdt.parse("adt List { getFirst -> 1; }").get.value
-
-    println(Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
-      autoImplLibrary,
-      dataStructuresLibrary.values.toSet,
-      adt))
-  }
+//  def main(args: Array[String]) {
+//    val adt = MainParser.nakedAdt.parse("adt List { getFirst -> 1; }").get.value
+//
+//    println(Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
+//      autoImplLibrary,
+//      dataStructuresLibrary.values.toSet,
+//      adt))
+//  }
 }

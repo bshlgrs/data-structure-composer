@@ -65,10 +65,10 @@ class DominanceSpec extends FunSpec with Checkers {
     }
   }
 
-  describe("Unfree impls") {
-    val partialCompare = UnfreeImpl.UnfreeImplPartialOrdering.partialCompare _
+  describe("Impls") {
+    val partialCompare = Impl.ImplPartialOrdering.partialCompare _
     it("does simple things") {
-      assert(partialCompare(UnfreeImpl("foo <- n"), UnfreeImpl("foo <- log(n)"))
+      assert(partialCompare(Impl("foo <- n"), Impl("foo <- log(n)"))
         == RightStrictlyDominates)
     }
   }

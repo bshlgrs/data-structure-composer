@@ -10,3 +10,12 @@ case class MethodName(name: String) {
 
   override def toString: String = name
 }
+
+class BoundMethodName(methodName: String, source: String) extends MethodName(s"$source.$methodName")
+object BoundMethodName {
+  def apply(methodName: String, source: String) = new BoundMethodName(methodName, source)
+}
+
+object MethodName {
+  implicit def fromString(s: String): MethodName = MethodName(s)
+}

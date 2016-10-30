@@ -10,6 +10,6 @@ abstract class ImplSource {
 case class StringSource(str: String) extends ImplSource {
   def parameters = Set()
 }
-case class DataStructureSource(structure: DataStructureShell) extends ImplSource {
-  def parameters = structure.parameters
-}
+//case class DataStructureSource(structure: DataStructureShell) extends ImplSource {
+//  def parameters = structure.parameters
+//}
