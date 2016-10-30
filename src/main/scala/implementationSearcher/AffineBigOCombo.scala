@@ -80,7 +80,7 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
   }
 
   // todo: this might be stupid
-  def minCost: BigOLiteral = (bias +: (if (weights.values.isEmpty) Nil else List(weights.values.min))).max
+  def minCost: BigOLiteral = (bias +: (if (weights.values.isEmpty) Nil else List(weights.values.max))).max
 }
 
 object AffineBigOCombo {

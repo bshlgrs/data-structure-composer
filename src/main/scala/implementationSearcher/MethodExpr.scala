@@ -15,6 +15,11 @@ case class MethodExpr(name: MethodName, args: List[FunctionExpr]) {
 
   def getNames: Set[MethodName] = Set(name) ++ args.flatMap(_.getNames)
 
+  def getAsNakedName: MethodName = {
+    assert(args.isEmpty)
+    name
+  }
+
   def alphaConvert(map: Map[MethodName, MethodName]) = {
     MethodExpr(map.getOrElse(name, name), args.map(_.alphaConvert(map)))
   }

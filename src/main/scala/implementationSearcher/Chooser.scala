@@ -84,36 +84,38 @@ object Chooser {
   }
 
   //
-//  def allParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
-//                                                structures: Set[DataStructure],
-//                                                adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
-//    val results = structures.subsets().map((x) => x -> getRelevantTimesForDataStructures(impls, x)).toSet
-//
-//    val choicesSet: Set[DataStructureChoice] = results.flatMap({ case (set: Set[DataStructure], sr: UnfreeImplSet) => {
-//      val methods = adt.methods.keys.map((methodExpr: MethodExpr) => {
-//        // TODO: let this be a proper dominance frontier
-//        methodExpr -> sr.implsWhichMatchMethodExpr(methodExpr, Scope(Map(), sr)).headOption.map(_._3)
-//      }).toMap
-//
-//      if (methods.forall(_._2.isDefined))
-//        Set[DataStructureChoice](DataStructureChoice(set.map(_.name), methods.mapValues(_.get)))
-//      else
-//        Set[DataStructureChoice]()
-//    }})
-//
-//    // A dominance frontier on choices, ranked by simplicity and also on the methods which the ADT cares about.
-//    DominanceFrontier.fromSet(choicesSet)
-//  }
-//
-//  // this is the ultimate method
-//  def allMinTotalCostParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
-//                                                            structures: Set[DataStructure],
-//                                                            adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
-//    val frontier = allParetoOptimalDataStructureCombosForAdt(impls, structures, adt)
-//
-//    val bestTime = frontier.items.map(_.overallTimeForAdt(adt)).min
-//
-//    frontier.filter(_.overallTimeForAdt(adt) == bestTime)
-//  }
+  def allParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
+                                                structures: Set[(String, DataStructure)],
+                                                decls: Map[MethodName, ImplDeclaration],
+                                                adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
+    val results = structures.subsets().map((subset) => subset -> getRelevantTimesForDataStructures(impls, subset.map(_._2), decls)).toSet
+
+    val choicesSet: Set[DataStructureChoice] = results.flatMap({ case (set: Set[(String, DataStructure)], sr: UnfreeImplSet) => {
+      val methods = adt.methods.keys.map((methodExpr: MethodExpr) => {
+        // TODO: let this be a proper dominance frontier
+        methodExpr -> sr.implsWhichMatchMethodExpr(methodExpr, ParameterList.empty).headOption.map(_.withName(methodExpr.name))
+      }).toMap
+
+      if (methods.forall(_._2.isDefined))
+        Set[DataStructureChoice](DataStructureChoice(set.map(_._1), methods.mapValues(_.get.rhs.mapKeys(_.getAsNakedName))))
+      else
+        Set[DataStructureChoice]()
+    }})
+
+    // A dominance frontier on choices, ranked by simplicity and also on the methods which the ADT cares about.
+    DominanceFrontier.fromSet(choicesSet)
+  }
+
+  // this is the ultimate method
+  def allMinTotalCostParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
+                                                            structures: Set[(String, DataStructure)],
+                                                            decls: Map[MethodName, ImplDeclaration],
+                                                            adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
+    val frontier = allParetoOptimalDataStructureCombosForAdt(impls, structures, decls, adt)
+
+    val bestTime = frontier.items.map(_.overallTimeForAdt(adt)).min
+
+    frontier.filter(_.overallTimeForAdt(adt) == bestTime)
+  }
 }
 
