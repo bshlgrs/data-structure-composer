@@ -26,13 +26,32 @@ object DataStructureChooserCli {
   }
 
   def main(args: Array[String]) {
-    val adt = MainParser.nakedAdt.parse("adt List { getByIndex -> 1; insertAtIndex! -> 1; }").get.value
+    val adt = MainParser.nakedAdt.parse("adt List { getMinimum -> 1; insertAtIndex! -> 1; }").get.value
 
-    println("hello")
-    println(Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
-      impls,
-      dataStructuresLibrary,
-      decls,
-      adt))
+    val res = time {
+      Chooser.allParetoOptimalDataStructureCombosForAdt(
+        impls,
+        dataStructuresLibrary,
+        decls,
+        adt)
+    }
+
+    println("Optimal results:")
+    println(res.items.map((choice) => {
+      choice.choices.mkString(",") ++ "\n" ++
+        choice.results.toList.sortBy(_._1.name.name).map((tuple) => {
+          "\t" ++ tuple._1.toString ++ " <- " ++ tuple._2.toString
+        }).mkString("\n")
+    }).mkString("\n"))
   }
+
+  def time[R](block: => R): R = {
+    val t0 = System.nanoTime()
+    val result = block    // call-by-name
+    val t1 = System.nanoTime()
+    println("Elapsed time: " + (t1 - t0) / 1000000 + "ms")
+    result
+  }
+
 }
+

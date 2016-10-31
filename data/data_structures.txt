@@ -35,7 +35,7 @@ ds Heap {
     getMinimum <- 1
     deleteNode! <- log(n)
     updateNode! <- log(n)
-    insertAtIndex! <- 1
+    insertAtIndex! <- log(n)
 }
 
 ds OrderedRedBlackTree[f, g] {

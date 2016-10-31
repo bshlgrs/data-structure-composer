@@ -119,6 +119,12 @@ object Chooser {
                                                             structures: Map[String, DataStructure],
                                                             decls: Map[MethodName, ImplDeclaration],
                                                             adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
+    adt.methods.keys.foreach((x) => {
+      assert(decls.contains(x.name),
+        s"Your ADT referred to ${x.name}, which doesn't exist")
+    })
+
+
     val frontier = allParetoOptimalDataStructureCombosForAdt(impls, structures, decls, adt)
 
     val bestTime = frontier.items.map(_.overallTimeForAdt(adt)).min
