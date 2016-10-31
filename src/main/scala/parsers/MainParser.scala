@@ -138,8 +138,8 @@ object MainParser {
   }
 
   def parseImplFileString(stuff: String): Try[(Set[Impl], Map[MethodName, ImplDeclaration])] = {
-    def blankImpl(name: MethodName): Impl = {
-      Impl(ImplLhs(name, ImplPredicateMap.empty), AffineBigOCombo({ ??? }, { ??? }))
+    def blankImplLhs(name: MethodName): ImplLhs = {
+      ImplLhs(name, ImplPredicateMap.empty)
     }
 
     for {
@@ -147,14 +147,31 @@ object MainParser {
       fileImpls <- Success(tuples.map(_._1))
 
       // these are the methods which are never defined, but which are used in other definitions
-      implicitDeclarationTuples <-
-        Success(fileImpls.flatMap(_.rhs.keys.flatMap((x) =>
-          if (x.args.isEmpty) Option(blankImpl(x.name) -> ImplDeclaration.empty) else Nil))
-        )
+      implicitDeclarationLhses <-
+        Try(fileImpls.flatMap(_.rhs.keys.flatMap((x) =>
+          // If the method is used, but was never defined, add it to the list of ImplDeclarations
+          // with some dummy information
+          tuples.find(_._1.lhs.name == x.name) match {
+            case Some(tuple) => {
+              assert(x.args.length == tuple._2.parameters.length,
+              s"You used the method expression $x, which has a different number of arguments from the" +
+                s" definition ${tuple._1}")
+
+              None
+            }
+            case None => {
+              Some(blankImplLhs(x.name) -> ImplDeclaration(x.args.zipWithIndex.map({ case (f, int) =>
+                MethodName(s"arg$int")
+              })))
+            }
+          }
+        )))
       fileDecls <- Try {
-        (tuples ++ implicitDeclarationTuples).groupBy(_._1.lhs.name).map({ case (m: MethodName, s: Set[(Impl, ImplDeclaration)]) => {
-          assert(s.forall(_._2 == s.head._2))
-          m -> s.head._2
+        (tuples.map((x) => x._1.lhs -> x._2) ++ implicitDeclarationLhses).groupBy(_._1.name).map({
+          case (m: MethodName, s: Set[(ImplLhs, ImplDeclaration)]) => {
+            assert(s.forall(_._2 == s.head._2), s"There were inconsistent definitions for $m: " +
+              s"$s")
+            m -> s.head._2
         }})
       }
     } yield (fileImpls, fileDecls)
@@ -167,6 +184,9 @@ object MainParser {
       dataStructureSyntax <- Try(dataStructureFile.parse(stuff).get.value)
       res <- Try(dataStructureSyntax.groupBy(_._1).map({ case (name, setOfTuples) => {
         assert(setOfTuples.size == 1, s"there were ${setOfTuples.size} data structures named $name")
+
+        val dataStructure = setOfTuples.head._2
+        // assert that all of the implementations in the data structure don't refer to anything which hasn't been defined
         setOfTuples.head
       }}))
     } yield res

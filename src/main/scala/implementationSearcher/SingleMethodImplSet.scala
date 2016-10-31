@@ -18,7 +18,7 @@ case class SingleMethodImplSet(options: DominanceFrontier[UnnamedImpl]) {
   }
 
   def isOtherImplUseful(impl: UnnamedImpl): Boolean = {
-    options.partialCompareToItem(impl).rightDominates
+    List(RightStrictlyDominates, NeitherDominates).contains(options.partialCompareToItem(impl))
   }
 
   // More impl conditions means that this function returns something better

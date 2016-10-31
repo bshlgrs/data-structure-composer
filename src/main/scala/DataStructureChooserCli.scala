@@ -26,10 +26,9 @@ object DataStructureChooserCli {
   }
 
   def main(args: Array[String]) {
-    val adt = MainParser.nakedAdt.parse("adt List { getFirst -> 1; }").get.value
+    val adt = MainParser.nakedAdt.parse("adt List { getByIndex -> 1; insertAtIndex! -> 1; }").get.value
 
-
-
+    println("hello")
     println(Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
       impls,
       dataStructuresLibrary,

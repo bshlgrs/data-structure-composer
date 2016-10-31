@@ -6,7 +6,9 @@ package implementationSearcher
 case class MethodName(name: String) {
   def isMutating = name.last == '!'
 
-  assert(name.toList.forall((x: Char) => x.isLetter || x == '!'))
+  assert(name.toList.forall((x: Char) => x.isLetter || x.isDigit || x == '!'),
+    s"In the name $name, not everything is a character or exclamation mark"
+  )
 
   override def toString: String = name
 }

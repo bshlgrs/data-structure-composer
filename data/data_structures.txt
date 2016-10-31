@@ -52,6 +52,6 @@ ds OrderedRedBlackTree[f, g] {
     getFirstNodeWithValue[f] <- log(n)
     deleteNode! <- 1 + g
     countBetweenBy[f] <- log(n)
-    twoSidedValueRangeQuery[g] <- g * log(n)
-    oneSidedValueRangeQuery[g] <- g * log(n)
+    twoSidedValueRangeQuery[g] <- log(n) * g
+    oneSidedValueRangeQuery[g] <- log(n) * g
 }

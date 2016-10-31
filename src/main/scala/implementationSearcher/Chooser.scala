@@ -26,16 +26,21 @@ object Chooser {
 
     var unfreeImplSet = UnfreeImplSet(Map(), freeVariables, declarations)
 
+
     queue ++= impls.filter(_.unboundCostTuples(unfreeImplSet).isEmpty)
 
     def queuePlusSelected: List[Impl] = queue.toList ++ unfreeImplSet.allImpls
 
     while (queue.nonEmpty) {
       val unfreeImpl: Impl = queue.minBy(_.rhs.minCost)
+
       queue.remove(unfreeImpl)
 
       if (unfreeImplSet.isOtherImplUseful(unfreeImpl)) {
         unfreeImplSet = unfreeImplSet.addImpl(unfreeImpl)
+
+
+
         for (otherImpl <- impls) {
           // So we have a random impl. Let's see if the unfreeImpl we just settled on is useful for that impl.
           // It's only useful if unfreeImpl's methodName is used by the rhs of the otherImpl (this condition is weaker than it could be)
@@ -46,7 +51,7 @@ object Chooser {
             val neighborUnfreeImpls = otherImpl.bindToAllOptions(unfreeImplSet)
 
             neighborUnfreeImpls.items.foreach((u: UnnamedImpl) =>
-              if (unfreeImplSet.isOtherImplUseful(u.withName(otherImpl.lhs.name))) {
+              if (unfreeImplSet.addImpls(queue.toSet).isOtherImplUseful(u.withName(otherImpl.lhs.name))) {
                 val impl = u.withName(otherImpl.lhs.name)
                 assert(impl.unboundCostTuples(unfreeImplSet).isEmpty)
                 queue += impl
@@ -70,9 +75,11 @@ object Chooser {
                                         structures: Set[DataStructure],
                                        decls: Map[MethodName, ImplDeclaration]): UnfreeImplSet = {
     val allProvidedReadImplementations: Set[Impl] = structures.flatMap(_.readMethods)
+
     val allFreeVariables = structures.flatMap(_.parameters)
 
     val bestReadImplementations: UnfreeImplSet = getAllTimes(allProvidedReadImplementations ++ impls, allFreeVariables, decls)
+
 
     val allWriteImplementations: Set[UnfreeImplSet] = structures.map((s) =>
       getAllTimes(s.writeMethods ++ bestReadImplementations.allImpls ++ impls, s.parameters.toSet, decls))
@@ -87,7 +94,9 @@ object Chooser {
                                                 structures: Map[String, DataStructure],
                                                 decls: Map[MethodName, ImplDeclaration],
                                                 adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
-    val results = structures.toSet.subsets().map((subset) => subset -> getRelevantTimesForDataStructures(impls, subset.map(_._2), decls)).toSet
+    val results = structures.toSet.subsets().map((subset) => {
+      subset -> getRelevantTimesForDataStructures(impls, subset.map(_._2), decls)
+    }).toSet
 
     val choicesSet: Set[DataStructureChoice] = results.flatMap({ case (set: Set[(String, DataStructure)], sr: UnfreeImplSet) => {
       val methods = adt.methods.keys.map((methodExpr: MethodExpr) => {
