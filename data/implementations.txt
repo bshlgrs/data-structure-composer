@@ -13,18 +13,18 @@ each[f] <- n * getByIndex + n * f
 each[f] <- getFirst + n * getNext + n * f
 
 // insertions
-insertAtEnd! <- getLast + insertAfterEndNode!
-insertAtEnd! <- insertAtIndex!
-insertAtFront! <- insertAtIndex!
-insertAtFront! <- getFirst + insertBeforeFrontNode!
+insertLast! <- getLast + insertAfterEndNode!
+insertLast! <- insertAtIndex!
+insertFirst! <- insertAtIndex!
+insertFirst! <- getFirst + insertBeforeFrontNode!
 insertAtIndex! <- getByIndex + insertAfterNode!
 insertAtIndex! <- getByIndex + insertBeforeNode!
 insertAfterNode! <- insertNextToNode!
 insertBeforeNode! <- insertNextToNode!
 extend! <- getLast + n * insertAfterEndNode!
 insertAnywhere! <- insertAtIndex!
-insertAnywhere! <- insertAtFront!
-insertAnywhere! <- insertAtEnd!
+insertAnywhere! <- insertFirst!
+insertAnywhere! <- insertLast!
 
 
 // deletions

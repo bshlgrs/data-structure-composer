@@ -13,7 +13,7 @@ import shared._
 class StandardLibraryChoosingSpec extends FunSpec {
   val minStackAdt = MainParser.nakedAdt.parse("""
     adt MinStack {
-      insertAtEnd! -> 1
+      insertLast! -> 1
       deleteLast! -> 1
       getByIndex -> 1
       getMinimum -> 1
@@ -33,7 +33,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
         )
 
         assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
-        assert(res.getNamed("insertAtEnd!") == Set(Impl("insertAtEnd! <- log(n)")))
+        assert(res.getNamed("insertLast!") == Set(Impl("insertLast! <- log(n)")))
       }
 
       it("can correctly evaluate the performance of a stack min memoizer and vector list") {
@@ -44,7 +44,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
         )
 
         assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
-        assert(res.getNamed("insertAtEnd!") == Set(Impl("insertAtEnd! <- 1")))
+        assert(res.getNamed("insertLast!") == Set(Impl("insertLast! <- 1")))
       }
     }
   }
@@ -53,7 +53,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
     it("can do a stack") {
       val adt = MainParser.nakedAdt.parse("""
         adt Stack {
-          insertAtEnd! -> 1
+          insertLast! -> 1
           deleteLast! -> 1
           getByIndex -> 1
           updateNode! -> 1
@@ -72,6 +72,33 @@ class StandardLibraryChoosingSpec extends FunSpec {
       assert(res.items.head.choices == Set("StackMinMemoizer","VectorList"))
     }
 
+    it("can do a stack with contains") {
+      val res = DataStructureChooserCli.chooseDataStructures(MainParser.nakedAdt.parse("""
+        adt Stack {
+          insertLast! -> 1
+          deleteLast! -> 1
+          getByIndex -> 1
+          updateNode! -> 1
+          contains -> 1
+        }""".trim()).get.value)
+
+      DataStructureChooserCli.printResults(res)
+
+      assert(res.items.head.choices == Set("HistogramHashMap","VectorList"))
+    }
+
+    it("can do a set which you never delete from") {
+      val res = DataStructureChooserCli.chooseDataStructures(MainParser.nakedAdt.parse("""
+        adt NeverDeletedSet {
+          insertLast! -> 1
+          contains -> 1
+        }""".trim()).get.value)
+
+      DataStructureChooserCli.printResults(res)
+
+      assert(res.items.head.choices == Set("HistogramHashMap"))
+    }
+
     it("knows how to use parameterized data structures") {
       val adt = MainParser.nakedAdt.parse("""
         adt RmqList {
@@ -81,6 +108,8 @@ class StandardLibraryChoosingSpec extends FunSpec {
         }""".trim()).get.value
 
       val res = DataStructureChooserCli.chooseDataStructures(adt)
+
+      DataStructureChooserCli.printResults(res)
 
       assert(res.items.head.choices == Set("AugmentedRedBlackOrderStatisticTreeList"))
     }

@@ -11,7 +11,7 @@ ds Array {
 ds VectorList {
     getByIndex <- 1
     updateNode! <- 1
-    insertAtEnd! <- 1
+    insertLast! <- 1
     deleteAtIndex! <- n
     deleteBetweenNodes! <- n
     deleteLast! <- 1
@@ -22,16 +22,16 @@ ds AugmentedRedBlackOrderStatisticTreeList[g] {
     updateNode! <- log(n) + log(n) * g
     getNext <- 1
     getPrev <- 1
-    insertAtEnd! <- 1 + log(n) * g
+    insertLast! <- 1 + log(n) * g
     insertAfterNode! <- 1 + log(n) * g
-    insertAtFront! <- 1  + log(n) * g
+    insertFirst! <- 1  + log(n) * g
     deleteNode! <- log(n) + log(n) * g
     deleteBetweenNodes! <- log(n) + log(n) * g
     twoSidedIndexRangeQuery[g] <- log(n) + log(n) * g
 }
 
 ds StackMinMemoizer[ordering] {
-    insertAtEnd! <- 1
+    insertLast! <- 1
     deleteLast! <- 1
     getFirstBy[ordering] <- 1
     getLastBy[ordering] <- 1
@@ -61,4 +61,17 @@ ds OrderedRedBlackTree[f, g] {
     countBetweenBy[f] <- log(n)
     twoSidedValueRangeQuery[g] <- log(n) * g
     oneSidedValueRangeQuery[g] <- log(n) * g
+}
+
+ds RangeMinQueryLinearithmicArrayThing[reduction] if reduction.idempotent {
+    twoSidedIndexRangeQuery[reduction] <- 1 + reduction
+    insertLast! <- log(n) + reduction
+    deleteLast! <- 1
+}
+
+ds HistogramHashMap {
+    count <- 1
+    insertAtIndex! <- 1
+    updateNode! <- 1
+    deleteAtIndex! <- 1
 }

@@ -52,7 +52,7 @@ object DataStructureChooserCli {
   def main(args: Array[String]) {
     val adt = MainParser.nakedAdt.parse("""
 adt List {
-  insertAtEnd! -> 1
+  insertLast! -> 1
   deleteLast! -> 1
   getByIndex -> 1
   updateNode! -> 1
