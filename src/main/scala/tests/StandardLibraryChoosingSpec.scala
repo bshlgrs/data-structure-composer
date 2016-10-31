@@ -1,0 +1,88 @@
+package tests
+
+/**
+  * Created by buck on 9/12/16.
+  */
+
+import cli.DataStructureChooserCli
+import implementationSearcher._
+import org.scalatest.FunSpec
+import parsers.MainParser
+import shared._
+
+class StandardLibraryChoosingSpec extends FunSpec {
+  val minStackAdt = MainParser.nakedAdt.parse("""
+    adt MinStack {
+      insertAtEnd! -> 1
+      deleteLast! -> 1
+      getByIndex -> 1
+      getMinimum -> 1
+    }""".trim()).get.value
+
+  describe("simple choosing with stdlib impls") {
+    val impls = DataStructureChooserCli.impls
+    val decls = DataStructureChooserCli.decls
+    val structures = DataStructureChooserCli.dataStructures
+
+    describe("with min stack") {
+      it("can correctly evaluate the performance of a generic heap and vector list") {
+        val res = Chooser.getRelevantTimesForDataStructures(
+          impls,
+          Set(structures("Heap"), structures("VectorList")),
+          decls
+        )
+
+        assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
+        assert(res.getNamed("insertAtEnd!") == Set(Impl("insertAtEnd! <- log(n)")))
+      }
+
+      it("can correctly evaluate the performance of a stack min memoizer and vector list") {
+        val res = Chooser.getRelevantTimesForDataStructures(
+          impls,
+          Set(structures("StackMinMemoizer"), structures("VectorList")),
+          decls
+        )
+
+        assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
+        assert(res.getNamed("insertAtEnd!") == Set(Impl("insertAtEnd! <- 1")))
+      }
+    }
+  }
+
+  describe("data structure analysis") {
+    it("can do a stack") {
+      val adt = MainParser.nakedAdt.parse("""
+        adt Stack {
+          insertAtEnd! -> 1
+          deleteLast! -> 1
+          getByIndex -> 1
+          updateNode! -> 1
+        }""".trim()).get.value
+
+      val res = DataStructureChooserCli.chooseDataStructures(adt)
+
+      assert(res.items.head.choices == Set("VectorList"))
+    }
+
+    it("can do a min-stack") {
+      val res = DataStructureChooserCli.chooseDataStructures(minStackAdt)
+
+      DataStructureChooserCli.printResults(res)
+
+      assert(res.items.head.choices == Set("StackMinMemoizer","VectorList"))
+    }
+
+    it("knows how to use parameterized data structures") {
+      val adt = MainParser.nakedAdt.parse("""
+        adt RmqList {
+          insertAtIndex! -> 1
+          getByIndex -> 1
+          rangeMinimumQuery -> 1
+        }""".trim()).get.value
+
+      val res = DataStructureChooserCli.chooseDataStructures(adt)
+
+      assert(res.items.head.choices == Set("AugmentedRedBlackOrderStatisticTreeList"))
+    }
+  }
+}

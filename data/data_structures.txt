@@ -4,7 +4,7 @@ ds Array {
     getByIndex <- 1
     deleteAtIndex! <- n
     deleteBetweenNodes! <- n
-    deleteAtEnd! <- 1
+    deleteLast! <- 1
     updateNode! <- 1
 }
 
@@ -14,25 +14,32 @@ ds VectorList {
     insertAtEnd! <- 1
     deleteAtIndex! <- n
     deleteBetweenNodes! <- n
-    deleteAtEnd! <- 1
+    deleteLast! <- 1
 }
 
-ds RedBlackOrderStatisticTreeList {
+ds AugmentedRedBlackOrderStatisticTreeList[g] {
     getByIndex <- log(n)
-    updateNode! <- 1
+    updateNode! <- log(n) + log(n) * g
     getNext <- 1
     getPrev <- 1
-    insertAtEnd! <- 1
-    insertAfterNode! <- 1
-    insertAtStart! <- 1
-    deleteNode! <- log(n)
-    deleteBetweenNodes! <- log(n)
+    insertAtEnd! <- 1 + log(n) * g
+    insertAfterNode! <- 1 + log(n) * g
+    insertAtFront! <- 1  + log(n) * g
+    deleteNode! <- log(n) + log(n) * g
+    deleteBetweenNodes! <- log(n) + log(n) * g
+    twoSidedIndexRangeQuery[g] <- log(n) + log(n) * g
 }
 
+ds StackMinMemoizer[ordering] {
+    insertAtEnd! <- 1
+    deleteLast! <- 1
+    getFirstBy[ordering] <- 1
+    getLastBy[ordering] <- 1
+}
 
-ds Heap {
+ds Heap[heapOrdering] {
     unorderedEach <- n
-    getMinimum <- 1
+    getFirstBy[heapOrdering] <- 1
     deleteNode! <- log(n)
     updateNode! <- log(n)
     insertAtIndex! <- log(n)

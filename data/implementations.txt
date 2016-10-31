@@ -14,15 +14,18 @@ each[f] <- getFirst + n * getNext + n * f
 
 // insertions
 insertAtEnd! <- getLast + insertAfterEndNode!
-insertAfterEndNode! <- insertAtEnd!
-insertAfterEndNode! <- insertAfterNode!
-insertBeforeFrontNode! <- insertBeforeNode!
+insertAtEnd! <- insertAtIndex!
+insertAtFront! <- insertAtIndex!
 insertAtFront! <- getFirst + insertBeforeFrontNode!
 insertAtIndex! <- getByIndex + insertAfterNode!
 insertAtIndex! <- getByIndex + insertBeforeNode!
 insertAfterNode! <- insertNextToNode!
 insertBeforeNode! <- insertNextToNode!
 extend! <- getLast + n * insertAfterEndNode!
+insertAnywhere! <- insertAtIndex!
+insertAnywhere! <- insertAtFront!
+insertAnywhere! <- insertAtEnd!
+
 
 // deletions
 deleteAtIndex! <- getAtIndex + deleteNode!
@@ -58,12 +61,18 @@ getLastBy[f] <- reduce[_{commutative} <- f, _]
 getLastBy[f] <- getKthBy[f]
 countBetweenBy[f] <- unorderedEach[f]
 getMaximum <- getFirstBy[valueOrdering]
+getMaximum <- getLastBy[valueOrdering]
 getMinimum <- getLastBy[valueOrdering]
-deleteMinimumBy![f] <- getMinimumBy[f] + deleteNode!
-deleteMaximumBy![f] <- getMaximumBy[f] + deleteNode!
-deleteMinimum! <- deleteMinimumBy![valueOrdering]
-deleteMaximum! <- deleteMaximumBy![valueOrdering]
+getMinimum <- getFirstBy[valueOrdering]
+deleteFirstBy![f] <- getFirstBy[f] + deleteNode!
+deleteLastBy![f] <- getLastBy[f] + deleteNode!
+deleteFirst! <- deleteFirstBy![valueOrdering]
+deleteLast! <- deleteLastBy![valueOrdering]
 getFirstNodeWithValue[f] <- unorderedEach[f]
+// The obvious implementation for getNearest is to just loop over everything
+getNearest[f] <- unorderedEach[f]
+// using binary search:
+getNearest[f] <- log(n) * getKthBy[f]
 
 // other reductions
 count <- unorderedEach[_]
@@ -79,13 +88,15 @@ mostCommonElement <- mostNumerousEquivalenceClass[_]
 
 // eg, querying for the sum of the elements between indexes i and j
 twoSidedIndexRangeQuery[reduction] <- unorderedEach[reduction]
+
 // eg, querying for the sum of the elements between index 0 and index i
 oneSidedIndexRangeQuery[reduction] <- unorderedEach[reduction]
-minimumRangeQuery <- twoSidedIndexRangeQuery[_]
+oneSidedIndexRangeQuery[reduction] <- twoSidedIndexRangeQuery[reduction]
+rangeMinimumQuery <- twoSidedIndexRangeQuery[_]
 
-// // eg, querying for the number of elements whose values are in the range (a, b)
+// eg, querying for the number of elements whose values are in the range (a, b)
 twoSidedValueRangeQuery[f,reduction] <- unorderedEach[_ <- f + reduction]
-// // eg, querying for the sum of the k smallest elements
+// eg, querying for the sum of the k smallest elements
 oneSidedValueRangeQuery[f,reduction] <- unorderedEach[_ <- f + reduction]
 oneSidedValueRangeQuery[f,reduction] <- twoSidedValueRangeQuery[f, reduction]
 

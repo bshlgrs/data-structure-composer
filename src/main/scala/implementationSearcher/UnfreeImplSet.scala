@@ -19,6 +19,12 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
     impls.foldLeft(this)((s, u) => s.addImpl(u))
   }
 
+  def filterMethods(includedMethods: MethodName*): UnfreeImplSet =
+    this.copy(impls = impls.filterKeys((x) => includedMethods.contains(x)))
+
+  def filterToAdt(adt: AbstractDataType): UnfreeImplSet = this.copy(impls =
+    impls.filterKeys((x) => adt.methods.keys.toSeq.map(_.name).contains(x)))
+
   def allImpls: Set[Impl] = {
     impls.flatMap({ case ((name, singleMethodImplSet)) => singleMethodImplSet.impls.map(_.withName(name)) }).toSet
   }
@@ -48,7 +54,9 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   }
 
   def toLongString: String = {
-    "Search Result {\n" + impls.toList.sortBy(_._1.name).map(_._2.toLongString).mkString("\n") + "\n}"
+    "Search Result {\n" + impls.toList.sortBy(_._1.name)
+      .map({ case (name, set) => "  " ++ name.name ++ ": " ++ set.toLongString})
+      .mkString("\n") + "\n}"
   }
 
   def get(methodName: MethodName): Set[UnnamedImpl] = impls.get(methodName).map(_.impls).getOrElse(Set())

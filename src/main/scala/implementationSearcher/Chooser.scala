@@ -89,7 +89,7 @@ object Chooser {
     bestReadImplementations.addImpls(combinedWriteImplementations.allImpls)
   }
 
-  //
+
   def allParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
                                                 structures: Map[String, DataStructure],
                                                 decls: Map[MethodName, ImplDeclaration],

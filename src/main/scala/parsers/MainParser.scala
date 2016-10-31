@@ -114,7 +114,7 @@ object MainParser {
   }
 
   lazy val adt: P[AbstractDataType] = {
-    ("adt" ~ name ~ "{" ~ "\n".? ~ (" ".rep() ~ methodExpr ~ "->" ~ bigOLiteral).rep(sep=lineSep) ~ lineSep ~ "}").map({
+    ("adt" ~ name ~ "{" ~/ "\n".? ~ (" ".rep() ~ methodExpr ~ "->" ~ bigOLiteral).rep(sep=lineSep) ~ lineSep ~ "}").map({
       case (l: String, adtImpls: Seq[(MethodExpr, BigOLiteral)]) =>
         new AbstractDataType(Map(), adtImpls.map({case ((mExpr, cost)) => mExpr -> cost}).toMap)
     })

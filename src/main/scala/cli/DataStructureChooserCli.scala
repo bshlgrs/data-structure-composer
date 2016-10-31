@@ -1,5 +1,8 @@
-import implementationSearcher.{Chooser, DataStructure}
+package cli
+
+import implementationSearcher.{AbstractDataType, Chooser, DataStructure, DataStructureChoice}
 import parsers.MainParser
+import shared.DominanceFrontier
 
 import scala.io.Source
 
@@ -21,21 +24,48 @@ object DataStructureChooserCli {
       .mkString("\n")
   }
 
-  lazy val dataStructuresLibrary: Map[String, DataStructure] = {
+  lazy val dataStructures: Map[String, DataStructure] = {
     MainParser.parseDataStructureFileString(dataStructuresText, impls, decls).get
   }
 
-  def main(args: Array[String]) {
-    val adt = MainParser.nakedAdt.parse("adt List { getMinimum -> 1; insertAtIndex! -> 1; }").get.value
-
-    val res = time {
-      Chooser.allParetoOptimalDataStructureCombosForAdt(
+  def chooseDataStructures(adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
+    time {
+      Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
         impls,
-        dataStructuresLibrary,
+        dataStructures,
         decls,
         adt)
     }
+  }
 
+  def chooseAllDataStructures(adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
+    time {
+      Chooser.allParetoOptimalDataStructureCombosForAdt(
+        impls,
+        dataStructures,
+        decls,
+        adt
+      )
+    }
+  }
+
+  def main(args: Array[String]) {
+    val adt = MainParser.nakedAdt.parse("""
+adt List {
+  insertAtEnd! -> 1
+  deleteLast! -> 1
+  getByIndex -> 1
+  updateNode! -> 1
+  getMinimum -> 1
+}
+    """.trim()).get.value
+
+    val res = chooseDataStructures(adt)
+
+    printResults(res)
+  }
+
+  def printResults(res: DominanceFrontier[DataStructureChoice]) = {
     println("Optimal results:")
     println(res.items.map((choice) => {
       choice.choices.mkString(",") ++ "\n" ++

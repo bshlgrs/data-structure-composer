@@ -4,8 +4,10 @@ package tests
   * Created by buck on 9/12/16.
   */
 
+import cli.DataStructureChooserCli
 import implementationSearcher._
 import org.scalatest.FunSpec
+import parsers.MainParser
 import shared._
 
 class DataStructureChooserSpec extends FunSpec {
@@ -36,6 +38,16 @@ class DataStructureChooserSpec extends FunSpec {
       |    getNext <- 1
       |    updateNode! <- 1
       |    insertAfterNode! <- 1
+      |}""".stripMargin)
+
+  val vectorList = DataStructure(
+    """ds VectorList {
+      |    getByIndex <- 1
+      |    updateNode! <- 1
+      |    insertAtEnd! <- 1
+      |    deleteAtIndex! <- n
+      |    deleteBetweenNodes! <- n
+      |    deleteLast! <- 1
       |}""".stripMargin)
 
 
