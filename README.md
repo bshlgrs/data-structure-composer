@@ -168,11 +168,7 @@ Interface things:
 
 ## Current tasks
 
-I need to turn UnfreeImpl into Impl. This is going to involve rewriting my tests, but they should all be true with the rewrite.
-
-Example todo items:
-
-- bindToContext in Impl
+- Better error checking for structures and methods which have been input.
 
 ## more things
 

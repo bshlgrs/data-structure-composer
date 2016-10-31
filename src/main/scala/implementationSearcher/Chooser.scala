@@ -84,10 +84,10 @@ object Chooser {
 
   //
   def allParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
-                                                structures: Set[(String, DataStructure)],
+                                                structures: Map[String, DataStructure],
                                                 decls: Map[MethodName, ImplDeclaration],
                                                 adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
-    val results = structures.subsets().map((subset) => subset -> getRelevantTimesForDataStructures(impls, subset.map(_._2), decls)).toSet
+    val results = structures.toSet.subsets().map((subset) => subset -> getRelevantTimesForDataStructures(impls, subset.map(_._2), decls)).toSet
 
     val choicesSet: Set[DataStructureChoice] = results.flatMap({ case (set: Set[(String, DataStructure)], sr: UnfreeImplSet) => {
       val methods = adt.methods.keys.map((methodExpr: MethodExpr) => {
@@ -107,7 +107,7 @@ object Chooser {
 
   // this is the ultimate method
   def allMinTotalCostParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
-                                                            structures: Set[(String, DataStructure)],
+                                                            structures: Map[String, DataStructure],
                                                             decls: Map[MethodName, ImplDeclaration],
                                                             adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
     val frontier = allParetoOptimalDataStructureCombosForAdt(impls, structures, decls, adt)

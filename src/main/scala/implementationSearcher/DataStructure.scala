@@ -28,5 +28,5 @@ object DataStructure {
     ???
   }
 
-  def apply(string: String): DataStructure = MainParser.nakedDataStructure.parse(string).get.value
+  def apply(string: String): DataStructure = MainParser.nakedDataStructure.parse(string).get.value._2
 }

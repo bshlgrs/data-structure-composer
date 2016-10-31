@@ -13,7 +13,7 @@ object DataStructureChooserCli {
       .mkString("\n")
   }
 
-  lazy val autoImplLibrary = MainParser.impls.parse(libraryText).get.value.toSet
+  lazy val (impls, decls) = MainParser.parseImplFileString(libraryText).get
 
   lazy val dataStructuresText = {
     Source.fromFile("data/data_structures.txt")
@@ -21,16 +21,19 @@ object DataStructureChooserCli {
       .mkString("\n")
   }
 
-//  lazy val dataStructuresLibrary: Map[String, DataStructure] = {
-//    MainParser.dataStructureFile.parse(dataStructuresText).get.value.map((x) => x.name -> x).toMap
-//  }
+  lazy val dataStructuresLibrary: Map[String, DataStructure] = {
+    MainParser.parseDataStructureFileString(dataStructuresText, impls, decls).get
+  }
 
-//  def main(args: Array[String]) {
-//    val adt = MainParser.nakedAdt.parse("adt List { getFirst -> 1; }").get.value
-//
-//    println(Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
-//      autoImplLibrary,
-//      dataStructuresLibrary.values.toSet,
-//      adt))
-//  }
+  def main(args: Array[String]) {
+    val adt = MainParser.nakedAdt.parse("adt List { getFirst -> 1; }").get.value
+
+
+
+    println(Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
+      impls,
+      dataStructuresLibrary,
+      decls,
+      adt))
+  }
 }

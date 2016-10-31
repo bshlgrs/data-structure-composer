@@ -10,6 +10,8 @@ case class ImplDeclaration(parameters: List[MethodName]) {
 }
 
 object ImplDeclaration {
+  lazy val empty = ImplDeclaration(Nil)
+
   def parseMany(strings: String*): (Set[Impl], Map[MethodName, ImplDeclaration]) = {
     val tuples: Set[(Impl, ImplDeclaration)] =
       strings.toSet.map((x: String) => MainParser.nakedImpl.parse(x).get.value)

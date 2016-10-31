@@ -4,6 +4,8 @@ import fastparse.WhitespaceApi
 import implementationSearcher._
 import shared._
 
+import scala.util.{Success, Try}
+
 /**
   * Created by buck on 9/12/16.
   */
@@ -98,16 +100,16 @@ object MainParser {
 
   lazy val implLine: P[Option[(Impl, ImplDeclaration)]] = P(impl.map(Some(_)) | ("//" ~ CharsWhile(_ != '\n')).map((_) => None))
 
-  lazy val dataStructure: P[DataStructure] = {
+  lazy val dataStructure: P[(String, DataStructure)] = {
     ("ds" ~/ implLhs ~/ "{" ~/ "\n".? ~ (" ".rep() ~ impl).rep(sep=lineSep) ~ lineSep ~ "}").map({
       case (l: ImplLhs, d: ImplDeclaration, impls: Seq[(Impl, ImplDeclaration)]) =>
-        DataStructure(d.parameters, l.conditions, impls.toSet.map((x: (Impl, ImplDeclaration)) => x._1))
+        l.name.name -> DataStructure(d.parameters, l.conditions, impls.toSet.map((x: (Impl, ImplDeclaration)) => x._1))
     })
   }
 
-  lazy val nakedDataStructure: P[DataStructure] = dataStructure ~ End
+  lazy val nakedDataStructure: P[(String, DataStructure)] = dataStructure ~ End
 
-  lazy val dataStructureFile: P[Set[DataStructure]] = {
+  lazy val dataStructureFile: P[Set[(String, DataStructure)]] = {
     P("\n".rep() ~ dataStructure.rep(sep="\n".rep()) ~ "\n".rep() ~ End).map(_.toSet)
   }
 
@@ -133,5 +135,40 @@ object MainParser {
 //    println(impl.parse("each[f] <- getByIndex * n + n * f"))
 //    println(P(implRhs ~ End).parse("getByIndex * n"))
 
+  }
+
+  def parseImplFileString(stuff: String): Try[(Set[Impl], Map[MethodName, ImplDeclaration])] = {
+    def blankImpl(name: MethodName): Impl = {
+      Impl(ImplLhs(name, ImplPredicateMap.empty), AffineBigOCombo({ ??? }, { ??? }))
+    }
+
+    for {
+      tuples: Set[(Impl, ImplDeclaration)] <- Try(impls.parse(stuff).get.value)
+      fileImpls <- Success(tuples.map(_._1))
+
+      // these are the methods which are never defined, but which are used in other definitions
+      implicitDeclarationTuples <-
+        Success(fileImpls.flatMap(_.rhs.keys.flatMap((x) =>
+          if (x.args.isEmpty) Option(blankImpl(x.name) -> ImplDeclaration.empty) else Nil))
+        )
+      fileDecls <- Try {
+        (tuples ++ implicitDeclarationTuples).groupBy(_._1.lhs.name).map({ case (m: MethodName, s: Set[(Impl, ImplDeclaration)]) => {
+          assert(s.forall(_._2 == s.head._2))
+          m -> s.head._2
+        }})
+      }
+    } yield (fileImpls, fileDecls)
+  }
+
+  def parseDataStructureFileString(stuff: String, impls: Set[Impl], decls: Map[MethodName, ImplDeclaration]):
+    Try[Map[String, DataStructure]] = {
+
+    for {
+      dataStructureSyntax <- Try(dataStructureFile.parse(stuff).get.value)
+      res <- Try(dataStructureSyntax.groupBy(_._1).map({ case (name, setOfTuples) => {
+        assert(setOfTuples.size == 1, s"there were ${setOfTuples.size} data structures named $name")
+        setOfTuples.head
+      }}))
+    } yield res
   }
 }

@@ -123,7 +123,7 @@ class DataStructureChooserSpec extends FunSpec {
       it("can choose the Pareto-optimal options for a List adt") {
         val listAdt = AbstractDataType(Map(), Map(MethodExpr.parse("getFirst") -> ConstantTime, MethodExpr.parse("getNext") -> ConstantTime))
 
-        val res = Chooser.allParetoOptimalDataStructureCombosForAdt(impls, Set("LinkedList" -> linkedList, "GenericHeap" -> genericHeap), decls, listAdt)
+        val res = Chooser.allParetoOptimalDataStructureCombosForAdt(impls, Map("LinkedList" -> linkedList, "GenericHeap" -> genericHeap), decls, listAdt)
 
         assert(res.items == Set(linkedListResult))
       }
@@ -131,7 +131,7 @@ class DataStructureChooserSpec extends FunSpec {
       it("can choose the best options for a List adt") {
         val listAdt = AbstractDataType(Map(), Map(MethodExpr.parse("getFirst") -> ConstantTime, MethodExpr.parse("getNext") -> ConstantTime))
 
-        val res = Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(impls, Set("LinkedList" -> linkedList, "GenericHeap" -> genericHeap), decls, listAdt)
+        val res = Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(impls, Map("LinkedList" -> linkedList, "GenericHeap" -> genericHeap), decls, listAdt)
 
         assert(res.items == Set(linkedListResult))
       }
@@ -155,7 +155,7 @@ class DataStructureChooserSpec extends FunSpec {
         )
 
         val res = Chooser.allParetoOptimalDataStructureCombosForAdt(
-          impls, Set("LinkedList" -> linkedList, "GenericHeap" -> genericHeap), decls, pQueueAdt)
+          impls, Map("LinkedList" -> linkedList, "GenericHeap" -> genericHeap), decls, pQueueAdt)
 
         assert(res.items == Set(linkedListPQResult, heapResult))
       }
@@ -167,7 +167,7 @@ class DataStructureChooserSpec extends FunSpec {
         )
 
         val res = Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
-          impls, Set("LinkedList" -> linkedList, "GenericHeap" -> genericHeap), decls, pQueueAdt)
+          impls, Map("LinkedList" -> linkedList, "GenericHeap" -> genericHeap), decls, pQueueAdt)
 
         assert(res.items == Set(heapResult))
       }
