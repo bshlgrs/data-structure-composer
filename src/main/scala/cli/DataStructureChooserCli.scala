@@ -1,6 +1,6 @@
 package cli
 
-import implementationSearcher.{AbstractDataType, Chooser, DataStructure, DataStructureChoice}
+import implementationSearcher._
 import parsers.MainParser
 import shared.DominanceFrontier
 
@@ -31,9 +31,7 @@ object DataStructureChooserCli {
   def chooseDataStructures(adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
     time {
       Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
-        impls,
-        dataStructures,
-        decls,
+        ImplLibrary(impls, decls, dataStructures),
         adt)
     }
   }
@@ -41,9 +39,7 @@ object DataStructureChooserCli {
   def chooseAllDataStructures(adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
     time {
       Chooser.allParetoOptimalDataStructureCombosForAdt(
-        impls,
-        dataStructures,
-        decls,
+        ImplLibrary(impls, decls, dataStructures),
         adt
       )
     }

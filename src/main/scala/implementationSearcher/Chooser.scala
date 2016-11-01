@@ -21,11 +21,10 @@ object Chooser {
 //      AffineBigOCombo[MethodExpr](ConstantTime, Map(MethodExpr("x", List(NamedFunctionExpr("g"))) -> ConstantTime)))
 //  )
 
-  def getAllTimes(impls: Set[Impl], freeVariables: Set[MethodName], declarations: Map[MethodName, ImplDeclaration]): UnfreeImplSet = {
+  def getAllTimes(impls: Set[Impl], implLibrary: ImplLibrary, freeVariables: Set[MethodName]): UnfreeImplSet = {
     val queue = mutable.Set[Impl]()
 
-    var unfreeImplSet = UnfreeImplSet(Map(), freeVariables, declarations)
-
+    var unfreeImplSet = UnfreeImplSet(Map(), freeVariables, implLibrary.decls)
 
     queue ++= impls.filter(_.unboundCostTuples(unfreeImplSet).isEmpty)
 
@@ -38,8 +37,6 @@ object Chooser {
 
       if (unfreeImplSet.isOtherImplUseful(unfreeImpl)) {
         unfreeImplSet = unfreeImplSet.addImpl(unfreeImpl)
-
-
 
         for (otherImpl <- impls) {
           // So we have a random impl. Let's see if the unfreeImpl we just settled on is useful for that impl.
@@ -65,37 +62,38 @@ object Chooser {
     unfreeImplSet
   }
 
-  def getAllTimesForDataStructure(impls: Set[Impl], dataStructure: DataStructure, declarations: Map[MethodName, ImplDeclaration]) = {
+  def getAllTimesForDataStructure(implLibrary: ImplLibrary, dataStructure: DataStructure) = {
     // todo: consider conditions
-    getAllTimes(impls.union(dataStructure.impls), dataStructure.parameters.toSet, declarations)
+    getAllTimes(implLibrary.impls.union(dataStructure.impls), implLibrary, dataStructure.parameters.toSet)
   }
 
 
-  def getRelevantTimesForDataStructures(impls: Set[Impl],
-                                        structures: Set[DataStructure],
-                                       decls: Map[MethodName, ImplDeclaration]): UnfreeImplSet = {
+  def getRelevantTimesForDataStructures(implLibrary: ImplLibrary,
+                                        structures: Set[DataStructure]): UnfreeImplSet = {
     val allProvidedReadImplementations: Set[Impl] = structures.flatMap(_.readMethods)
 
     val allFreeVariables = structures.flatMap(_.parameters)
 
-    val bestReadImplementations: UnfreeImplSet = getAllTimes(allProvidedReadImplementations ++ impls, allFreeVariables, decls)
+    val bestReadImplementations: UnfreeImplSet = getAllTimes(
+      allProvidedReadImplementations ++ implLibrary.impls, implLibrary, allFreeVariables)
 
 
     val allWriteImplementations: Set[UnfreeImplSet] = structures.map((s) =>
-      getAllTimes(s.writeMethods ++ bestReadImplementations.allImpls ++ impls, s.parameters.toSet, decls))
+      getAllTimes(s.writeMethods ++ bestReadImplementations.allImpls ++ implLibrary.impls, implLibrary, s.parameters.toSet))
 
-    val combinedWriteImplementations: UnfreeImplSet = allWriteImplementations.reduceOption(_.product(_)).getOrElse(UnfreeImplSet(Map(), allFreeVariables, decls))
+    val combinedWriteImplementations: UnfreeImplSet =
+      allWriteImplementations
+        .reduceOption(_.product(_))
+        .getOrElse(UnfreeImplSet(Map(), allFreeVariables, implLibrary.decls))
 
     bestReadImplementations.addImpls(combinedWriteImplementations.allImpls)
   }
 
 
-  def allParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
-                                                structures: Map[String, DataStructure],
-                                                decls: Map[MethodName, ImplDeclaration],
+  def allParetoOptimalDataStructureCombosForAdt(library: ImplLibrary,
                                                 adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
-    val results = structures.toSet.subsets().map((subset) => {
-      subset -> getRelevantTimesForDataStructures(impls, subset.map(_._2), decls)
+    val results = library.structures.toSet.subsets().map((subset) => {
+      subset -> getRelevantTimesForDataStructures(library, subset.map(_._2))
     }).toSet
 
     val choicesSet: Set[DataStructureChoice] = results.flatMap({ case (set: Set[(String, DataStructure)], sr: UnfreeImplSet) => {
@@ -115,17 +113,15 @@ object Chooser {
   }
 
   // this is the ultimate method
-  def allMinTotalCostParetoOptimalDataStructureCombosForAdt(impls: Set[Impl],
-                                                            structures: Map[String, DataStructure],
-                                                            decls: Map[MethodName, ImplDeclaration],
+  def allMinTotalCostParetoOptimalDataStructureCombosForAdt(library: ImplLibrary,
                                                             adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
     adt.methods.keys.foreach((x) => {
-      assert(decls.contains(x.name),
+      assert(library.decls.contains(x.name),
         s"Your ADT referred to ${x.name}, which doesn't exist")
     })
 
 
-    val frontier = allParetoOptimalDataStructureCombosForAdt(impls, structures, decls, adt)
+    val frontier = allParetoOptimalDataStructureCombosForAdt(library, adt)
 
     val bestTime = frontier.items.map(_.overallTimeForAdt(adt)).min
 

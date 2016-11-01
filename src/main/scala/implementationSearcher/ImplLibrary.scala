@@ -14,13 +14,13 @@ case class ImplLibrary(impls: Set[Impl], decls: Map[MethodName, ImplDeclaration]
 
   def closureOfMap[A](map: Map[A, Set[A]]): Map[A, Set[A]] = {
     def dfs(start: A): Set[A] = {
-      val visited = collection.mutable.Set(start)
-      val frontier = collection.mutable.Stack(map(start).toSeq:_*)
+      val visited = collection.mutable.Set[A](start)
+      val frontier = collection.mutable.Stack(start)
 
       while (frontier.nonEmpty) {
         val item = frontier.pop()
 
-        map(item).foreach((neighbor) => {
+        map.getOrElse(item, Set()).foreach((neighbor) => {
           if (!visited.contains(neighbor)) {
             visited.add(neighbor)
             frontier.push(neighbor)
@@ -31,7 +31,7 @@ case class ImplLibrary(impls: Set[Impl], decls: Map[MethodName, ImplDeclaration]
       visited.toSet
     }
 
-    map.keys.map((k) => k -> dfs(k)).toMap
+    (map.keys ++ map.values.flatten.toSet).map((k) => k -> dfs(k)).toMap
   }
 
   // map from MethodNames to all the things that can be used to implement them
@@ -47,7 +47,7 @@ case class ImplLibrary(impls: Set[Impl], decls: Map[MethodName, ImplDeclaration]
   lazy val forwardImplArrows: Map[MethodName, Set[MethodName]] = {
     backwardImplArrows
       .toList
-      .flatMap({ case (m: MethodName, s: Set[MethodName]) => s.map((m2) => m -> m2)})
+      .flatMap({ case (m: MethodName, s: Set[MethodName]) => s.map((m2) => m2 -> m)})
       .groupBy(_._1)
       .mapValues(_.map(_._2).toSet)
   }

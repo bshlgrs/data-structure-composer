@@ -40,17 +40,6 @@ class DataStructureChooserSpec extends FunSpec {
       |    insertAfterNode! <- 1
       |}""".stripMargin)
 
-  val vectorList = DataStructure(
-    """ds VectorList {
-      |    getByIndex <- 1
-      |    updateNode! <- 1
-      |    insertAtEnd! <- 1
-      |    deleteAtIndex! <- n
-      |    deleteBetweenNodes! <- n
-      |    deleteLast! <- 1
-      |}""".stripMargin)
-
-
   val genericHeap = DataStructure(
     """ds GenericHeap[g] {
       |    updateNode! <- log(n) + g
@@ -68,11 +57,13 @@ class DataStructureChooserSpec extends FunSpec {
       |    unorderedEach[f] <- n + n * f
       |}""".stripMargin)
 
+  val library = ImplLibrary(impls, decls,
+    Map("GenericHeap" -> genericHeap, "LinkedList" -> linkedList))
 
   describe("data structure analysis") {
     describe("integration tests") {
       it("can do a linked list") {
-        val res = Chooser.getAllTimesForDataStructure(impls, linkedList, decls)
+        val res = Chooser.getAllTimesForDataStructure(library, linkedList)
 
         assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
         assert(res.getNamed("getFirst") == Set(Impl("getFirst <- 1")))
@@ -82,7 +73,7 @@ class DataStructureChooserSpec extends FunSpec {
       }
 
       it("can do a heap") {
-        val res = Chooser.getAllTimesForDataStructure(impls, heap, decls)
+        val res = Chooser.getAllTimesForDataStructure(library, heap)
 
         assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
         assert(res.getNamed("getSmallest") == Set(Impl("getSmallest <- 1")))
@@ -92,7 +83,7 @@ class DataStructureChooserSpec extends FunSpec {
 
       it("can do linked-list + heap") {
         val res =
-          Chooser.getRelevantTimesForDataStructures(impls, Set(linkedList, heap), decls)
+          Chooser.getRelevantTimesForDataStructures(library, Set(linkedList, heap))
 
         assert(res.getNamed("getFirst") == Set(Impl("getFirst <- 1")))
         assert(res.getNamed("insertAnywhere!") == Set(Impl("insertAnywhere! <- log(n)")))
@@ -100,7 +91,7 @@ class DataStructureChooserSpec extends FunSpec {
       }
 
       describe("doing a generic heap") {
-        val res = Chooser.getAllTimesForDataStructure(impls, genericHeap, decls)
+        val res = Chooser.getAllTimesForDataStructure(library, genericHeap)
 
         it("succeeds at the read methods") {
           assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
@@ -116,7 +107,7 @@ class DataStructureChooserSpec extends FunSpec {
       }
 
       it("can do linked-list + generic heap") {
-        val res = Chooser.getRelevantTimesForDataStructures(impls, Set(linkedList, genericHeap), decls)
+        val res = Chooser.getRelevantTimesForDataStructures(library, Set(linkedList, genericHeap))
 
         assert(res.getNamed("getFirst") == Set(Impl("getFirst <- 1")))
         assert(res.getNamed("insertAnywhere!") == Set(Impl("insertAnywhere! <- g + log(n)")))
@@ -135,7 +126,7 @@ class DataStructureChooserSpec extends FunSpec {
       it("can choose the Pareto-optimal options for a List adt") {
         val listAdt = AbstractDataType(Map(), Map(MethodExpr.parse("getFirst") -> ConstantTime, MethodExpr.parse("getNext") -> ConstantTime))
 
-        val res = Chooser.allParetoOptimalDataStructureCombosForAdt(impls, Map("LinkedList" -> linkedList, "GenericHeap" -> genericHeap), decls, listAdt)
+        val res = Chooser.allParetoOptimalDataStructureCombosForAdt(library, listAdt)
 
         assert(res.items == Set(linkedListResult))
       }
@@ -143,7 +134,7 @@ class DataStructureChooserSpec extends FunSpec {
       it("can choose the best options for a List adt") {
         val listAdt = AbstractDataType(Map(), Map(MethodExpr.parse("getFirst") -> ConstantTime, MethodExpr.parse("getNext") -> ConstantTime))
 
-        val res = Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(impls, Map("LinkedList" -> linkedList, "GenericHeap" -> genericHeap), decls, listAdt)
+        val res = Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(library, listAdt)
 
         assert(res.items == Set(linkedListResult))
       }
@@ -166,8 +157,7 @@ class DataStructureChooserSpec extends FunSpec {
             MethodExpr.parse("insertAnywhere!") -> ConstantTime)
         )
 
-        val res = Chooser.allParetoOptimalDataStructureCombosForAdt(
-          impls, Map("LinkedList" -> linkedList, "GenericHeap" -> genericHeap), decls, pQueueAdt)
+        val res = Chooser.allParetoOptimalDataStructureCombosForAdt(library, pQueueAdt)
 
         assert(res.items == Set(linkedListPQResult, heapResult))
       }
@@ -178,8 +168,7 @@ class DataStructureChooserSpec extends FunSpec {
             MethodExpr.parse("insertAnywhere!") -> ConstantTime)
         )
 
-        val res = Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
-          impls, Map("LinkedList" -> linkedList, "GenericHeap" -> genericHeap), decls, pQueueAdt)
+        val res = Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(library, pQueueAdt)
 
         assert(res.items == Set(heapResult))
       }

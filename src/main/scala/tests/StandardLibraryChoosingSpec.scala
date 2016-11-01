@@ -23,13 +23,13 @@ class StandardLibraryChoosingSpec extends FunSpec {
     val impls = DataStructureChooserCli.impls
     val decls = DataStructureChooserCli.decls
     val structures = DataStructureChooserCli.dataStructures
+    val library = ImplLibrary(impls, decls, structures)
 
     describe("with min stack") {
       it("can correctly evaluate the performance of a generic heap and vector list") {
         val res = Chooser.getRelevantTimesForDataStructures(
-          impls,
-          Set(structures("Heap"), structures("VectorList")),
-          decls
+          library,
+          Set(structures("Heap"), structures("VectorList"))
         )
 
         assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
@@ -38,9 +38,8 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       it("can correctly evaluate the performance of a stack min memoizer and vector list") {
         val res = Chooser.getRelevantTimesForDataStructures(
-          impls,
-          Set(structures("StackMinMemoizer"), structures("VectorList")),
-          decls
+          library,
+          Set(structures("StackMinMemoizer"), structures("VectorList"))
         )
 
         assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
