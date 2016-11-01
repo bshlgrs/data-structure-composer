@@ -131,7 +131,7 @@ There might be some trickiness in making it easy for users to find all those met
 
 immediate:
 
-- [ ] Handle parameterized data structures
+- [x] Handle parameterized data structures
 
 then:
 
@@ -142,6 +142,7 @@ then:
   - [ ] then that introspection needs to be done.
 - [ ] Store the chains of logic for every implementation, so that you can see what everything's relying on.
 - [ ] generalize to parameterized ADTs.
+- [ ] optimize the compiler to only consider composite data structures that could theoretically be better than simpler versions of themselves.
 
 Interface things:
 
@@ -158,11 +159,6 @@ Interface things:
 - My code assumes everything is an ordered list. Is there an elegant way of handling multiple different types (and conversions between them)?
 - Do I have to do anything fancy to get things like `union` or `intersection` to work?
 - The frontend might let you select between methods in multiple languages.
-
-
-
-
-
 
 ----------
 

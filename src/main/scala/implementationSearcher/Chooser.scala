@@ -51,7 +51,7 @@ object Chooser {
             val neighborUnfreeImpls = otherImpl.bindToAllOptions(unfreeImplSet)
 
             neighborUnfreeImpls.items.foreach((u: UnnamedImpl) =>
-              if (unfreeImplSet.addImpls(queue.toSet).isOtherImplUseful(u.withName(otherImpl.lhs.name))) {
+              if (unfreeImplSet.isOtherImplUseful(u.withName(otherImpl.lhs.name))) {
                 val impl = u.withName(otherImpl.lhs.name)
                 assert(impl.unboundCostTuples(unfreeImplSet).isEmpty)
                 queue += impl

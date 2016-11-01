@@ -1,13 +1,4 @@
 
-
-ds Array {
-    getByIndex <- 1
-    deleteAtIndex! <- n
-    deleteBetweenNodes! <- n
-    deleteLast! <- 1
-    updateNode! <- 1
-}
-
 ds VectorList {
     getByIndex <- 1
     updateNode! <- 1
