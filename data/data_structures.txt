@@ -84,3 +84,4 @@ ds InvertibleReductionMemoizer[f] if f.invertible, f.commutative {
     updateNode! <- 1 + getByIndex
     deleteNode! <- 1 + getByIndex
 }
+

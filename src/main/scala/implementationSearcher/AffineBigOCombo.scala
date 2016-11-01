@@ -57,7 +57,7 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
     this.copy(weights = weights.filterKeys(p))
   }
 
-  def keys: Set[A] = weights.keys.toSet
+  lazy val keys: Set[A] = weights.keys.toSet
 
   def partialCompare(other: AffineBigOCombo[A]): DominanceRelationship = {
     PartialOrdering.fromSetOfDominanceRelationships(
@@ -72,7 +72,7 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
     weights.keys.map((key) => map.getOrElse(key, ConstantTime)).foldLeft(bias)(_ + _)
   }
 
-  def asConstant: Option[BigOLiteral] = {
+  lazy val asConstant: Option[BigOLiteral] = {
     if (weights.nonEmpty) {
       None
     } else {
@@ -81,7 +81,7 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
   }
 
   // todo: this might be stupid
-  def minCost: BigOLiteral = (bias +: (if (weights.values.isEmpty) Nil else List(weights.values.max))).max
+  lazy val minCost: BigOLiteral = (bias +: (if (weights.values.isEmpty) Nil else List(weights.values.max))).max
 }
 
 object AffineBigOCombo {
