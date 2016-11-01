@@ -92,7 +92,20 @@ object Chooser {
 
   def allParetoOptimalDataStructureCombosForAdt(library: ImplLibrary,
                                                 adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
-    val results = library.structures.toSet.subsets().map((subset) => {
+    val potentiallyRelevantDataStructures = library.structures.filter({ case (name: String, structure: DataStructure) => {
+      // This structure is potentially relevant if there's any way for the read methods it contributes
+      // to be useful to the implementation of the ADT's methods
+
+      val adtReadMethods = adt.methods.map(_._1.name).toSet
+
+      structure.readMethods.exists((i: Impl) => {
+        val methodNamesThisIsHelpfulFor = library.closuresOfForwardImplArrows(i.lhs.name)
+        (adtReadMethods & methodNamesThisIsHelpfulFor).nonEmpty
+      })
+    }}).toSet
+    println(potentiallyRelevantDataStructures.map(_._1))
+
+    val results = potentiallyRelevantDataStructures.subsets().map((subset) => {
       subset -> getRelevantTimesForDataStructures(library, subset.map(_._2))
     }).toSet
 
