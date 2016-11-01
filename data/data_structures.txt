@@ -33,9 +33,11 @@ ds AugmentedRedBlackOrderStatisticTreeList[g] {
     twoSidedIndexRangeQuery[g] <- log(n)
 }
 
-ds StackMemoizer[reduction] if reduction.idempotent {
+ds DequeMemoizer[reduction] if reduction.idempotent {
     insertLast! <- 1
     deleteLast! <- 1
+    insertFirst! <- 1
+    deleteFirst! <- 1
     reduce[reduction] <- 1
 }
 

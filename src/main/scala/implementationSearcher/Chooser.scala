@@ -89,9 +89,10 @@ object Chooser {
     bestReadImplementations.addImpls(combinedWriteImplementations.allImpls)
   }
 
-
   def allParetoOptimalDataStructureCombosForAdt(library: ImplLibrary,
                                                 adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
+    println(s"Potentially relevant data structures: ${library.potentiallyRelevantDataStructures(adt).map(_._1)}")
+
     val results = library.potentiallyRelevantDataStructures(adt).subsets().map((subset) => {
       subset -> getRelevantTimesForDataStructures(library, subset.map(_._2))
     }).toSet

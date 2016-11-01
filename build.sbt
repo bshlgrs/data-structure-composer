@@ -17,6 +17,4 @@ libraryDependencies ++= Seq(
 )
 libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0"
 
-
-
 scalaJSUseRhino in Global := false
