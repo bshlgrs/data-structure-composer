@@ -100,16 +100,17 @@ object MainParser {
 
   lazy val implLine: P[Option[(Impl, ImplDeclaration)]] = P(impl.map(Some(_)) | ("//" ~ CharsWhile(_ != '\n')).map((_) => None))
 
-  lazy val dataStructure: P[(String, DataStructure)] = {
+  lazy val dataStructure: P[(ImplLhs, ImplDeclaration, Set[(Impl, ImplDeclaration)])] = {
     ("ds" ~/ implLhs ~/ "{" ~/ "\n".? ~ (" ".rep() ~ impl).rep(sep=lineSep) ~ lineSep ~ "}").map({
       case (l: ImplLhs, d: ImplDeclaration, impls: Seq[(Impl, ImplDeclaration)]) =>
-        l.name.name -> DataStructure(d.parameters, l.conditions, impls.toSet.map((x: (Impl, ImplDeclaration)) => x._1))
+        (l, d, impls.toSet)
     })
   }
 
-  lazy val nakedDataStructure: P[(String, DataStructure)] = dataStructure ~ End
 
-  lazy val dataStructureFile: P[Set[(String, DataStructure)]] = {
+  lazy val nakedDataStructure: P[(ImplLhs, ImplDeclaration, Set[(Impl, ImplDeclaration)])] = dataStructure ~ End
+
+  lazy val dataStructureFile: P[Set[(ImplLhs, ImplDeclaration, Set[(Impl, ImplDeclaration)])]] = {
     P("\n".rep() ~ dataStructure.rep(sep="\n".rep()) ~ "\n".rep() ~ End).map(_.toSet)
   }
 
@@ -137,7 +138,7 @@ object MainParser {
 
   }
 
-  def parseImplFileString(stuff: String): Try[(Set[Impl], Map[MethodName, ImplDeclaration])] = {
+  def parseImplFileString(stuff: String): Try[(Set[Impl], ImplLibrary.Decls)] = {
     def blankImplLhs(name: MethodName): ImplLhs = {
       ImplLhs(name, ImplPredicateMap.empty)
     }
@@ -177,7 +178,7 @@ object MainParser {
     } yield (fileImpls, fileDecls)
   }
 
-  def parseDataStructureFileString(stuff: String, impls: Set[Impl], decls: Map[MethodName, ImplDeclaration]):
+  def parseDataStructureFileString(stuff: String, decls: ImplLibrary.Decls):
     Try[Map[String, DataStructure]] = {
 
     for {
@@ -185,9 +186,9 @@ object MainParser {
       res <- Try(dataStructureSyntax.groupBy(_._1).map({ case (name, setOfTuples) => {
         assert(setOfTuples.size == 1, s"there were ${setOfTuples.size} data structures named $name")
 
-        val dataStructure = setOfTuples.head._2
-        // assert that all of the implementations in the data structure don't refer to anything which hasn't been defined
-        setOfTuples.head
+        val (ImplLhs(MethodName(dsName), dsConditions), ImplDeclaration(dsParameters), impls) = setOfTuples.head
+
+        dsName -> DataStructure.build(dsName, dsParameters, dsConditions, impls, decls)
       }}))
     } yield res
   }

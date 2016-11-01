@@ -25,8 +25,10 @@ object DataStructureChooserCli {
   }
 
   lazy val dataStructures: Map[String, DataStructure] = {
-    MainParser.parseDataStructureFileString(dataStructuresText, impls, decls).get
+    MainParser.parseDataStructureFileString(dataStructuresText, decls).get
   }
+
+  lazy val library = ImplLibrary(impls, decls, dataStructures)
 
   def chooseDataStructures(adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
     time {

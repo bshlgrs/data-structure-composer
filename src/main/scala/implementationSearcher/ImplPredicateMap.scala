@@ -14,7 +14,6 @@ case class ImplPredicateMap(map: Map[MethodName, Set[FunctionProperty]]) {
 
   def isEmpty: Boolean = map.values.forall(_.isEmpty)
 
-  // todo: unsafe
   def get(name: MethodName): Set[FunctionProperty] = map.getOrElse(name, Set())
 
   def toNiceString: String =

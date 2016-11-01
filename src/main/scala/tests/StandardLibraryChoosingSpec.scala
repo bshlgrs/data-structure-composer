@@ -39,7 +39,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       it("can correctly evaluate the performance of a stack min memoizer and vector list") {
         val res = Chooser.getRelevantTimesForDataStructures(
           library,
-          Set(structures("StackMinMemoizer"), structures("VectorList"))
+          Set(structures("StackMemoizer"), structures("VectorList"))
         )
 
         assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
@@ -68,7 +68,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choices == Set("StackMinMemoizer","VectorList"))
+      assert(res.items.head.choices == Set("StackMemoizer", "VectorList"))
     }
 
     it("can do a stack with contains") {
@@ -83,7 +83,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choices == Set("HistogramHashMap","VectorList"))
+      assert(res.items.head.choices == Set("HistogramHashMap", "VectorList"))
     }
 
     it("can do a set which you never delete from") {
@@ -111,6 +111,21 @@ class StandardLibraryChoosingSpec extends FunSpec {
       DataStructureChooserCli.printResults(res)
 
       assert(res.items.head.choices == Set("AugmentedRedBlackOrderStatisticTreeList"))
+    }
+
+    it("knows how to use RMQ") {
+      val adt = MainParser.nakedAdt.parse("""
+        adt RmqList {
+          insertLast! -> 1
+          getByIndex -> 1
+          rangeMinimumQuery -> n
+        }""".trim()).get.value
+
+      val res = DataStructureChooserCli.chooseDataStructures(adt)
+
+      DataStructureChooserCli.printResults(res)
+
+      assert(res.items.head.choices == Set("RangeMinQueryLinearithmicArrayThing", "VectorList"))
     }
   }
 }

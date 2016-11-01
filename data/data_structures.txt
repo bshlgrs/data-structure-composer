@@ -21,11 +21,10 @@ ds AugmentedRedBlackOrderStatisticTreeList[g] {
     twoSidedIndexRangeQuery[g] <- log(n) + log(n) * g
 }
 
-ds StackMinMemoizer[ordering] {
+ds StackMemoizer[reduction] if reduction.idempotent {
     insertLast! <- 1
     deleteLast! <- 1
-    getFirstBy[ordering] <- 1
-    getLastBy[ordering] <- 1
+    reduce[reduction, zero] <- 1
 }
 
 ds Heap[heapOrdering] {
@@ -56,7 +55,7 @@ ds OrderedRedBlackTree[f, g] {
 
 ds RangeMinQueryLinearithmicArrayThing[reduction] if reduction.idempotent {
     twoSidedIndexRangeQuery[reduction] <- 1 + reduction
-    insertLast! <- log(n) + reduction
+    insertLast! <- log(n) * reduction
     deleteLast! <- 1
 }
 

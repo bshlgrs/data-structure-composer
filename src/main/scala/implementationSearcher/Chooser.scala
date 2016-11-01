@@ -62,7 +62,7 @@ object Chooser {
     unfreeImplSet
   }
 
-  def getAllTimesForDataStructure(implLibrary: ImplLibrary, dataStructure: DataStructure) = {
+  def getAllTimesForDataStructure(implLibrary: ImplLibrary, dataStructure: DataStructure): UnfreeImplSet = {
     // todo: consider conditions
     getAllTimes(implLibrary.impls.union(dataStructure.impls), implLibrary, dataStructure.parameters.toSet)
   }
@@ -103,7 +103,6 @@ object Chooser {
         (adtReadMethods & methodNamesThisIsHelpfulFor).nonEmpty
       })
     }}).toSet
-    println(potentiallyRelevantDataStructures.map(_._1))
 
     val results = potentiallyRelevantDataStructures.subsets().map((subset) => {
       subset -> getRelevantTimesForDataStructures(library, subset.map(_._2))

@@ -1,12 +1,13 @@
 package implementationSearcher
 
+import implementationSearcher.ImplLibrary.Decls
+
 import scala.annotation.tailrec
 
 /**
   * Created by buck on 10/31/16.
   */
-case class ImplLibrary(impls: Set[Impl], decls: Map[MethodName, ImplDeclaration], structures: Map[String, DataStructure]) {
-
+case class ImplLibrary(impls: Set[Impl], decls: Decls, structures: Map[String, DataStructure]) {
   // suppose we had x <- y and y <- z
   // then our arrows would be
   lazy val closuresOfForwardImplArrows: Map[MethodName, Set[MethodName]] = closureOfMap(forwardImplArrows)
@@ -51,4 +52,8 @@ case class ImplLibrary(impls: Set[Impl], decls: Map[MethodName, ImplDeclaration]
       .groupBy(_._1)
       .mapValues(_.map(_._2).toSet)
   }
+}
+
+object ImplLibrary {
+  type Decls = Map[MethodName, ImplDeclaration]
 }

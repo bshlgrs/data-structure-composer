@@ -11,26 +11,8 @@ import parsers.MainParser
 import shared._
 
 class DataStructureChooserSpec extends FunSpec {
-  val (impls, decls) = {
-    val (impls1, decls1) = ImplDeclaration.parseMany(
-      "getByIndex <- getFirst + n * getNext",
-      "getByIndex <- unorderedEach[_]",
-      "getFirst <- getByIndex",
-      "getNext <- getByIndex",
-      "unorderedEach[f] <- getFirst + n * getNext + n * f",
-      "getSmallest <- getSmallestBy[valueOrdering]",
-      "getSmallestBy[f] <- unorderedEach[_ <- f]",
-      "insertAtIndex! <- getByIndex + insertAfterNode!",
-      "insertAnywhere! <- insertAfterNode! + getFirst",
-      "insertAnywhere! <- insertAtIndex!",
-      "valueOrdering <- 1"
-    )
-
-    impls1 -> (decls1 ++ ImplDeclaration.parseManyFromLhses(
-      "insertAfterNode!",
-      "updateNode!"
-    ))
-  }
+  val impls = DataStructureChooserCli.impls
+  val decls = DataStructureChooserCli.decls
 
   val linkedList = DataStructure(
     """ds LinkedList {
@@ -38,27 +20,37 @@ class DataStructureChooserSpec extends FunSpec {
       |    getNext <- 1
       |    updateNode! <- 1
       |    insertAfterNode! <- 1
-      |}""".stripMargin)
+      |    insertFirst! <- 1
+      |}""".stripMargin, decls)
 
   val genericHeap = DataStructure(
     """ds GenericHeap[g] {
       |    updateNode! <- log(n) + g
-      |    getSmallestBy[f] <- 1
+      |    getFirstBy[f] <- 1
       |    insertAtIndex! <- log(n) + g
       |    unorderedEach[f] <- n + n * f
-      |}""".stripMargin)
+      |}""".stripMargin, decls)
 
 
   val heap = DataStructure(
     """ds Heap {
-      |    getSmallest <- 1
+      |    getMinimum <- 1
       |    updateNode! <- log(n)
       |    insertAtIndex! <- log(n)
       |    unorderedEach[f] <- n + n * f
-      |}""".stripMargin)
+      |}""".stripMargin, decls)
 
-  val library = ImplLibrary(impls, decls,
+
+  val stackMemoizer = DataStructure(
+    """ds StackMemoizer[reduction] if reduction.idempotent {
+      |    insertLast! <- reduction
+      |    deleteLast! <- reduction
+      |    reduce[reduction, zero] <- 1
+      |}""".stripMargin, decls)
+
+  val library: ImplLibrary = ImplLibrary(impls, decls,
     Map("GenericHeap" -> genericHeap, "LinkedList" -> linkedList))
+
 
   describe("data structure analysis") {
     describe("integration tests") {
@@ -67,7 +59,7 @@ class DataStructureChooserSpec extends FunSpec {
 
         assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
         assert(res.getNamed("getFirst") == Set(Impl("getFirst <- 1")))
-        assert(res.getNamed("getSmallest") == Set(Impl("getSmallest <- n")))
+        assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- n")))
         assert(res.getNamed("getNext") == Set(Impl("getNext <- 1")))
         assert(res.getNamed("updateNode!") == Set(Impl("updateNode! <- 1")))
       }
@@ -76,7 +68,7 @@ class DataStructureChooserSpec extends FunSpec {
         val res = Chooser.getAllTimesForDataStructure(library, heap)
 
         assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
-        assert(res.getNamed("getSmallest") == Set(Impl("getSmallest <- 1")))
+        assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
         assert(res.getNamed("getFirst") == Set(Impl("getFirst <- n")))
         assert(res.getNamed("updateNode!") == Set(Impl("updateNode! <- log(n)")))
       }
@@ -87,7 +79,7 @@ class DataStructureChooserSpec extends FunSpec {
 
         assert(res.getNamed("getFirst") == Set(Impl("getFirst <- 1")))
         assert(res.getNamed("insertAnywhere!") == Set(Impl("insertAnywhere! <- log(n)")))
-        assert(res.getNamed("getSmallest") == Set(Impl("getSmallest <- 1")))
+        assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
       }
 
       describe("doing a generic heap") {
@@ -95,7 +87,7 @@ class DataStructureChooserSpec extends FunSpec {
 
         it("succeeds at the read methods") {
           assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
-          assert(res.getNamed("getSmallest") == Set(Impl("getSmallest <- 1")))
+          assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
           assert(res.getNamed("getFirst") == Set(Impl("getFirst <- n")))
           assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
           assert(res.getNamed("getNext") == Set(Impl("getNext <- n")))
@@ -111,7 +103,7 @@ class DataStructureChooserSpec extends FunSpec {
 
         assert(res.getNamed("getFirst") == Set(Impl("getFirst <- 1")))
         assert(res.getNamed("insertAnywhere!") == Set(Impl("insertAnywhere! <- g + log(n)")))
-        assert(res.getNamed("getSmallest") == Set(Impl("getSmallest <- 1")))
+        assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
       }
     }
   }
@@ -143,17 +135,17 @@ class DataStructureChooserSpec extends FunSpec {
     describe("priority queue ADT") {
       val linkedListPQResult = DataStructureChoice(
         Set("LinkedList"),
-        Map(MethodExpr.parse("getSmallest") -> AffineBigOCombo(LinearTime, Map()),
+        Map(MethodExpr.parse("getMinimum") -> AffineBigOCombo(LinearTime, Map()),
           MethodExpr.parse("insertAnywhere!") -> AffineBigOCombo(ConstantTime, Map())))
 
       val heapResult = DataStructureChoice(
         Set("GenericHeap"),
-        Map(MethodExpr.parse("getSmallest") -> AffineBigOCombo(ConstantTime, Map()),
+        Map(MethodExpr.parse("getMinimum") -> AffineBigOCombo(ConstantTime, Map()),
           MethodExpr.parse("insertAnywhere!") -> Impl.rhs("g + log(n)").mapKeys(_.getAsNakedName)))
 
       it("can choose the Pareto-optimal options for a PriorityQueue adt") {
         val pQueueAdt = AbstractDataType(Map(),
-          Map(MethodExpr.parse("getSmallest") -> ConstantTime,
+          Map(MethodExpr.parse("getMinimum") -> ConstantTime,
             MethodExpr.parse("insertAnywhere!") -> ConstantTime)
         )
 
@@ -164,7 +156,7 @@ class DataStructureChooserSpec extends FunSpec {
 
       it("can choose the best options for a PriorityQueue adt") {
         val pQueueAdt = AbstractDataType(Map(),
-          Map(MethodExpr.parse("getSmallest") -> ConstantTime,
+          Map(MethodExpr.parse("getMinimum") -> ConstantTime,
             MethodExpr.parse("insertAnywhere!") -> ConstantTime)
         )
 

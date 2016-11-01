@@ -3,6 +3,7 @@
 getFirst <- getByIndex
 getNext <- getByIndex
 getByIndex <- getFirst + n * getNext
+getByIndex <- unorderedEach[_]
 getLast <- getByIndex
 getPrev <- getByIndex
 
