@@ -113,9 +113,9 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
     (unfreeImplSet.boundVariables ++ unfreeImplSet.declarations(this.lhs.name).parameters).contains(methodExpr.name)
   }
 
-  def getNames: Set[MethodName] = rhs.weights.keys.flatMap(_.getNames).toSet
+  lazy val getNames: Set[MethodName] = rhs.weights.keys.flatMap(_.getNames).toSet
 
-  def unnamed = UnnamedImpl(lhs.conditions, rhs)
+  lazy val unnamed = UnnamedImpl(lhs.conditions, rhs)
 }
 
 object Impl {
