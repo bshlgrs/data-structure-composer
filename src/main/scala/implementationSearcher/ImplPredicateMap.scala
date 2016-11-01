@@ -16,7 +16,7 @@ case class ImplPredicateMap(map: Map[MethodName, Set[FunctionProperty]]) {
 
   def get(name: MethodName): Set[FunctionProperty] = map.getOrElse(name, Set())
 
-  def toNiceString: String =
+  lazy val toNiceString: String =
     map.flatMap({ case (name: MethodName, y: Set[FunctionProperty]) => y.map((z) => s"${name.name}.$z") }).mkString(", ")
 }
 

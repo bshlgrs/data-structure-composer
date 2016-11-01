@@ -68,8 +68,8 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
   // and you want to bind it to f[y], in a context where the parameter list has y in it
 
   // you get back `if y.foo <- y`
-  def bindToContext(methodExpr: MethodExpr, unfreeImplSet: UnfreeImplSet, list: ParameterList): Set[UnnamedImpl] = {
 
+  def bindToContext(methodExpr: MethodExpr, unfreeImplSet: UnfreeImplSet, list: ParameterList): Set[UnnamedImpl] = {
     val parameters = unfreeImplSet.declarations(lhs.name).parameters
 
     assert(methodExpr.args.length == parameters.length,
@@ -80,13 +80,9 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
     val conditionsAndRhses: List[Set[UnnamedImpl]] = methodExpr.args.zipWithIndex.map({case (f: FunctionExpr, idx) =>
       val that = this
       val relevantParamName = parameters(idx)
-      rhs.weights.get(MethodExpr(relevantParamName, Nil)) match {
-        case None =>
-          Set(UnnamedImpl(ImplPredicateMap.empty, AffineBigOCombo[MethodExpr](ConstantTime, Map())))
-        case Some(weightOfParam) =>
-          f.getConditionsAndCosts(lhs.conditions.get(parameters(idx)), unfreeImplSet, list)
-            .items.map((x: UnnamedImpl) => x.copy(cost = x.cost * weightOfParam))
-      }
+      val weightOfParam = rhs.weights.getOrElse(MethodExpr(relevantParamName, Nil), ZeroTime)
+      f.getConditionsAndCosts(lhs.conditions.get(parameters(idx)), unfreeImplSet, list)
+        .items.map((x: UnnamedImpl) => x.copy(cost = x.cost * weightOfParam))
     })
 
     val combinationsOfImpls: Set[List[UnnamedImpl]] = Utils.cartesianProducts(conditionsAndRhses)
@@ -120,7 +116,13 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
 
 object Impl {
   def apply(string: String): Impl = {
-    MainParser.impl.parse(string).get.value._1
+    val (impl, decl) = MainParser.impl.parse(string).get.value
+
+    impl.addConditions(
+      ImplPredicateMap(
+        decl.parameters.map((x) => x -> Set[FunctionProperty]()).toMap
+      )
+    )
   }
 
   type Rhs = AffineBigOCombo[MethodExpr]

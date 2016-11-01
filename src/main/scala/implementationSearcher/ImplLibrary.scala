@@ -52,6 +52,44 @@ case class ImplLibrary(impls: Set[Impl], decls: Decls, structures: Map[String, D
       .groupBy(_._1)
       .mapValues(_.map(_._2).toSet)
   }
+
+  def potentiallyRelevantDataStructures(adt: AbstractDataType) = {
+    structures.filter({ case (name: String, structure: DataStructure) => {
+      // This structure is potentially relevant if there's any way for the read methods it contributes
+      // to be useful to the implementation of the ADT's methods
+
+      val adtReadMethods = adt.methods.map(_._1.name).toSet
+
+      structure.readMethods.exists((i: Impl) => {
+        val methodNamesThisIsHelpfulFor = closuresOfForwardImplArrows(i.lhs.name)
+        (adtReadMethods & methodNamesThisIsHelpfulFor).nonEmpty
+      })
+    }}).toSet
+  }
+
+  // If you compare Ost to AugmentedOst, the only reason to use AugmentedOst is if you need to use the
+  // twoSidedIndexRangeQuery at some point. Otherwise, Ost is better.
+
+  // This can be calculated by observing that Ost has strictly better write methods, and then finding the set of queries
+  // which AugmentedOst is better than Ost at.
+
+  // If there's a totally useless structure, it will never be used.
+
+  // map from data structure names to all of the read methods which that data structure implements faster than every
+  // data structure which dominates it on write times
+  lazy val qualifyingReadMethodsForDataStructures: Map[String, Option[Set[MethodName]]] = {
+//    structures.map({ case (structureName, structure) => {
+//      val otherStructures: Iterable[DataStructure] = structures.filterKeys(_ != structureName)
+//        .values
+//        .filter((other) => structure.partialCompareWriteMethods(other).rightDominates)
+//
+////      otherStructures.flatMap((other) => {
+////
+////      })
+//      ???
+//    }}).toMap
+    ???
+  }
 }
 
 object ImplLibrary {

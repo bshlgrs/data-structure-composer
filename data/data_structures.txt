@@ -8,23 +8,35 @@ ds VectorList {
     deleteLast! <- 1
 }
 
-ds AugmentedRedBlackOrderStatisticTreeList[g] {
+ds RedBlackOrderStatisticTreeList {
     getByIndex <- log(n)
-    updateNode! <- log(n) + log(n) * g
+    updateNode! <- log(n)
     getNext <- 1
     getPrev <- 1
-    insertLast! <- 1 + log(n) * g
-    insertAfterNode! <- 1 + log(n) * g
-    insertFirst! <- 1  + log(n) * g
-    deleteNode! <- log(n) + log(n) * g
-    deleteBetweenNodes! <- log(n) + log(n) * g
-    twoSidedIndexRangeQuery[g] <- log(n) + log(n) * g
+    insertLast! <- 1
+    insertAfterNode! <- 1
+    insertFirst! <- 1
+    deleteNode! <- log(n)
+    deleteBetweenNodes! <- log(n)
+}
+
+ds AugmentedRedBlackOrderStatisticTreeList[g] {
+    getByIndex <- log(n)
+    updateNode! <- log(n)
+    getNext <- 1
+    getPrev <- 1
+    insertLast! <- log(n)
+    insertAfterNode! <- log(n)
+    insertFirst! <- log(n)
+    deleteNode! <- log(n)
+    deleteBetweenNodes! <- log(n)
+    twoSidedIndexRangeQuery[g] <- log(n)
 }
 
 ds StackMemoizer[reduction] if reduction.idempotent {
     insertLast! <- 1
     deleteLast! <- 1
-    reduce[reduction, zero] <- 1
+    reduce[reduction] <- 1
 }
 
 ds Heap[heapOrdering] {
@@ -41,27 +53,34 @@ ds OrderedRedBlackTree[f, g] {
     getPrev <- 1
     getFirst <- 1
     getLast <- 1
-    updateNode! <- 1 + g
+    updateNode! <- 1
     getFirstBy[f] <- 1
     getLastBy[f] <- 1
     getKthBy[f] <- log(n)
-    insertAtIndex! <- log(n) + g
+    insertAtIndex! <- log(n)
     getFirstNodeWithValue[f] <- log(n)
-    deleteNode! <- 1 + g
+    deleteNode! <- 1
     countBetweenBy[f] <- log(n)
-    twoSidedValueRangeQuery[g] <- log(n) * g
-    oneSidedValueRangeQuery[g] <- log(n) * g
+    twoSidedValueRangeQuery[g] <- log(n)
+    oneSidedValueRangeQuery[g] <- log(n)
 }
 
 ds RangeMinQueryLinearithmicArrayThing[reduction] if reduction.idempotent {
     twoSidedIndexRangeQuery[reduction] <- 1 + reduction
-    insertLast! <- log(n) * reduction
+    insertLast! <- log(n)
     deleteLast! <- 1
 }
 
-ds HistogramHashMap {
-    count <- 1
+ds HistogramHashMap[groupingFunction] {
+    countOfEquivalenceClass[groupingFunction] <- 1
     insertAtIndex! <- 1
     updateNode! <- 1
     deleteAtIndex! <- 1
+}
+
+ds InvertibleReductionMemoizer[f] if f.invertible, f.commutative {
+    reduce[f] <- 1
+    insertAtIndex! <- 1
+    updateNode! <- 1 + getByIndex
+    deleteNode! <- 1 + getByIndex
 }

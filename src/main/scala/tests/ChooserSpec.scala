@@ -57,6 +57,17 @@ class ChooserSpec extends FunSpec {
       assert(res.getNamed("y").head == Impl("y[g] if g.foo <- log(n) + g"))
     }
 
+    it("doesn't use methods without necessary conditions") {
+      val (impls, decls) = ImplDeclaration.parseMany(
+        "x[f] if f.foo <- n",
+        "y <- x[_]"
+      )
+
+      val res = Chooser.getAllTimes(impls, ImplLibrary(impls, decls, Map()), Set())
+
+      assert(res.getNamed("y").isEmpty)
+    }
+
     it("handles named functions in method expressions") {
       val (impls, decls) = ImplDeclaration.parseMany(
         "y[f] <- n * f",

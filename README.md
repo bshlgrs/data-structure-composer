@@ -149,6 +149,11 @@ Interface things:
 - [ ] Make a webpage
 - [ ] Make a command line tool
 
+new list of todos:
+
+- [ ] figure out the data structure domination thing
+- [ ] pass previous results of searching for read impls into the Chooser.getAllTimes method
+
 ### Things to include
 
 - min stack memoizer

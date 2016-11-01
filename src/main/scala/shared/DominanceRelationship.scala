@@ -1,5 +1,7 @@
 package shared
 
+import implementationSearcher.MethodName
+
 /**
   * Created by buck on 9/25/16.
   */
@@ -55,6 +57,17 @@ object DominanceRelationship {
       RightStrictlyDominates
     }
   }
+
+//  def fromTwoMaps[A, B <: PartialOrdering[B]](left: Map[A, B], right: Map[A, B]): DominanceRelationship = {
+//    (left.keys ++ right.keys).map((blah: A) =>
+//      (left.get(blah), right.get(blah)) match {
+//        case (Some(x), Some(y)) => implicitly[PartialOrdering[B]].partialCompare(x, y)
+//        case (Some(x), None) => LeftStrictlyDominates
+//        case (None, Some(y)) => RightStrictlyDominates
+//        case (None, None) => BothDominate
+//      }
+//    ).foldLeft(BothDominate: DominanceRelationship)(_ infimum _)
+//  }
 
   trait DominanceRelationshipFromTotalOrdering[A <: Ordered[A]] extends PartialOrdering[A] {
     def partialCompare(x: A, y: A): DominanceRelationship = {

@@ -67,9 +67,23 @@ class DominanceSpec extends FunSpec with Checkers {
 
   describe("Impls") {
     val partialCompare = Impl.ImplPartialOrdering.partialCompare _
-    it("does simple things") {
+    it("compares runtimes") {
       assert(partialCompare(Impl("foo <- n"), Impl("foo <- log(n)"))
         == RightStrictlyDominates)
+    }
+
+    it("compares conditions") {
+      assert(partialCompare(
+        Impl("reduce[f] <- n + n * f"),
+        Impl("reduce[f] if f.commutative <- n + n * f"))
+        == LeftStrictlyDominates)
+    }
+
+    it("deals with conditions and runtimes conflicting") {
+      assert(partialCompare(
+        Impl("reduce[f] <- n + n * f"),
+        Impl("reduce[f] if f.commutative <- log(n)"))
+        == NeitherDominates)
     }
   }
 }

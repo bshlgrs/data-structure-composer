@@ -38,5 +38,29 @@ class FunctionExprSpecs extends FunSpec {
 
       assert(conditionsAndCosts == expected)
     }
+
+//    it("notices when implementations are impossible") {
+//      val scope = UnfreeImplSet(Map(), Set(),
+//        Map(
+//          MethodName("f") -> ImplDeclaration(List("x")),
+//          MethodName("g") -> ImplDeclaration(List("y"))
+//        )
+//      )
+//
+//      val functionExpr = AnonymousFunctionExpr(Set("commutative"), AffineBigOCombo[MethodName](ConstantTime))
+//
+//      val conditionsAndCosts = functionExpr.getConditionsAndCosts(Set(), scope,
+//        ParameterList.easy("y"))
+//
+//      val expectedUnnamedImpl = UnnamedImpl(
+//        ImplPredicateMap(Map(MethodName("y") -> Set())),
+//        AffineBigOCombo[MethodExpr](ZeroTime,
+//          Map(MethodExpr.parse("y") -> ConstantTime)
+//        )
+//      )
+//      val expected = DominanceFrontier.fromSet(Set(expectedUnnamedImpl))
+//
+//      assert(conditionsAndCosts == expected)
+//    }
   }
 }

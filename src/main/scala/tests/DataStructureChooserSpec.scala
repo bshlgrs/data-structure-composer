@@ -5,7 +5,7 @@ package tests
   */
 
 import cli.DataStructureChooserCli
-import implementationSearcher._
+import implementationSearcher.{Impl, _}
 import org.scalatest.FunSpec
 import parsers.MainParser
 import shared._
@@ -20,15 +20,17 @@ class DataStructureChooserSpec extends FunSpec {
       |    getNext <- 1
       |    updateNode! <- 1
       |    insertAfterNode! <- 1
+      |    deleteNode! <- 1
       |    insertFirst! <- 1
       |}""".stripMargin, decls)
 
   val genericHeap = DataStructure(
     """ds GenericHeap[g] {
-      |    updateNode! <- log(n) + g
+      |    updateNode! <- log(n)
       |    getFirstBy[f] <- 1
-      |    insertAtIndex! <- log(n) + g
+      |    insertAtIndex! <- log(n)
       |    unorderedEach[f] <- n + n * f
+      |    deleteNode! <- log(n)
       |}""".stripMargin, decls)
 
 
@@ -38,18 +40,19 @@ class DataStructureChooserSpec extends FunSpec {
       |    updateNode! <- log(n)
       |    insertAtIndex! <- log(n)
       |    unorderedEach[f] <- n + n * f
+      |    deleteNode! <- log(n)
       |}""".stripMargin, decls)
 
 
-  val stackMemoizer = DataStructure(
-    """ds StackMemoizer[reduction] if reduction.idempotent {
-      |    insertLast! <- reduction
-      |    deleteLast! <- reduction
-      |    reduce[reduction, zero] <- 1
+  val invertibleReductionMemoizer = DataStructure(
+    """ds InvertibleReductionMemoizer[f] if f.invertible, f.commutative {
+      |    reduce[f] <- 1
+      |    insertAtIndex! <- 1
+      |    updateNode! <- 1 + getByIndex
       |}""".stripMargin, decls)
 
   val library: ImplLibrary = ImplLibrary(impls, decls,
-    Map("GenericHeap" -> genericHeap, "LinkedList" -> linkedList))
+    Map("GenericHeap" -> genericHeap, "LinkedList" -> linkedList, "InvertibleReductionMemoizer" -> invertibleReductionMemoizer))
 
 
   describe("data structure analysis") {
@@ -94,7 +97,7 @@ class DataStructureChooserSpec extends FunSpec {
         }
 
         it("succeeds at the write methods") {
-          assert(res.getNamed("updateNode!") == Set(Impl("updateNode! <- g + log(n)")))
+          assert(res.getNamed("updateNode!") == Set(Impl("updateNode! <- log(n)")))
         }
       }
 
@@ -102,8 +105,19 @@ class DataStructureChooserSpec extends FunSpec {
         val res = Chooser.getRelevantTimesForDataStructures(library, Set(linkedList, genericHeap))
 
         assert(res.getNamed("getFirst") == Set(Impl("getFirst <- 1")))
-        assert(res.getNamed("insertAnywhere!") == Set(Impl("insertAnywhere! <- g + log(n)")))
+        assert(res.getNamed("insertAnywhere!") == Set(Impl("insertAnywhere! <- log(n)")))
         assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
+      }
+
+      describe("with invertible reduction memoizer") {
+        it("does getRelevantTimes correctly") {
+          val res = Chooser.getRelevantTimesForDataStructures(library, Set(invertibleReductionMemoizer, linkedList))
+
+          assert(res.getNamed("getSum") == Set(Impl("getSum <- 1")))
+          assert(res.getNamed("reduce") == Set(
+            Impl("reduce[f] if f.invertible, f.commutative <- 1"),
+            Impl("reduce[f] <- n * f + n")))
+        }
       }
     }
   }
@@ -136,18 +150,24 @@ class DataStructureChooserSpec extends FunSpec {
       val linkedListPQResult = DataStructureChoice(
         Set("LinkedList"),
         Map(MethodExpr.parse("getMinimum") -> AffineBigOCombo(LinearTime, Map()),
-          MethodExpr.parse("insertAnywhere!") -> AffineBigOCombo(ConstantTime, Map())))
+          MethodExpr.parse("insertAnywhere!") -> AffineBigOCombo(ConstantTime, Map()),
+          MethodExpr.parse("deleteNode!") -> AffineBigOCombo(ConstantTime, Map())
+        ))
 
       val heapResult = DataStructureChoice(
         Set("GenericHeap"),
         Map(MethodExpr.parse("getMinimum") -> AffineBigOCombo(ConstantTime, Map()),
-          MethodExpr.parse("insertAnywhere!") -> Impl.rhs("g + log(n)").mapKeys(_.getAsNakedName)))
+          MethodExpr.parse("insertAnywhere!") -> AffineBigOCombo(LogTime, Map()),
+          MethodExpr.parse("deleteNode!") -> AffineBigOCombo(LogTime, Map())))
+
+      val pQueueAdt = AbstractDataType(Map(),
+        Map(MethodExpr.parse("getMinimum") -> ConstantTime,
+          MethodExpr.parse("insertAnywhere!") -> ConstantTime,
+          MethodExpr.parse("deleteNode!") -> ConstantTime)
+      )
 
       it("can choose the Pareto-optimal options for a PriorityQueue adt") {
-        val pQueueAdt = AbstractDataType(Map(),
-          Map(MethodExpr.parse("getMinimum") -> ConstantTime,
-            MethodExpr.parse("insertAnywhere!") -> ConstantTime)
-        )
+        val res2 = Chooser.getRelevantTimesForDataStructures(library, Set(linkedList)).filterToAdt(pQueueAdt)
 
         val res = Chooser.allParetoOptimalDataStructureCombosForAdt(library, pQueueAdt)
 
@@ -155,11 +175,6 @@ class DataStructureChooserSpec extends FunSpec {
       }
 
       it("can choose the best options for a PriorityQueue adt") {
-        val pQueueAdt = AbstractDataType(Map(),
-          Map(MethodExpr.parse("getMinimum") -> ConstantTime,
-            MethodExpr.parse("insertAnywhere!") -> ConstantTime)
-        )
-
         val res = Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(library, pQueueAdt)
 
         assert(res.items == Set(heapResult))

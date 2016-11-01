@@ -38,6 +38,7 @@ object Chooser {
       if (unfreeImplSet.isOtherImplUseful(unfreeImpl)) {
         unfreeImplSet = unfreeImplSet.addImpl(unfreeImpl)
 
+        // todo: put a Map in here instead of looping over everything, to speed this up?
         for (otherImpl <- impls) {
           // So we have a random impl. Let's see if the unfreeImpl we just settled on is useful for that impl.
           // It's only useful if unfreeImpl's methodName is used by the rhs of the otherImpl (this condition is weaker than it could be)
@@ -77,7 +78,6 @@ object Chooser {
     val bestReadImplementations: UnfreeImplSet = getAllTimes(
       allProvidedReadImplementations ++ implLibrary.impls, implLibrary, allFreeVariables)
 
-
     val allWriteImplementations: Set[UnfreeImplSet] = structures.map((s) =>
       getAllTimes(s.writeMethods ++ bestReadImplementations.allImpls ++ implLibrary.impls, implLibrary, s.parameters.toSet))
 
@@ -92,19 +92,7 @@ object Chooser {
 
   def allParetoOptimalDataStructureCombosForAdt(library: ImplLibrary,
                                                 adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
-    val potentiallyRelevantDataStructures = library.structures.filter({ case (name: String, structure: DataStructure) => {
-      // This structure is potentially relevant if there's any way for the read methods it contributes
-      // to be useful to the implementation of the ADT's methods
-
-      val adtReadMethods = adt.methods.map(_._1.name).toSet
-
-      structure.readMethods.exists((i: Impl) => {
-        val methodNamesThisIsHelpfulFor = library.closuresOfForwardImplArrows(i.lhs.name)
-        (adtReadMethods & methodNamesThisIsHelpfulFor).nonEmpty
-      })
-    }}).toSet
-
-    val results = potentiallyRelevantDataStructures.subsets().map((subset) => {
+    val results = library.potentiallyRelevantDataStructures(adt).subsets().map((subset) => {
       subset -> getRelevantTimesForDataStructures(library, subset.map(_._2))
     }).toSet
 

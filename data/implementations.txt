@@ -56,9 +56,9 @@ updateByIndex! <- getAtIndex + updateNode!
 // stuff about orderings by values
 quickSelect[f] <- unorderedEach[f]
 getKthBy[f] <- quickSelect[f]
-getFirstBy[f] <- reduce[_{commutative} <- f, _]
+getFirstBy[f] <- reduce[_{commutative, idempotent} <- f]
 getFirstBy[f] <- getKthBy[f]
-getLastBy[f] <- reduce[_{commutative} <- f, _]
+getLastBy[f] <- reduce[_{commutative, idempotent} <- f]
 getLastBy[f] <- getKthBy[f]
 countBetweenBy[f] <- unorderedEach[f]
 getMaximum <- getFirstBy[valueOrdering]
@@ -80,9 +80,10 @@ count <- unorderedEach[_]
 contains <- count
 contains <- getFirstNodeWithValue[f]
 select[f] <- unorderedEach[f]
-reduce[f, zero] <- zero + each[f]
-reduce[f, zero] if f.commutative <- zero + unorderedEach[f]
+reduce[f] <- each[f]
+reduce[f] if f.commutative <- unorderedEach[f]
 
+count <- countOfEquivalenceClass[_]
 countOfEquivalenceClass[f] <- unorderedEach[f]
 mostNumerousEquivalenceClass[f] <- unorderedEach[f]
 mostCommonElement <- mostNumerousEquivalenceClass[_]
@@ -93,7 +94,7 @@ twoSidedIndexRangeQuery[reduction] <- unorderedEach[reduction]
 // eg, querying for the sum of the elements between index 0 and index i
 oneSidedIndexRangeQuery[reduction] <- unorderedEach[reduction]
 oneSidedIndexRangeQuery[reduction] <- twoSidedIndexRangeQuery[reduction]
-rangeMinimumQuery <- twoSidedIndexRangeQuery[_]
+rangeMinimumQuery <- twoSidedIndexRangeQuery[_{idempotent}]
 
 // eg, querying for the number of elements whose values are in the range (a, b)
 twoSidedValueRangeQuery[f,reduction] <- unorderedEach[_ <- f + reduction]
@@ -102,3 +103,5 @@ oneSidedValueRangeQuery[f,reduction] <- unorderedEach[_ <- f + reduction]
 oneSidedValueRangeQuery[f,reduction] <- twoSidedValueRangeQuery[f, reduction]
 
 valueOrdering <- 1
+
+getSum <- reduce[_{commutative, invertible} <- 1]

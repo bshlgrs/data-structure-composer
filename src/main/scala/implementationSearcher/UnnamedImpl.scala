@@ -22,7 +22,7 @@ object UnnamedImpl {
 
   implicit object UnnamedImplPartialOrdering extends PartialOrdering[UnnamedImpl] {
     def partialCompare(x: UnnamedImpl, y: UnnamedImpl): DominanceRelationship = {
-      val generalityDominance = implicitly[PartialOrdering[ImplPredicateMap]].partialCompare(x.predicates, y.predicates).flip
+      val generalityDominance = implicitly[PartialOrdering[ImplPredicateMap]].partialCompare(x.predicates, y.predicates)
       val timeDominance = x.cost.partialCompare(y.cost)
       generalityDominance.infimum(timeDominance)
     }
