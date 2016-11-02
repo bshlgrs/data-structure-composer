@@ -2,9 +2,9 @@ console.log("hey");
 
 var chooser = webapp.WebApp();
 
-$.get("/data/data_structures.txt", function (dataStructuresText) {
+$.get("../data/data_structures.txt", function (dataStructuresText) {
   $("#structures").val(dataStructuresText);
-  $.get("/data/implementations.txt", function (implsText) {
+  $.get("../data/implementations.txt", function (implsText) {
     $("#impls").val(implsText);
     $("#analyse-button").on("click", function(e) {
       var adtString = $("#adt").val().trim();
