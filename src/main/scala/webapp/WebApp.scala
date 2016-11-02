@@ -1,6 +1,7 @@
 package webapp
 
-import implementationSearcher.{DataStructure, Chooser, Impl}
+import cli.DataStructureChooserCli
+import implementationSearcher.{AbstractDataType, Chooser, DataStructure, Impl}
 import parsers.MainParser
 
 import scala.scalajs.js
@@ -26,7 +27,7 @@ object WebApp extends JSApp {
   }
 
   @JSExport
-  def makeChoices(implsString: String, dataStructuresString: String): js.Array[js.Array[String]] = {
+  def makeChoices(adtString: String): js.Array[js.Dictionary[js.Any]] = {
 //    val impls: Set[Impl] = ??? // MainParser.impls.parse(implsString).get.value
 //    val dataStructures: Set[DataStructure] = MainParser.dataStructureFile.parse(dataStructuresString).get.value
 //
@@ -41,6 +42,16 @@ object WebApp extends JSApp {
 //    }
 //
 //    js.Array(resultStrings:_*)
-    ???
+    val adt = AbstractDataType.parse(adtString)
+    val res = DataStructureChooserCli.chooseDataStructures(adt)
+
+    js.Array(res.items.map((choice) => {
+      js.Dictionary[js.Any](
+        "choices" -> js.Array(choice.choices.toArray:_*),
+        "times" -> js.Dictionary(choice.results.map({case (m, cost) =>
+          m.toString -> cost.toString
+        }).toSeq:_*)
+      )
+    }).toList: _*)
   }
 }

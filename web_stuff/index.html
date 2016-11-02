@@ -14,121 +14,13 @@
     <div class="row">
         <div class="col-xs-6">
             <h1>Data structure composer!!!</h1>
-            <h4>Method implementations</h4>
-<textarea class="form-control" rows=100 id="impls">
-// access by index
-getFirst <- getByIndex
-getNext <- getByIndex
-getByIndex <- getFirst + n * getNext
-getLast <- getByIndex
-getPrev <- getByIndex
-
-// looping
-unorderedEach[f] <- each[f]
-each[f] <- unorderedEach[_] + nlogn + n * f
-each[f] <- n * getByIndex + n * f
-each[f] <- getFirst + n * getNext + n * f
-
-// insertions
-insertAtEnd! <- getLast + insertAfterEndNode!
-insertAfterEndNode! <- insertAtEnd!
-insertAfterEndNode! <- insertAfterNode!
-insertBeforeFrontNode! <- insertBeforeNode!
-insertAtFront! <- getFirst + insertBeforeFrontNode!
-insertAtIndex! <- getByIndex + insertAfterNode!
-insertAtIndex! <- getByIndex + insertBeforeNode!
-insertAfterNode! <- insertNextToNode!
-insertBeforeNode! <- insertNextToNode!
-extend! <- getLast + n * insertAfterEndNode!
-
-// deletions
-deleteAtIndex! <- getAtIndex + deleteNode!
-deleteFirst! <- deleteAtIndex!
-deleteFirst! <- getFirst + deleteNodeWhichIsFirst!
-deleteLast! <- deleteAtIndex!
-deleteLast! <- getLast + deleteNodeWhichIsLast!
-deleteNodeWhichIsFirst! <- deleteNode!
-deleteNodeWhichIsLast! <- deleteNode!
-deleteBetweenNodes! <- n * deleteNode! + n * getNext
-deleteAtIndex! <- deleteBetweenNodes!
-
-deleteFirstNodeWithValue! <- getFirstNodeWithValue[valueOrdering] + deleteNode!
-
-// updates
-updateFirstNode! <- getFirst + updateNodeWhichIsFirst!
-updateNodeWhichIsFirst! <- updateNode!
-updateFirstNode! <- deleteFirst! + insertAfterFrontNode!
-
-updateLastNode! <- getLast + updateNodeWhichIsLast!
-updateNodeWhichIsLast! <- updateNode!
-updateLastNode! <- deleteLast! + insertAfterEndNode!
-
-updateByIndex! <- deleteAtIndex! + insertNextToNode!
-updateByIndex! <- getAtIndex + updateNode!
-
-// stuff about orderings by values
-quickSelect[f] <- unorderedEach[f]
-getKthBy[f] <- quickSelect[f]
-getFirstBy[f] <- reduce[_{commutative} <- f, _]
-getFirstBy[f] <- getKthBy[f]
-getLastBy[f] <- reduce[_{commutative} <- f, _]
-getLastBy[f] <- getKthBy[f]
-countBetweenBy[f] <- unorderedEach[f]
-getMaximum <- getFirstBy[valueOrdering]
-getMinimum <- getLastBy[valueOrdering]
-deleteMinimumBy![f] <- getMinimumBy[f] + deleteNode!
-deleteMaximumBy![f] <- getMaximumBy[f] + deleteNode!
-deleteMinimum! <- deleteMinimumBy![valueOrdering]
-deleteMaximum! <- deleteMaximumBy![valueOrdering]
-getFirstNodeWithValue[f] <- unorderedEach[f]
-
-// other reductions
-count <- unorderedEach[_]
-contains <- count
-contains <- getFirstNodeWithValue[f]
-select[f] <- unorderedEach[f]
-reduce[f, zero] <- zero + each[f]
-reduce[f, zero] if f.commutative <- zero + unorderedEach[f]
-
-countOfEquivalenceClass[f] <- unorderedEach[f]
-mostNumerousEquivalenceClass[f] <- unorderedEach[f]
-mostCommonElement <- mostNumerousEquivalenceClass[_]
-
-// eg, querying for the sum of the elements between indexes i and j
-twoSidedIndexRangeQuery[reduction] <- unorderedEach[reduction]
-// eg, querying for the sum of the elements between index 0 and index i
-oneSidedIndexRangeQuery[reduction] <- unorderedEach[reduction]
-minimumRangeQuery <- twoSidedIndexRangeQuery[_]
-
-// // eg, querying for the number of elements whose values are in the range (a, b)
-// twoSidedValueRangeQuery[f,reduction] <- unorderedEach[_ <- f + reduction]
-// // eg, querying for the sum of the k smallest elements
-// oneSidedValueRangeQuery[f,reduction] <- unorderedEach[_ <- f + reduction]
-// oneSidedValueRangeQuery[f,reduction] <- twoSidedValueRangeQuery[_ <- f + reduction]
-
-valueOrdering <- 1
-</textarea>
-
-            <h4>Data structures</h4>
-<textarea id="data-structures" rows=20  class="form-control" >
-VectorList {
-    getByIndex <- 1
-    updateNode! <- 1
-    insertAtEnd! <- 1
-    deleteAtIndex! <- n
-    deleteBetweenNodes! <- n
-    deleteAtEnd! <- 1
-}
-
-OrderStatisticTreeList {
-    getByIndex <- log(n)
-    updateNode! <- 1
-    getNext <- 1
-    insertAtEnd! <- 1
-    insertAtStart! <- 1
-    deleteNode! <- log(n)
-    deleteBetweenNodes! <- log(n)
-    deleteAtEnd! <- 1
+            <h4>ADT</h4>
+<textarea class="form-control" id="adt">
+adt MinStack {
+  insertLast! -> 1
+  deleteLast! -> 1
+  getByIndex -> 1
+  getMinimum -> 1
 }
 </textarea>
 
@@ -156,12 +48,8 @@ OrderStatisticTreeList {
     <script type="text/javascript">
 
         $("#analyse-button").on("click", function(e) {
-            var result = webapp.WebApp().makeChoices($("#impls").val(), $("#data-structures").val());
-            $("#result").html("");
-            result.forEach((r) => {
-                $("#result").append("<h3>" + r[0] + "</h3>");
-                $("#result").append("<pre>" + r[1] + "</pre>");
-            });
+            var result = webapp.WebApp().makeChoices($("#adt").val());
+            $("#result").html(JSON.stringify(result));
         })
     </script>
 </body>

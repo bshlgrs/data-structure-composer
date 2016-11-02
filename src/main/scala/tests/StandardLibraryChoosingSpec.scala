@@ -106,8 +106,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
     }
 
     it("can do a stack with contains") {
-//      for(i <- Range(0, 100)) {
-        val res = DataStructureChooserCli.chooseDataStructures(MainParser.nakedAdt.parse("""
+      val res = DataStructureChooserCli.chooseDataStructures(MainParser.nakedAdt.parse("""
         adt Stack {
           insertLast! -> 1
           deleteLast! -> 1
@@ -119,15 +118,14 @@ class StandardLibraryChoosingSpec extends FunSpec {
         DataStructureChooserCli.printResults(res)
 
         assert(res.items.head.choices == Set("HistogramHashMap", "VectorList"))
-//      }
     }
 
     it("can do a set which you never delete from") {
-      val res = DataStructureChooserCli.chooseDataStructures(MainParser.nakedAdt.parse("""
+      val res = DataStructureChooserCli.chooseDataStructures(AbstractDataType.parse("""
         adt NeverDeletedSet {
           insertLast! -> 1
           contains -> 1
-        }""".trim()).get.value)
+        }""".trim()))
 
       DataStructureChooserCli.printResults(res)
 
