@@ -123,7 +123,7 @@ object MainParser {
 
   lazy val lineSep: P[Unit] = P("\n" | ";")
 
-  lazy val nakedAdt: P[AbstractDataType] = adt ~ End
+  lazy val nakedAdt: P[AbstractDataType] = adt ~ "\n".rep() ~ End
 
   def main (args: Array[String]) {
 //    println(bigOLiteral.parse("1"))

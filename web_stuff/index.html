@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Data structure composer demo</title>
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <title>Data structure composer demo</title>
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
 </head>
 <body>
 
 
 <div class="container">
-    <div class="row">
-        <div class="col-xs-6">
-            <h1>Data structure composer!!!</h1>
-            <h4>ADT</h4>
-<textarea class="form-control" id="adt">
+  <div class="row">
+    <div class="col-xs-6">
+      <h1>Data structure composer!!!</h1>
+      <h4>ADT</h4>
+<textarea class="form-control" rows="10" id="adt">
 adt MinStack {
   insertLast! -> 1
   deleteLast! -> 1
@@ -24,33 +24,28 @@ adt MinStack {
 }
 </textarea>
 
-        </div>
+<h4>Methods</h4>
+<textarea class="form-control" rows="10" id="impls">
+</textarea>
 
-        <div class="col-xs-6">
-            <button id="analyse-button" type="button" class="btn btn-primary">Analyse!</button>
-            <div id="result">
+<h4>Data structures</h4>
+<textarea class="form-control" rows="10" id="structures">
+</textarea>
+  </div>
 
-            </div>
-
-
-
-
-        </div>
+    <div class="col-xs-6">
+      <button id="analyse-button" type="button" class="btn btn-primary">Analyse!</button>
+      <div id="result">
+      </div>
     </div>
+  </div>
 </div>
 
 
 
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript" src="../target/scala-2.11/scala_big_o-fastopt.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+<script type="text/javascript" src="../target/scala-2.11/scala_big_o-fastopt.js"></script>
 <script>window.webapp || document.write('<script src="./scala_big_o-fastopt.js">\x3C/script>')</script>
-
-    <script type="text/javascript">
-
-        $("#analyse-button").on("click", function(e) {
-            var result = webapp.WebApp().makeChoices($("#adt").val());
-            $("#result").html(JSON.stringify(result));
-        })
-    </script>
+<script type="text/javascript" src="./main.js"></script>
 </body>
 </html>
