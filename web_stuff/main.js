@@ -8,7 +8,12 @@ $.get("/data/data_structures.txt", function (dataStructuresText) {
     $("#impls").val(implsText);
     $("#analyse-button").on("click", function(e) {
       var adtString = $("#adt").val().trim();
+
+      var startTime = Date.now();
+
       var choices = chooser.makeChoices($("#impls").val(), $("#structures").val(), adtString);
+
+      console.log((Date.now() - startTime) / 1000);
 
       var resultString = choices.map((choice) => {
         return (
