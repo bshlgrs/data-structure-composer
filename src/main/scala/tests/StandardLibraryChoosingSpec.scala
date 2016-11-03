@@ -206,10 +206,33 @@ class StandardLibraryChoosingSpec extends FunSpec {
           getMinimum -> 1
           getByIndex -> 1
           updateNode! -> 1
-        }""".trim()).get.value
+        }""".trim()
+      ).get.value
 
       val res2 = Chooser.getRelevantTimesForDataStructures(library,
               Set(structures("InvertibleReductionMemoizer"), structures("VectorList"))).filterToAdt(adt)
+
+      assert(res2.getNamed("getMinimum") == Set(Impl("getMinimum <- n")))
+      val res = DataStructureChooserCli.chooseDataStructures(adt)
+
+      DataStructureChooserCli.printResults(res)
+
+      assert(res.items.map(_.choices) == Set(Set("VectorList", "OrderedRedBlackTree")))
+    }
+
+    it("can do min stack with getKthBy") {
+      val adt = MainParser.nakedAdt.parse("""
+        adt MinStack {
+          insertLast! -> 1
+          deleteLast! -> 1
+          getByIndex -> 1
+          getMinimum -> 1
+          getKthBy[_] -> 1
+        }""".trim()
+      ).get.value
+
+      val res2 = Chooser.getRelevantTimesForDataStructures(library,
+        Set(structures("InvertibleReductionMemoizer"), structures("VectorList"))).filterToAdt(adt)
 
       assert(res2.getNamed("getMinimum") == Set(Impl("getMinimum <- n")))
       val res = DataStructureChooserCli.chooseDataStructures(adt)

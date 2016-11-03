@@ -16,7 +16,8 @@ case class MethodExpr(name: MethodName, args: List[FunctionExpr]) {
   def getNames: Set[MethodName] = Set(name) ++ args.flatMap(_.getNames)
 
   def getAsNakedName: MethodName = {
-    assert(args.isEmpty)
+    // todo: put this assertion back
+//    assert(args.isEmpty)
     name
   }
 

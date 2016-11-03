@@ -13,7 +13,13 @@ $.get("../data/data_structures.txt", function (dataStructuresText) {
 
         var startTime = Date.now();
 
-        var choices = chooser.makeChoices($("#impls").val(), $("#structures").val(), adtString);
+        try {
+          var choices = chooser.makeChoices($("#impls").val(), $("#structures").val(), adtString);
+        } catch (e) {
+          $("#result").html("<p>Error: " + e.toString() + "</p><p>" + e.stack + "</p>");
+          debugger;
+          return;
+        }
 
         console.log((Date.now() - startTime) / 1000);
 

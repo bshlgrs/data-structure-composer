@@ -123,7 +123,7 @@ but can also do other things...
 
 These are all eminently doable.
 
-There might be some trickiness in making it easy for users to find all those methods--maybe they won't guess the name of `find_mode` or `pop!` or something like that.
+There might be some trickiness in making it easy for users to find all those methods--maybe they won't guess the name of `find_mode` or `pop!` or something like that. I will probably make a web app with descriptions for each method and data structure, and then send them to be backend with each request.
 
 ----
 

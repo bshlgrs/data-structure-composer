@@ -87,3 +87,10 @@ ds InvertibleReductionMemoizer[f] if f.invertible, f.commutative {
     deleteNode! <- 1 + getByIndex
 }
 
+ds EquivalenceClassPopularityHeap[f] {
+    updateNode! <- 1
+    deleteAtIndex! <- 1
+    insertAtIndex! <- 1
+    countOfEquivalenceClass[f] <- 1
+    mostNumerousEquivalenceClass[f] <- 1
+}

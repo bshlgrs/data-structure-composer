@@ -67,8 +67,8 @@ getMinimum <- getLastBy[valueOrdering]
 getMinimum <- getFirstBy[valueOrdering]
 deleteFirstBy![f] <- getFirstBy[f] + deleteNode!
 deleteLastBy![f] <- getLastBy[f] + deleteNode!
-deleteFirst! <- deleteFirstBy![valueOrdering]
-deleteLast! <- deleteLastBy![valueOrdering]
+deleteSmallest! <- deleteFirstBy![valueOrdering]
+deleteBiggest! <- deleteLastBy![valueOrdering]
 getFirstNodeWithValue[f] <- unorderedEach[f]
 // The obvious implementation for getNearest is to just loop over everything
 getNearest[f] <- unorderedEach[f]
