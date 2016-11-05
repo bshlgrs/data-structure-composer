@@ -83,20 +83,25 @@ class App extends Component {
 
         <button onClick={() => this.fetch()}>{this.state.searching ? "Searching..." : "Search!"}</button>
 
-
       {optimalDataStructures &&
-        <table>
-          <tbody>
-            <tr>
-              <th />
-              {previousSearchMethods.map((m, idx) => <th key={idx}>{m}</th>)}
-            </tr>
-            {optimalDataStructures.map((ds, idx) => <tr key={idx}>
-              <td>{ds.choices.join(", ")}</td>
-              {previousSearchMethods.map((m, idx) => <td key={idx}>{ds.results[m].as_string_for_json}</td>)}
-            </tr>)}
-          </tbody>
-        </table>}
+        (optimalDataStructures.length ?
+          <table>
+            <tbody>
+              <tr>
+                <th />
+                {previousSearchMethods.map((m, idx) => <th key={idx}>{m}</th>)}
+              </tr>
+              {optimalDataStructures.map((ds, idx) => <tr key={idx}>
+                <td>{ds.choices.join(", ")}</td>
+                {previousSearchMethods.map((m, idx) => <td key={idx}>{ds.results[m].as_string_for_json}</td>)}
+              </tr>)}
+            </tbody>
+          </table> :
+          <div>
+            <p>There were no results found for that ADT!</p>
+            <p>This is basically just an error in this app; there shouldn't actually be ADTs which can't be implemented.</p>
+          </div>
+        )}
       </div>
     );
   }
