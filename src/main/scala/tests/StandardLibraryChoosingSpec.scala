@@ -117,7 +117,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
         DataStructureChooserCli.printResults(res)
 
-        assert(res.items.head.choices == Set("HistogramHashMap", "VectorList"))
+        assert(res.items.exists(_.choices == Set("HistogramHashMap", "VectorList")))
     }
 
     it("can do a set which you never delete from") {
@@ -175,7 +175,8 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choices == Set("RangeMinQueryLinearithmicArrayThing", "HistogramHashMap", "VectorList"))
+      assert(res.items.exists(_.choices ==
+        Set("RangeMinQueryLinearithmicArrayThing", "HistogramHashMap", "VectorList")))
     }
 
     it("can do sum stack with random modification") {
@@ -217,7 +218,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.map(_.choices) == Set(Set("VectorList", "OrderedRedBlackTree")))
+      assert(res.items.map(_.choices) == Set(Set("VectorList", "ValueOrderedRedBlackAugmentedOST")))
     }
 
     it("can do min stack with getKthBy") {
@@ -239,7 +240,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.map(_.choices) == Set(Set("VectorList", "OrderedRedBlackTree")))
+      assert(res.items.map(_.choices) == Set(Set("VectorList", "ValueOrderedRedBlackAugmentedOST")))
     }
   }
 }
