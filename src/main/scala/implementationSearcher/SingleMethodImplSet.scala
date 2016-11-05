@@ -1,20 +1,19 @@
 package implementationSearcher
 
-import implementationSearcher.ImplLhs._
 import shared._
 
 /**
   * Created by buck on 9/10/16.
   */
-case class SingleMethodImplSet(options: DominanceFrontier[UnnamedImpl]) {
+case class SingleMethodImplSet(options: DominanceFrontier[UnnamedImpl], map: Map[UnnamedImpl, ImplSource]) {
   def impls = options.items
 
   def bestImplsForConditions(conditions: ImplPredicateMap): DominanceFrontier[UnnamedImpl] = {
     DominanceFrontier.fromSet(implsWhichMatchConditions(conditions).items)
   }
 
-  def add(impl: UnnamedImpl): SingleMethodImplSet = {
-    SingleMethodImplSet(options.add(impl))
+  def add(impl: UnnamedImpl, source: ImplSource): SingleMethodImplSet = {
+    SingleMethodImplSet(options.add(impl), map.updated(impl, source))
   }
 
   def isOtherImplUseful(impl: UnnamedImpl): Boolean = {
@@ -39,17 +38,17 @@ case class SingleMethodImplSet(options: DominanceFrontier[UnnamedImpl]) {
   }
 
   def sum(other: SingleMethodImplSet): SingleMethodImplSet = {
-    SingleMethodImplSet(this.options ++ other.options)
+    SingleMethodImplSet(this.options ++ other.options, this.map ++ other.map)
   }
 
   def product(other: SingleMethodImplSet): SingleMethodImplSet =
-    SingleMethodImplSet.fromSet(for {
+    SingleMethodImplSet.fromSetOfTuples(for {
       x <- this.impls
       y <- other.impls
     } yield {
       val lhs = x.predicates.and(y.predicates)
       val rhs = x.cost + y.cost
-      UnnamedImpl(lhs, rhs)
+      UnnamedImpl(lhs, rhs) -> ProductSource(other.map(x), other.map(y))
     })
 
 
@@ -59,7 +58,12 @@ case class SingleMethodImplSet(options: DominanceFrontier[UnnamedImpl]) {
 }
 
 object SingleMethodImplSet {
-  def fromSet(set: Set[UnnamedImpl]): SingleMethodImplSet = {
-    SingleMethodImplSet(DominanceFrontier.fromSet(set))
+  def fromSet(set: Set[UnnamedImpl], map: Map[UnnamedImpl, ImplSource]): SingleMethodImplSet = {
+    val df = DominanceFrontier.fromSet(set)
+    SingleMethodImplSet(df, map.filterKeys((x) => df.items.contains(x)))
+  }
+
+  def fromSetOfTuples(set: Set[(UnnamedImpl, ImplSource)]): SingleMethodImplSet = {
+    fromSet(set.map(_._1), set.toMap)
   }
 }
