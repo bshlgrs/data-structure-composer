@@ -88,7 +88,7 @@ object Chooser {
 
     val bestReadImplementations: UnfreeImplSet = getAllTimes(
       UnfreeImplSet(Map(), allFreeVariables, implLibrary.decls),
-      allProvidedReadImplementations ++ implLibrary.impls,
+      allProvidedReadImplementations ++ implLibrary.readMethods,
       implLibrary)
 
     val allWriteImplementations: Set[UnfreeImplSet] = structures.map((s) =>

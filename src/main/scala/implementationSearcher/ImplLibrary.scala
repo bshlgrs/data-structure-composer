@@ -36,6 +36,7 @@ case class ImplLibrary(impls: Set[Impl], decls: Decls, structures: Map[String, D
   }
 
   lazy val writeMethods = impls.filter(_.lhs.isMutating)
+  lazy val readMethods = impls.filter(!_.lhs.isMutating)
 
   // map from MethodNames to all the things that can be used to implement them
   // eg, if we just had `reduce` and `getSum` here, our impls would have `getSum <- reduce[_]` in them,
