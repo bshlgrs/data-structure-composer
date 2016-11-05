@@ -1,5 +1,6 @@
 package implementationSearcher
 
+import implementationSearcher.Chooser.SearchResultMap
 import shared._
 
 import scala.PartialOrdering
@@ -8,7 +9,9 @@ import scala.PartialOrdering
   * Created by buck on 10/10/16.
   */
 
-case class DataStructureChoice(choices: Set[String], results: Map[MethodExpr, AffineBigOCombo[MethodName]]) {
+case class DataStructureChoice(choices: Set[String],
+                               results: Map[MethodExpr, AffineBigOCombo[MethodName]],
+                               sources: Map[MethodExpr, Option[String]]) {
   def overallTimeForAdt(abstractDataType: AbstractDataType): BigOLiteral = {
 //    assert(results.keys.forall(_.args.isEmpty),
 //       s"While calculating the overall time for an ADT on the data structure choice $this, " +
@@ -34,5 +37,12 @@ object DataStructureChoice {
 
       timeComparison.orIfTied(simplicityComparison)
     }
+  }
+
+  def buildWithSources(set: Set[(String, DataStructure)],
+                       results: Map[MethodExpr, AffineBigOCombo[MethodName]],
+                       searchResultMap: SearchResultMap
+                      ): DataStructureChoice = {
+    
   }
 }

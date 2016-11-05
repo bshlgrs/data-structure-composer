@@ -6,7 +6,9 @@ import shared.BigOLiteral
 /**
   * Created by buck on 9/10/16.
   */
-case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVariables: Set[MethodName], declarations: Map[MethodName, ImplDeclaration]) {
+case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet],
+                         boundVariables: Set[MethodName],
+                         declarations: Map[MethodName, ImplDeclaration]) {
   def addImpl(impl: Impl): UnfreeImplSet = {
     if (impls.contains(impl.lhs.name)) {
       this.copy(impls = impls.updated(impl.lhs.name, impls(impl.lhs.name).add(impl)))
