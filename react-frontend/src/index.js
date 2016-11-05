@@ -3,7 +3,13 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import './index.css';
 
-ReactDOM.render(
-  <App />,
-  document.getElementById('root')
-);
+fetch('/api/start-data').then((response) => {
+  response.json().then(function(data) {
+    ReactDOM.render(
+      <App {...data} />,
+      document.getElementById('root')
+    );
+  });
+});
+
+

@@ -21,6 +21,8 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
     AffineBigOCombo(bias + other, weights)
   }
 
+  val asStringForJson: String = toString
+
   def *(c: BigOLiteral): AffineBigOCombo[A] = {
     AffineBigOCombo(c * bias, weights.mapValues(_ * c))
   }

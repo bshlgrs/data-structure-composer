@@ -49,13 +49,9 @@ ds Heap[heapOrdering] {
     insertAtIndex! <- log(n)
 }
 
-ds OrderedRedBlackTree[f, g] {
+ds ValueOrderedRedBlackAugmentedOST[f, g] {
     unorderedEach <- n
-    getNext <- 1
-    getPrev <- 1
-    getFirst <- 1
-    getLast <- 1
-    updateNode! <- 1
+    updateNode! <- log(n)
     getFirstBy[f] <- 1
     getLastBy[f] <- 1
     getKthBy[f] <- log(n)

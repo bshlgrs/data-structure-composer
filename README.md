@@ -165,13 +165,40 @@ new list of todos:
 - Do I have to do anything fancy to get things like `union` or `intersection` to work?
 - The frontend might let you select between methods in multiple languages.
 
+## more things
+
+https://dzone.com/articles/introduction-probabilistic-0
+
+
 ----------
 
 ## Current tasks
 
-- Better error checking for structures and methods which have been input.
+- Front-end
+  - Let you specify non-primitive methods
+  - Let you view the impls
+  - Let you see which data structures correspond to which methods.
+  - better search interface
+- Search algorithm efficiency
+  - Store an upper bound on cost required to be competitive with the best solutions, stop early on uncompetitive data structures
+  - Better automatic reasoning on data structures not being helpful
+  - As you add on data structures, auto-enqueing all the previous read methods found.
+- Search algorithm other
+  - Make it possible to see where the data structures were used in an implementation.
+  - Allow me to nest data structures. So it's clearer when we're using an OST vs something else.
+- Front end data structure wiki
+  - migrate everything to database instead of flat files?
 
-## more things
+---------
 
-https://dzone.com/articles/introduction-probabilistic-0
+## Crazy extensions
+
+work with more complex data? eg multiple columns?
+
+output code???
+
+- How hard would this be?
+  - I think not that hard.
+    - It relies on me knowing which method comes from where.
+  - Key idea: just output all impls that were selected, except for the primitive insertions, which need to be done some other way.
 

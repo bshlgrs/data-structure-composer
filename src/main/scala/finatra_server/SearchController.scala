@@ -3,10 +3,11 @@ package finatra_server
 import cli.DataStructureChooserCli
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
-import implementationSearcher.{ImplLhs, MethodExpr}
+import implementationSearcher._
 
 import scala.util.{Failure, Success, Try}
 import parsers.MainParser
+import shared.{BigOLiteral, ConstantTime, DominanceFrontier}
 
 class SearchController extends Controller {
 //  get("/compile") { compilationRequest: CompilationRequest =>
@@ -29,18 +30,30 @@ class SearchController extends Controller {
 //    }
 //  }
 
-//  get("/search") search{ searchRequest: SearchRequest =>
-//    val result = for {
-//      (impls, decls) <- searchRequest.mbImplsString match {
-//        MainParser
-//      }.parseImplFileString(searchRequest.`mbImplsString`)
-//      dataStructures <- MainParser.parseDataStructureFileString(
-//        searchRequest.dataStructuresString, decls)
-//
-//    }
-//  }
+  post("/search") { searchRequest: SearchRequest =>
+    val tryResult: Try[DominanceFrontier[DataStructureChoice]] = for {
+      (impls, decls) <- (searchRequest.mbImplsString match {
+        case None => Success(DataStructureChooserCli.impls, DataStructureChooserCli.decls)
+        case Some(text) => MainParser.parseImplFileString(text)
+      }) : Try[(Set[Impl], ImplLibrary.Decls)]
+      dataStructures <- searchRequest.dataStructuresString match {
+        case None => Success(DataStructureChooserCli.dataStructures)
+        case Some(text) => MainParser.parseDataStructureFileString(text, decls)
+      }
+      adt <- Try(AbstractDataType(Map(),
+        searchRequest.adtMethods.map((x: String) =>
+          MethodExpr(x) -> (ConstantTime: BigOLiteral)).toMap))
+      library <- Try(ImplLibrary(impls, decls, dataStructures))
+      searchResults <- Try(Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(library, adt))
+    } yield searchResults
 
-  get("/") { request: Request =>
+    tryResult match {
+      case Success(result) => response.ok.body(result.items)
+      case Failure(err) => response.badRequest(err)
+    }
+  }
+
+  get("/start-data") { request: Request =>
 //    response.ok.body(ImplLhs.parse("f[y] if y.foo"))
     response.ok.body(
       Map(

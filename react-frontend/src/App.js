@@ -2,8 +2,26 @@ import React, { Component } from 'react';
 import './App.css';
 
 class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      selectedMethods: ['insertLast!', 'deleteLast!', 'getLast', 'getMinimum'],
+      optimalDataStructures: null,
+      searching: false
+    }
+  }
+
   fetch() {
-    fetch('/api').then((response) => {
+    var body = JSON.stringify({
+      adt_methods: this.state.selectedMethods
+    });
+
+    this.setState({ searching: true });
+
+    fetch('/api/search', { headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json, charset=UTF-8'
+    }, method: "POST", body: body }).then((response) => {
       if (response.status !== 200) {
         console.log('Looks like there was a problem. Status Code: ' +
           response.status);
@@ -11,57 +29,67 @@ class App extends Component {
       }
 
       // Examine the text in the response
-      response.json().then(function(data) {
-        console.log(data);
+      response.json().then((result) => {
+        this.setState({ optimalDataStructures: result, searching: false });
       });
     });
   }
+
+  changeSelectedMethod(e, idx) {
+    var newSelectedMethods = [...this.state.selectedMethods];
+    newSelectedMethods[idx] = e.target.value;
+    this.setState({ selectedMethods: newSelectedMethods });
+  }
+
+  addSelectedMethod(e, idx) {
+    this.setState({ selectedMethods: [...this.state.selectedMethods, ""]});
+  }
+
+  removeSelectedMethod(idx) {
+    var newSelectedMethods = [...this.state.selectedMethods];
+    newSelectedMethods.splice(idx, 1);
+    this.setState({ selectedMethods: newSelectedMethods});
+  }
+
   render() {
+    var optimalDataStructures = this.state.optimalDataStructures;
+    var previousSearchMethods = optimalDataStructures && optimalDataStructures[0] && Object.keys(optimalDataStructures[0].results).sort();
+
     return (
       <div className="App">
         <div className="App-header">
           <h2>Data structure chooser</h2>
         </div>
         <p className="App-body">
-          Choose the methods you want WOW
+          Choose the methods you want
         </p>
 
-        <button onClick={() => this.fetch()}>Fetch!</button>
+        {this.state.selectedMethods.map((x, idx) => <div key={idx}>
+          <select value={x} onChange={(e) => this.changeSelectedMethod(e, idx)}>
+            <option />
+            {Object.keys(this.props.decls).sort().map((decl, idx) => <option value={decl} key={idx}>{decl}</option>)}
+          </select>
+          <button onClick={() => this.removeSelectedMethod(idx)}>remove</button>
+        </div>)}
 
+        <button onClick={() => this.addSelectedMethod()}>add method</button>
+
+        <button onClick={() => this.fetch()}>{this.state.searching ? "Searching..." : "Search!"}</button>
+
+
+      {optimalDataStructures &&
         <table>
           <tbody>
             <tr>
-              <th>Methods</th>
-              <th>Hash map</th>
-              <th>BST + OST</th>
-              <th>OST</th>
+              <th />
+              {previousSearchMethods.map((m, idx) => <th key={idx}>{m}</th>)}
             </tr>
-            <tr>
-              <td>insertByIndex!</td>
-              <td>log(n)</td>
-              <td>log(n)</td>
-              <td>log(n)</td>
-            </tr>
-            <tr>
-              <td>deleteMinimum</td>
-              <td>log(n)</td>
-              <td>log(n)</td>
-              <td>log(n)</td>
-            </tr>
-            <tr>
-              <td>insertAtFront!</td>
-              <td>log(n)</td>
-              <td>log(n)</td>
-              <td>log(n)</td>
-            </tr>
-            <tr>
-              <td>updateNode!</td>
-              <td>log(n)</td>
-              <td>log(n)</td>
-              <td>log(n)</td>
-            </tr>
+            {optimalDataStructures.map((ds, idx) => <tr key={idx}>
+              <td>{ds.choices.join(", ")}</td>
+              {previousSearchMethods.map((m, idx) => <td key={idx}>{ds.results[m].as_string_for_json}</td>)}
+            </tr>)}
           </tbody>
-        </table>
+        </table>}
       </div>
     );
   }
