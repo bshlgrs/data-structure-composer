@@ -175,19 +175,18 @@ https://dzone.com/articles/introduction-probabilistic-0
 ## Current tasks
 
 - Front-end
-  - Let you specify non-primitive methods
-  - Let you view the impls
-  - Let you see which data structures correspond to which methods.
+  - [x] Let you specify non-primitive methods
+  - Let you see which data structures correspond to which methods. (blocked by the search algorithm semantics one)
   - better search interface
 - Search algorithm efficiency
   - Store an upper bound on cost required to be competitive with the best solutions, stop early on uncompetitive data structures
   - Better automatic reasoning on data structures not being helpful
   - As you add on data structures, auto-enqueing all the previous read methods found.
-- Search algorithm other
+- Search algorithm semantics
   - Make it possible to see where the data structures were used in an implementation.
   - Allow me to nest data structures. So it's clearer when we're using an OST vs something else.
 - Front end data structure wiki
-  - migrate everything to database instead of flat files?
+  - nah. Instead, make the parser able to handle descriptions 
 
 ---------
 

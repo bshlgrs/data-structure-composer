@@ -16,7 +16,7 @@ class App extends Component {
       adt_methods: this.state.selectedMethods.map((methodName) => {
         var parameters = this.props.decls[methodName].parameters;
         if (parameters.length) {
-          return methodName + "[" + parameters.map((p) => p.name) + "]";
+          return methodName + "[" + parameters.map((p) => "_") + "]";
         } else {
           return methodName;
         }

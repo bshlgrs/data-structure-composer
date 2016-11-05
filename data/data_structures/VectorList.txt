@@ -1,0 +1,14 @@
+ds ArrayList {
+    getByIndex <- 1
+    updateNode! <- 1
+
+    insertAtIndex! <- n
+    insertLast! <- 1
+
+    deleteAtIndex! <- n
+    deleteBetweenNodes! <- n
+
+    deleteLast! <- 1
+}
+
+This is a list backed by a dynamically resizing array.
