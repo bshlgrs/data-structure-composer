@@ -17,13 +17,13 @@ getMinimum <- getLastBy[valueOrdering]
 deleteMinimumBy![f] <- getMinimumBy[f] + deleteNode!
 
   */
-case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
+case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr], source: ImplSource) {
   override def toString: String = {
     s"$lhs <- $rhs"
   }
 
   def addConditions(conditions: ImplPredicateMap): Impl = {
-    Impl(lhs.addConditions(conditions), rhs)
+    this.copy(lhs = lhs.addConditions(conditions))
   }
 
   // Suppose you have an implementation, like
@@ -39,9 +39,10 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
 
   // f[x] <- x * n
   // f[x] if x.foo <- x * log(n)
-  def bindToAllOptions(searchResult: UnfreeImplSet): DominanceFrontier[UnnamedImpl] =
+  def bindToAllOptions(searchResult: UnfreeImplSet): DominanceFrontier[Impl] =
     unboundCostTuples(searchResult) match {
-      case Nil => DominanceFrontier.fromSet(Set(this.copy(rhs = this.boundCost(searchResult))))
+      case Nil =>
+        DominanceFrontier.fromSet(Set(this.copy(rhs = this.boundCost(searchResult))))
       case (methodExpr, methodCostWeight) :: other => {
         val otherwiseSubbedImpls = this.copy(rhs = rhs.filterKeys(_ != methodExpr)).bindToAllOptions(searchResult)
 

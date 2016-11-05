@@ -8,12 +8,16 @@ import shared._
 case class SingleMethodImplSet(options: DominanceFrontier[UnnamedImpl], map: Map[UnnamedImpl, ImplSource]) {
   def impls = options.items
 
+  def withNameAndSources(name: MethodName): Set[ImplWithSource] = {
+    options.items.map((u) => ImplWithSource(u.withName(name), map(u)))
+  }
+
   def bestImplsForConditions(conditions: ImplPredicateMap): DominanceFrontier[UnnamedImpl] = {
     DominanceFrontier.fromSet(implsWhichMatchConditions(conditions).items)
   }
 
-  def add(impl: UnnamedImpl, source: ImplSource): SingleMethodImplSet = {
-    SingleMethodImplSet(options.add(impl), map.updated(impl, source))
+  def add(impl: UnnamedImpl): SingleMethodImplSet = {
+    SingleMethodImplSet(options.add(impl))
   }
 
   def isOtherImplUseful(impl: UnnamedImpl): Boolean = {
@@ -51,7 +55,6 @@ case class SingleMethodImplSet(options: DominanceFrontier[UnnamedImpl], map: Map
       UnnamedImpl(lhs, rhs) -> ProductSource(other.map(x), other.map(y))
     })
 
-
 //  def bestFullyGeneralTime: Option[AffineBigOCombo[MethodName]] = {
 //    this.bestImplementationForConditions(ImplPredicateList.empty(impls.head.lhs.parameters.length)).map(_.rhs)
 //  }
@@ -63,7 +66,11 @@ object SingleMethodImplSet {
     SingleMethodImplSet(df, map.filterKeys((x) => df.items.contains(x)))
   }
 
+  def fromSetOfImplsWithSource(set: Set[ImplWithSource]): SingleMethodImplSet = {
+    fromSet(set.map(_.impl.unnamed), set.map((x) => x.impl.unnamed -> x.source).toMap)
+  }
+
   def fromSetOfTuples(set: Set[(UnnamedImpl, ImplSource)]): SingleMethodImplSet = {
-    fromSet(set.map(_._1), set.toMap)
+    fromSet(set.map(_._1), set.map((x) => x._1 -> x._2).toMap)
   }
 }

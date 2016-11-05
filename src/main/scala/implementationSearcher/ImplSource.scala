@@ -15,6 +15,7 @@ case object TopLevelImplSource extends ImplSource
 case class ApplicationSource(impl: Impl) extends ImplSource
 
 case class ProduceSource(lhs: ImplSource, rhs: ImplSource) extends ImplSource
+
 //case class DataStructureSource(structure: DataStructureShell) extends ImplSource {
 //  def parameters = structure.parameters
 //}
