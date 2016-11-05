@@ -21,10 +21,17 @@ object Chooser {
 //      AffineBigOCombo[MethodExpr](ConstantTime, Map(MethodExpr("x", List(NamedFunctionExpr("g"))) -> ConstantTime)))
 //  )
 
-  def getAllTimes(impls: Set[Impl], implLibrary: ImplLibrary, freeVariables: Set[MethodName]): UnfreeImplSet = {
+
+  def getAllTimesFromEmpty(impls: Set[Impl], library: ImplLibrary, freeVariables: Set[MethodName]): UnfreeImplSet = {
+    getAllTimes(UnfreeImplSet(Map(), freeVariables, library.decls), impls, library)
+  }
+
+  def getAllTimes(initialUnfreeImplSet: UnfreeImplSet,
+                  impls: Set[Impl],
+                  implLibrary: ImplLibrary): UnfreeImplSet = {
     val queue = mutable.Set[Impl]()
 
-    var unfreeImplSet = UnfreeImplSet(Map(), freeVariables, implLibrary.decls)
+    var unfreeImplSet = initialUnfreeImplSet
 
     queue ++= impls.filter(_.unboundCostTuples(unfreeImplSet).isEmpty)
 
@@ -41,7 +48,8 @@ object Chooser {
         // todo: put a Map in here instead of looping over everything, to speed this up?
         for (otherImpl <- impls) {
           // So we have a random impl. Let's see if the unfreeImpl we just settled on is useful for that impl.
-          // It's only useful if unfreeImpl's methodName is used by the rhs of the otherImpl (this condition is weaker than it could be)
+          // It's only useful if unfreeImpl's methodName is used by the rhs of the otherImpl
+          // (this condition is weaker than it could be)
 
           val otherImplMethodsUsed = otherImpl.getNames
 
@@ -65,7 +73,10 @@ object Chooser {
 
   def getAllTimesForDataStructure(implLibrary: ImplLibrary, dataStructure: DataStructure): UnfreeImplSet = {
     // todo: consider conditions
-    getAllTimes(implLibrary.impls.union(dataStructure.impls), implLibrary, dataStructure.parameters.toSet)
+    getAllTimes(
+      UnfreeImplSet(Map(), dataStructure.parameters.toSet, implLibrary.decls),
+      implLibrary.impls.union(dataStructure.impls),
+      implLibrary)
   }
 
 
@@ -76,10 +87,12 @@ object Chooser {
     val allFreeVariables = structures.flatMap(_.parameters)
 
     val bestReadImplementations: UnfreeImplSet = getAllTimes(
-      allProvidedReadImplementations ++ implLibrary.impls, implLibrary, allFreeVariables)
+      UnfreeImplSet(Map(), allFreeVariables, implLibrary.decls),
+      allProvidedReadImplementations ++ implLibrary.impls,
+      implLibrary)
 
     val allWriteImplementations: Set[UnfreeImplSet] = structures.map((s) =>
-      getAllTimes(s.writeMethods ++ bestReadImplementations.allImpls ++ implLibrary.impls, implLibrary, s.parameters.toSet))
+      getAllTimes(bestReadImplementations, s.writeMethods ++ implLibrary.writeMethods, implLibrary))
 
     val combinedWriteImplementations: UnfreeImplSet =
       allWriteImplementations

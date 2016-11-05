@@ -190,7 +190,8 @@ class StandardLibraryChoosingSpec extends FunSpec {
         }""".trim()).get.value
 
 //      val res2 = Chooser.getRelevantTimesForDataStructures(library,
-//        Set(structures("InvertibleReductionMemoizer"), structures("VectorList"))).filterToAdt(adt)
+//        Set(structures("InvertibleReductionMemoizer"), structures("VectorList")))//.filterToAdt(adt)
+////      println(res2.toLongString)
 
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 

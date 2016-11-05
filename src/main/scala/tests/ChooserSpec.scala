@@ -16,7 +16,7 @@ class ChooserSpec extends FunSpec {
         "z <- y"
       )
 
-      val res = Chooser.getAllTimes(impls, ImplLibrary(impls, decls, Map()), Set())
+      val res = Chooser.getAllTimesFromEmpty(impls, ImplLibrary(impls, decls, Map()), Set())
 
       assert(res.getNamed("x") == Set(Impl("x <- n")))
       assert(res.getNamed("y") == Set(Impl("y <- n")))
@@ -29,7 +29,7 @@ class ChooserSpec extends FunSpec {
         "y <- x[_]"
       )
 
-      val res = Chooser.getAllTimes(impls, ImplLibrary(impls, decls, Map()), Set())
+      val res = Chooser.getAllTimesFromEmpty(impls, ImplLibrary(impls, decls, Map()), Set())
 
       assert(res.getNamed("y") == Set(Impl("y <- n")))
     }
@@ -40,7 +40,7 @@ class ChooserSpec extends FunSpec {
         "y[f] <- x[f]"
       )
 
-      val res = Chooser.getAllTimes(impls, ImplLibrary(impls, decls, Map()), Set())
+      val res = Chooser.getAllTimesFromEmpty(impls, ImplLibrary(impls, decls, Map()), Set())
 
       val expected = Impl(ImplLhs("y", ImplPredicateMap(Map(MethodName("f") -> Set()))), Impl.rhs("n * f"))
       assert(res.getNamed("y") == Set(expected))
@@ -52,7 +52,7 @@ class ChooserSpec extends FunSpec {
         "y[g] <- x[g]"
       )
 
-      val res = Chooser.getAllTimes(impls, ImplLibrary(impls, decls, Map()), Set())
+      val res = Chooser.getAllTimesFromEmpty(impls, ImplLibrary(impls, decls, Map()), Set())
 
       assert(res.getNamed("y").head == Impl("y[g] if g.foo <- log(n) + g"))
     }
@@ -63,7 +63,7 @@ class ChooserSpec extends FunSpec {
         "y <- x[_]"
       )
 
-      val res = Chooser.getAllTimes(impls, ImplLibrary(impls, decls, Map()), Set())
+      val res = Chooser.getAllTimesFromEmpty(impls, ImplLibrary(impls, decls, Map()), Set())
 
       assert(res.getNamed("y").isEmpty)
     }
@@ -75,7 +75,7 @@ class ChooserSpec extends FunSpec {
         "k <- 1"
       )
 
-      val res = Chooser.getAllTimes(impls, ImplLibrary(impls, decls, Map()), Set())
+      val res = Chooser.getAllTimesFromEmpty(impls, ImplLibrary(impls, decls, Map()), Set())
 
       assert(res.getNamed(MethodName("x")) == Set(Impl("x <- n")))
     }
@@ -91,7 +91,7 @@ class ChooserSpec extends FunSpec {
         "k <- 1"
       )
 
-      val res = Chooser.getAllTimes(impls, ImplLibrary(impls, decls, Map()), Set())
+      val res = Chooser.getAllTimesFromEmpty(impls, ImplLibrary(impls, decls, Map()), Set())
 
       assert(res.getNamed(MethodName("x")) == Set(Impl("x <- n")))
     }

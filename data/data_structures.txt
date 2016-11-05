@@ -79,8 +79,8 @@ ds HistogramHashMap[groupingFunction] {
 ds InvertibleReductionMemoizer[f] if f.invertible, f.commutative {
     reduce[f] <- 1
     insertAtIndex! <- 1
-    updateNode! <- 1 + getByIndex
-    deleteNode! <- 1 + getByIndex
+    updateNode! <- 1
+    deleteNode! <- 1
 }
 
 ds NoDeleteReductionMemoizer[reduction] {
