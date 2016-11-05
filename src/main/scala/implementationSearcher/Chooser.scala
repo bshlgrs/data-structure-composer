@@ -124,9 +124,13 @@ object Chooser {
 
     val frontier = allParetoOptimalDataStructureCombosForAdt(library, adt)
 
-    val bestTime = frontier.items.map(_.overallTimeForAdt(adt)).min
+    if (frontier.items.nonEmpty) {
+      val bestTime = frontier.items.map(_.overallTimeForAdt(adt)).min
 
-    frontier.filter(_.overallTimeForAdt(adt) == bestTime)
+      frontier.filter(_.overallTimeForAdt(adt) == bestTime)
+    } else {
+      frontier
+    }
   }
 }
 

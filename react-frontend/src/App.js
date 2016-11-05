@@ -13,7 +13,14 @@ class App extends Component {
 
   fetch() {
     var body = JSON.stringify({
-      adt_methods: this.state.selectedMethods
+      adt_methods: this.state.selectedMethods.map((methodName) => {
+        var parameters = this.props.decls[methodName].parameters;
+        if (parameters.length) {
+          return methodName + "[" + parameters.map((p) => p.name) + "]";
+        } else {
+          return methodName;
+        }
+      })
     });
 
     this.setState({ searching: true });

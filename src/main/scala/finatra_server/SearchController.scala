@@ -42,7 +42,7 @@ class SearchController extends Controller {
       }
       adt <- Try(AbstractDataType(Map(),
         searchRequest.adtMethods.map((x: String) =>
-          MethodExpr(x) -> (ConstantTime: BigOLiteral)).toMap))
+          MethodExpr.parse(x) -> (ConstantTime: BigOLiteral)).toMap))
       library <- Try(ImplLibrary(impls, decls, dataStructures))
       searchResults <- Try(Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(library, adt))
     } yield searchResults
