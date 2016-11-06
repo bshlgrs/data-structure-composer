@@ -1,0 +1,13 @@
+ds AugmentedRedBlackOrderStatisticTreeList[g] {
+    getByIndex <- log(n)
+    updateNode! <- log(n)
+    getNext <- 1
+    getPrev <- 1
+    insertLast! <- log(n)
+    insertAfterNode! <- log(n)
+    insertFirst! <- log(n)
+    deleteNode! <- log(n)
+    deleteBetweenNodes! <- log(n)
+    twoSidedIndexRangeQuery[g] <- log(n)
+}
+

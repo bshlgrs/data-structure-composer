@@ -1,0 +1,7 @@
+ds BinaryHeap[heapOrdering] {
+    unorderedEach <- n
+    getFirstBy[heapOrdering] <- 1
+    deleteNode! <- log(n)
+    updateNode! <- log(n)
+    insertAtIndex! <- log(n)
+}

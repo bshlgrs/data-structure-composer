@@ -1,0 +1,7 @@
+ds InvertibleReductionMemoizer[f] if f.invertible, f.commutative {
+    reduce[f] <- 1
+    insertAtIndex! <- 1
+    updateNode! <- 1
+    deleteNode! <- 1
+}
+

@@ -121,7 +121,7 @@ object MainParser {
     })
   }
 
-  lazy val lineSep: P[Unit] = P("\n" | ";")
+  lazy val lineSep: P[Unit] = P("\n".rep | ";")
 
   lazy val nakedAdt: P[AbstractDataType] = adt ~ "\n".rep() ~ End
 
@@ -191,5 +191,21 @@ object MainParser {
         dsName -> DataStructure.build(dsName, dsParameters, dsConditions, impls, decls)
       }}))
     } yield res
+  }
+
+  def parseSingleDataStructureFileString(stuff: String, decls: ImplLibrary.Decls):
+   Try[(String,DataStructure, String)] = {
+
+    for {
+      parseResult <- Try(dataStructure.parse(stuff))
+      dataStructureSyntax <- Try(parseResult.get.value)
+
+      (ds, dsName) <- Try {
+        val (ImplLhs(MethodName(dsName), dsConditions), ImplDeclaration(dsParameters), impls) = dataStructureSyntax
+
+        DataStructure.build(dsName, dsParameters, dsConditions, impls, decls) -> dsName
+      }
+      text <- Success(stuff.drop(parseResult.index))
+    } yield (dsName, ds, text)
   }
 }

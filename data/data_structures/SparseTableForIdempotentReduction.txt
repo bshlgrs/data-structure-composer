@@ -1,0 +1,5 @@
+ds SparseTableForIdempotentReduction[reduction] if reduction.idempotent {
+    twoSidedIndexRangeQuery[reduction] <- 1 + reduction
+    insertLast! <- log(n)
+    deleteLast! <- 1
+}

@@ -26,7 +26,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
   describe("regressions") {
     it("knows about how reduce works") {
-      val res = Chooser.getRelevantTimesForDataStructures(library, Set(library.structures("VectorList")))
+      val res = Chooser.getRelevantTimesForDataStructures(library, Set(library.structures("ArrayList")))
       assert(res.getNamed("reduce").contains(Impl("reduce[f] <- n * f + n")))
     }
 
@@ -50,7 +50,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       it("can correctly evaluate the performance of a generic heap and vector list") {
         val res = Chooser.getRelevantTimesForDataStructures(
           library,
-          Set(structures("Heap"), structures("VectorList"))
+          Set(structures("BinaryHeap"), structures("ArrayList"))
         )
 
         assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
@@ -60,7 +60,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       it("can correctly evaluate the performance of a stack min memoizer and vector list") {
         val res = Chooser.getRelevantTimesForDataStructures(
           library,
-          Set(structures("DequeMemoizer"), structures("VectorList"))
+          Set(structures("DequeMemoizer"), structures("ArrayList"))
         )
 
         assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
@@ -81,7 +81,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
-      assert(res.items.head.choices == Set("VectorList"))
+      assert(res.items.head.choices == Set("ArrayList"))
     }
 
     it("can do a list") {
@@ -102,7 +102,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choices == Set("DequeMemoizer", "VectorList"))
+      assert(res.items.head.choices == Set("DequeMemoizer", "ArrayList"))
     }
 
     it("can do a stack with contains") {
@@ -117,7 +117,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
         DataStructureChooserCli.printResults(res)
 
-        assert(res.items.exists(_.choices == Set("HistogramHashMap", "VectorList")))
+        assert(res.items.exists(_.choices == Set("HistogramHashMap", "ArrayList")))
     }
 
     it("can do a set which you never delete from") {
@@ -159,7 +159,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choices == Set("RangeMinQueryLinearithmicArrayThing", "VectorList"))
+      assert(res.items.head.choices == Set("SparseTableForIdempotentReduction", "ArrayList"))
     }
 
     it("can solve RMQ and count") {
@@ -176,7 +176,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       DataStructureChooserCli.printResults(res)
 
       assert(res.items.exists(_.choices ==
-        Set("RangeMinQueryLinearithmicArrayThing", "HistogramHashMap", "VectorList")))
+        Set("SparseTableForIdempotentReduction", "HistogramHashMap", "ArrayList")))
     }
 
     it("can do sum stack with random modification") {
@@ -190,14 +190,14 @@ class StandardLibraryChoosingSpec extends FunSpec {
         }""".trim()).get.value
 
 //      val res2 = Chooser.getRelevantTimesForDataStructures(library,
-//        Set(structures("InvertibleReductionMemoizer"), structures("VectorList")))//.filterToAdt(adt)
+//        Set(structures("InvertibleReductionMemoizer"), structures("ArrayList")))//.filterToAdt(adt)
 ////      println(res2.toLongString)
 
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choices == Set("VectorList", "InvertibleReductionMemoizer"))
+      assert(res.items.head.choices == Set("ArrayList", "InvertibleReductionMemoizer"))
     }
 
     it("can do min stack with random modification") {
@@ -212,14 +212,14 @@ class StandardLibraryChoosingSpec extends FunSpec {
       ).get.value
 
       val res2 = Chooser.getRelevantTimesForDataStructures(library,
-              Set(structures("InvertibleReductionMemoizer"), structures("VectorList"))).filterToAdt(adt)
+              Set(structures("InvertibleReductionMemoizer"), structures("ArrayList"))).filterToAdt(adt)
 
       assert(res2.getNamed("getMinimum") == Set(Impl("getMinimum <- n")))
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.map(_.choices) == Set(Set("VectorList", "ValueOrderedRedBlackAugmentedOST")))
+      assert(res.items.map(_.choices) == Set(Set("ArrayList", "ValueOrderedRedBlackAugmentedOst")))
     }
 
     it("can do min stack with getKthBy") {
@@ -234,14 +234,14 @@ class StandardLibraryChoosingSpec extends FunSpec {
       ).get.value
 
       val res2 = Chooser.getRelevantTimesForDataStructures(library,
-        Set(structures("InvertibleReductionMemoizer"), structures("VectorList"))).filterToAdt(adt)
+        Set(structures("InvertibleReductionMemoizer"), structures("ArrayList"))).filterToAdt(adt)
 
       assert(res2.getNamed("getMinimum") == Set(Impl("getMinimum <- n")))
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.map(_.choices) == Set(Set("VectorList", "ValueOrderedRedBlackAugmentedOST")))
+      assert(res.items.map(_.choices) == Set(Set("ArrayList", "ValueOrderedRedBlackAugmentedOst")))
     }
   }
 }

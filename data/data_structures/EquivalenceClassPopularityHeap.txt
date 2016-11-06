@@ -1,0 +1,7 @@
+ds EquivalenceClassPopularityHeap[f] {
+    updateNode! <- 1
+    deleteAtIndex! <- 1
+    insertAtIndex! <- 1
+    countOfEquivalenceClass[f] <- 1
+    mostNumerousEquivalenceClass[f] <- 1
+}

@@ -1,0 +1,5 @@
+ds NoDeleteReductionMemoizer[reduction] {
+    insertLast! <- 1
+    insertFirst! <- 1
+    reduce[reduction] <- 1
+}

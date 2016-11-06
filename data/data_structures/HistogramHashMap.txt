@@ -1,0 +1,6 @@
+ds HistogramHashMap[groupingFunction] {
+    countOfEquivalenceClass[groupingFunction] <- 1
+    insertAtIndex! <- 1
+    updateNode! <- 1
+    deleteAtIndex! <- 1
+}

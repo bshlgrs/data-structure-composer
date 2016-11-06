@@ -18,14 +18,26 @@ object DataStructureChooserCli {
 
   lazy val (impls, decls) = MainParser.parseImplFileString(libraryText).get
 
-  lazy val dataStructuresText = {
-    Source.fromFile("data/data_structures.txt")
-      .getLines()
-      .mkString("\n")
+  val dataStructuresTexts: Set[String] = {
+    new java.io.File("data/data_structures").list().map((fileName: String) => {
+      Source.fromFile("data/data_structures/" + fileName)
+        .getLines()
+        .mkString("\n")
+    }).toSet
   }
 
-  lazy val dataStructures: Map[String, DataStructure] = {
-    MainParser.parseDataStructureFileString(dataStructuresText, decls).get
+  lazy val (dataStructures: Map[String, DataStructure], dataStructureTexts: Map[String, String]) = {
+    val dataStructureTuples =
+      dataStructuresTexts.map((x: String) => MainParser.parseSingleDataStructureFileString(x, decls).get)
+
+    val duplicationErrors = dataStructureTuples.groupBy(_._1).filter(_._2.size > 1)
+
+    assert(duplicationErrors.isEmpty,
+      s"There were data structures with duplicate names: ${duplicationErrors.keys.mkString(", ")}")
+
+    val dataStructures = dataStructureTuples.map((x) => x._1 -> x._2).toMap
+
+    (dataStructures, dataStructureTuples.map((x) => x._1 -> x._3).toMap)
   }
 
   lazy val library = ImplLibrary(impls, decls, dataStructures)
