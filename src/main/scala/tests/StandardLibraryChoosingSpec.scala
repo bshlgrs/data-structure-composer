@@ -171,7 +171,9 @@ class StandardLibraryChoosingSpec extends FunSpec {
           count -> 1
         }""".trim()).get.value
 
-      val res = DataStructureChooserCli.chooseDataStructures(adt)
+      val res = Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
+        ImplLibrary(impls, decls, DataStructureChooserCli.dataStructures.filterKeys(List("SparseTableForIdempotentReduction", "HistogramHashMap", "ArrayList").contains(_))),
+        adt)
 
       DataStructureChooserCli.printResults(res)
 

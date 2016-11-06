@@ -31,6 +31,7 @@ object DataStructureChoice {
           case (None, None) => BothDominate
         }).toSet
       )
+
       val simplicityComparison =
         PartialOrdering.fromSetsOfProperties(x.choices, y.choices).flip.neitherToBoth
           .orIfTied(library.partialCompareSetFromExtensionRelations(x.choices, y.choices))

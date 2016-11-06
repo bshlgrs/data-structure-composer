@@ -52,6 +52,12 @@ case class SingleMethodImplSet(options: DominanceFrontier[UnnamedImpl]) {
       UnnamedImpl(lhs, rhs)
     })
 
+  def partialCompare(other: SingleMethodImplSet): DominanceRelationship = {
+    (for {
+      x <- this.options.items
+      y <- other.options.items
+    } yield implicitly[PartialOrdering[UnnamedImpl]].partialCompare(x, y)).reduce(_ infimum _)
+  }
 
 //  def bestFullyGeneralTime: Option[AffineBigOCombo[MethodName]] = {
 //    this.bestImplementationForConditions(ImplPredicateList.empty(impls.head.lhs.parameters.length)).map(_.rhs)

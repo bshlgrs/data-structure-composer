@@ -11,30 +11,8 @@ import scala.annotation.tailrec
 case class ImplLibrary(impls: Set[Impl], decls: Decls, structures: Map[String, DataStructure]) {
   // suppose we had x <- y and y <- z
   // then our arrows would be
-  lazy val closuresOfForwardImplArrows: Map[MethodName, Set[MethodName]] = closureOfMap(forwardImplArrows)
-  lazy val closuresOfBackwardImplArrows: Map[MethodName, Set[MethodName]] = closureOfMap(backwardImplArrows)
-
-  def closureOfMap[A](map: Map[A, Set[A]]): Map[A, Set[A]] = {
-    def dfs(start: A): Set[A] = {
-      val visited = collection.mutable.Set[A](start)
-      val frontier = collection.mutable.Stack(start)
-
-      while (frontier.nonEmpty) {
-        val item = frontier.pop()
-
-        map.getOrElse(item, Set()).foreach((neighbor) => {
-          if (!visited.contains(neighbor)) {
-            visited.add(neighbor)
-            frontier.push(neighbor)
-          }
-        })
-      }
-
-      visited.toSet
-    }
-
-    (map.keys ++ map.values.flatten.toSet).map((k) => k -> dfs(k)).toMap
-  }
+  lazy val closuresOfForwardImplArrows: Map[MethodName, Set[MethodName]] = GraphSearch.closureOfMap(forwardImplArrows)
+  lazy val closuresOfBackwardImplArrows: Map[MethodName, Set[MethodName]] = GraphSearch.closureOfMap(backwardImplArrows)
 
   lazy val writeMethods = impls.filter(_.lhs.isMutating)
   lazy val readMethods = impls.filter(!_.lhs.isMutating)
@@ -55,6 +33,14 @@ case class ImplLibrary(impls: Set[Impl], decls: Decls, structures: Map[String, D
       .flatMap({ case (m: MethodName, s: Set[MethodName]) => s.map((m2) => m2 -> m)})
       .groupBy(_._1)
       .mapValues(_.map(_._2).toSet)
+  }
+
+  // suppose A extends B, and B extends C. Then we have A -> {A, B, C}, B -> {B, C}, C -> {C}
+  lazy val closuresOfExtensionArrows: Map[String, Set[String]] =
+    GraphSearch.closureOfMap(structures.mapValues(_.extensionOf))
+
+  def oneDsExtendsOther(x: String, y: String): Boolean = {
+    closuresOfExtensionArrows(x).contains(y) || closuresOfExtensionArrows(y).contains(x)
   }
 
   def potentiallyRelevantDataStructures(adt: AbstractDataType) = {
@@ -109,12 +95,17 @@ case class ImplLibrary(impls: Set[Impl], decls: Decls, structures: Map[String, D
   def partialCompareFromExtensionRelation(x: String, y: String): DominanceRelationship = {
     if (x == y)
       NeitherDominates
-    else if (structures(x).extensionOf.contains(y))
+    else if (closuresOfExtensionArrows(x).contains(y))
       RightStrictlyDominates
-    else if (structures(y).extensionOf.contains(x))
+    else if (closuresOfExtensionArrows(y).contains(x))
       LeftStrictlyDominates
     else
       NeitherDominates
+  }
+
+  def isImplRelevantToAdt(impl: Impl, adt: AbstractDataType): Boolean = {
+    closuresOfForwardImplArrows(impl.lhs.name)
+      .exists((x) => adt.methods.keySet.map(_.name).contains(x))
   }
 }
 

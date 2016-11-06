@@ -21,7 +21,6 @@ object Chooser {
 //      AffineBigOCombo[MethodExpr](ConstantTime, Map(MethodExpr("x", List(NamedFunctionExpr("g"))) -> ConstantTime)))
 //  )
 
-
   def getAllTimesFromEmpty(impls: Set[Impl], library: ImplLibrary, freeVariables: Set[MethodName]): UnfreeImplSet = {
     getAllTimes(UnfreeImplSet(Map(), freeVariables, library.decls), impls, library)
   }
@@ -81,10 +80,14 @@ object Chooser {
 
 
   def getRelevantTimesForDataStructures(implLibrary: ImplLibrary,
-                                        structures: Set[DataStructure]): UnfreeImplSet = {
+                                        structures: Set[DataStructure],
+                                        mbRelevantReadMethods: Option[Set[Impl]] = None,
+                                        mbUnfreeImplSet: Option[Set[Impl]] = None): UnfreeImplSet = {
     val allProvidedReadImplementations: Set[Impl] = structures.flatMap(_.readMethods)
 
     val allFreeVariables = structures.flatMap(_.parameters)
+
+    val relevantImpls = mbRelevantReadMethods.getOrElse(implLibrary.readMethods)
 
     val bestReadImplementations: UnfreeImplSet = getAllTimes(
       UnfreeImplSet(Map(), allFreeVariables, implLibrary.decls),
@@ -102,13 +105,62 @@ object Chooser {
     bestReadImplementations.addImpls(combinedWriteImplementations.allImpls)
   }
 
+  def dataStructureComboSearch(library: ImplLibrary,
+                               adt: AbstractDataType,
+                               alreadyChosen: Set[(String, DataStructure)],
+                               relevantReadMethods: Set[Impl],
+                               structuresToConsider: Set[(String, DataStructure)],
+                               previousSearchResult: UnfreeImplSet
+                              ): Set[(Set[(String, DataStructure)], UnfreeImplSet)] = {
+    if (structuresToConsider.isEmpty) {
+      Set()
+    } else {
+
+      val (head, tail) = structuresToConsider.head -> structuresToConsider.tail
+//      println(s"Already chosen [${alreadyChosen.map(_._1).mkString(", ")}]. Looking at ${head._1}")
+
+      val result =
+        getRelevantTimesForDataStructures(library, alreadyChosen.map(_._2) + head._2, Some(relevantReadMethods))
+
+      // Was adding this data structure useful in any way? If so, we want to continue searching for
+      // composite data structures using it.
+//      if (result.partialCompareWithTime(previousSearchResult).leftDominates) {
+//        println("Wow, it was helpful! Recursing!")
+        val filteredTail = tail.filter({ case (dsName: String, ds: DataStructure) =>
+          ! library.oneDsExtendsOther(dsName, head._1)})
+
+        dataStructureComboSearch(library, adt, alreadyChosen + head, relevantReadMethods, filteredTail, result) ++
+          dataStructureComboSearch(library, adt, alreadyChosen, relevantReadMethods, tail, previousSearchResult) ++
+          Set((alreadyChosen + head) -> result)
+//      } else {
+//        println("It was not helpful! Going to next option.")
+//        // Otherwise, forget this data structure and just search through other ones.
+//
+//        dataStructureComboSearch(library, adt, alreadyChosen, relevantReadMethods, tail, previousSearchResult) ++
+//          Set((alreadyChosen + head) -> result)
+//      }
+    }
+  }
+
   def allParetoOptimalDataStructureCombosForAdt(library: ImplLibrary,
                                                 adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
     println(s"Potentially relevant data structures: ${library.potentiallyRelevantDataStructures(adt).map(_._1)}")
 
-    val results = library.potentiallyRelevantDataStructures(adt).subsets().map((subset) => {
-      subset -> getRelevantTimesForDataStructures(library, subset.map(_._2))
-    }).toSet
+//    val results: Set[(Set[(String, DataStructure)], UnfreeImplSet)] = library
+//      .potentiallyRelevantDataStructures(adt)
+//      .subsets()
+//      .map((subset) => {
+//        subset -> getRelevantTimesForDataStructures(library, subset.map(_._2)).filterToAdt(adt)
+//      }).toSet
+
+    val results = dataStructureComboSearch(
+      library,
+      adt,
+      Set(),
+      library.readMethods.filter((x) => library.isImplRelevantToAdt(x, adt)),
+      library.potentiallyRelevantDataStructures(adt),
+      UnfreeImplSet(Map(), Set(), Map())
+    )
 
     val choicesSet: Set[DataStructureChoice] = results.flatMap({ case (set: Set[(String, DataStructure)], sr: UnfreeImplSet) => {
       val methods = adt.methods.keys.map((methodExpr: MethodExpr) => {
@@ -121,6 +173,9 @@ object Chooser {
       else
         Set[DataStructureChoice]()
     }})
+
+//    println(s"There are ${choicesSet.size} different composite data structures we considered")
+//    println(choicesSet)
 
     // A dominance frontier on choices, ranked by:
     // - simplicity, measured by which data structures are used. Eg Set(a, b, c) is worse than Set(a, b).

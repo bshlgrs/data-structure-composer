@@ -1,6 +1,6 @@
 package implementationSearcher
 
-import shared.BigOLiteral
+import shared._
 
 
 /**
@@ -71,6 +71,17 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
         Nil
       }
     }), boundVariables ++ other.boundVariables, declarations ++ other.declarations)
+  }
+
+  def partialCompareWithTime(other: UnfreeImplSet): DominanceRelationship = {
+    PartialOrdering.fromSetOfDominanceRelationships(
+      (this.impls.keys ++ other.impls.keys).map((key) => (this.impls.get(key), other.impls.get(key)) match {
+        case (Some(xRes), Some(yRes)) => xRes.partialCompare(yRes)
+        case (Some(_), None) => LeftStrictlyDominates
+        case (None, Some(_)) => RightStrictlyDominates
+        case (None, None) => BothDominate
+      }).toSet
+    )
   }
 
 //  def bestFullyGeneralTimes: Map[MethodName, AffineBigOCombo[MethodName]] = {

@@ -1,8 +1,6 @@
 ds StackReductionMemoizer[reduction] {
     insertLast! <- 1
     deleteLast! <- 1
-    insertFirst! <- 1
-    deleteFirst! <- 1
     reduce[reduction] <- 1
 }
 
