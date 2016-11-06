@@ -122,8 +122,12 @@ object Chooser {
         Set[DataStructureChoice]()
     }})
 
-    // A dominance frontier on choices, ranked by simplicity and also on the methods which the ADT cares about.
-    DominanceFrontier.fromSet(choicesSet)
+    // A dominance frontier on choices, ranked by:
+    // - simplicity, measured by which data structures are used. Eg Set(a, b, c) is worse than Set(a, b).
+    //   - This also takes into account the explicit measure of simplicity that the data structures
+    //     themselves maintain. So if Deque extends Stack, we prefer Stack, ceteris paribus.
+    // - time on the methods which the ADT cares about
+    DominanceFrontier.fromSetWithOrder(choicesSet, library.dataStructureChoicePartialOrdering)
   }
 
   // this is the ultimate method

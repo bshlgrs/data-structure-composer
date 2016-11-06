@@ -1,4 +1,4 @@
-ds AugmentedOrderStatisticTreeList[g] {
+ds AugmentedOrderStatisticTreeList[g] extends OrderStatisticTreeList {
     getByIndex <- log(n)
     updateNode! <- log(n)
     getNext <- 1

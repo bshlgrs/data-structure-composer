@@ -219,7 +219,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.map(_.choices) == Set(Set("ArrayList", "ValueOrderedAugmentedOst")))
+      assert(res.items.map(_.choices) == Set(Set("ArrayList", "ValueOrderedOst")))
     }
 
     it("can do min stack with getKthBy") {
@@ -241,7 +241,53 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.map(_.choices) == Set(Set("ArrayList", "ValueOrderedAugmentedOst")))
+      assert(res.items.map(_.choices) == Set(Set("ArrayList", "ValueOrderedOst")))
+    }
+  }
+
+  describe("data structure dominance") {
+    describe("partialCompareFromExtensionRelation") {
+      it("knows how to deal when they're the same") {
+        assert(library.partialCompareFromExtensionRelation("ArrayList", "ArrayList") == NeitherDominates)
+      }
+
+      it("knows how to deal when they're unrelated") {
+        assert(library.partialCompareFromExtensionRelation("ArrayList", "BinaryHeap") == NeitherDominates)
+      }
+
+      it("deals when they're related") {
+        assert(
+          library.partialCompareFromExtensionRelation("ValueOrderedOst", "ValueOrderedAugmentedOst")
+            == LeftStrictlyDominates)
+      }
+    }
+
+    describe("partialCompareSetFromExtensionRelations") {
+      it("deals with unrelated sets properly") {
+        assert(library.partialCompareSetFromExtensionRelations(
+          Set("ArrayList"), Set("BinaryHeap")) == NeitherDominates)
+      }
+
+      it("deals with related sets properly") {
+        assert(library.partialCompareSetFromExtensionRelations(
+          Set("ValueOrderedOst"), Set("ValueOrderedAugmentedOst")) == LeftStrictlyDominates)
+      }
+    }
+  }
+
+  describe("data structure choice partial compare") {
+    it("handles related elements in singleton sets") {
+      assert(library.dataStructureChoicePartialOrdering.partialCompare(
+        DataStructureChoice(Set("ValueOrderedOst"), Map()),
+        DataStructureChoice(Set("ValueOrderedAugmentedOst"), Map())
+      ) == LeftStrictlyDominates)
+    }
+
+    it("handles related elements in two-element sets") {
+      assert(library.dataStructureChoicePartialOrdering.partialCompare(
+        DataStructureChoice(Set("ValueOrderedOst", "ArrayList"), Map()),
+        DataStructureChoice(Set("ValueOrderedAugmentedOst", "ArrayList"), Map())
+      ) == LeftStrictlyDominates)
     }
   }
 }

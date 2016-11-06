@@ -20,17 +20,20 @@ case class DataStructureChoice(choices: Set[String], results: Map[MethodExpr, Af
 }
 
 object DataStructureChoice {
-  implicit object DataStructureChoicePartialOrdering extends shared.PartialOrdering[DataStructureChoice] {
+  class DataStructureChoicePartialOrdering(library: ImplLibrary)
+    extends shared.PartialOrdering[DataStructureChoice] {
     def partialCompare(x: DataStructureChoice, y: DataStructureChoice): DominanceRelationship = {
-      val simplicityComparison = PartialOrdering.fromSetsOfProperties(x.choices, y.choices).flip
       val timeComparison = PartialOrdering.fromSetOfDominanceRelationships(
         (x.results.keys ++ y.results.keys).map((key) => (x.results.get(key), y.results.get(key)) match {
           case (Some(xRes), Some(yRes)) => xRes.partialCompare(yRes)
           case (Some(_), None) => LeftStrictlyDominates
           case (None, Some(_)) => RightStrictlyDominates
-          case (None, None) => NeitherDominates
+          case (None, None) => BothDominate
         }).toSet
       )
+      val simplicityComparison =
+        PartialOrdering.fromSetsOfProperties(x.choices, y.choices).flip.neitherToBoth
+          .orIfTied(library.partialCompareSetFromExtensionRelations(x.choices, y.choices))
 
       timeComparison.orIfTied(simplicityComparison)
     }

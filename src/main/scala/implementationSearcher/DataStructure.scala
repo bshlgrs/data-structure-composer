@@ -4,7 +4,10 @@ import implementationSearcher.ImplLhs.FunctionProperty
 import parsers.MainParser
 import shared.{DominanceRelationship, PartialOrdering}
 
-case class DataStructure(parameters: List[MethodName], conditions: ImplPredicateMap, impls: Set[Impl]) {
+case class DataStructure(parameters: List[MethodName],
+                         conditions: ImplPredicateMap,
+                         impls: Set[Impl],
+                         extensionOf: Set[String]) {
   def isSimple: Boolean = parameters.isEmpty
 
 //  def searchResult: UnfreeImplSet = UnfreeImplSet.fromSetOfUnfreeImpls(impls)
@@ -37,12 +40,13 @@ case class DataStructure(parameters: List[MethodName], conditions: ImplPredicate
 object DataStructure {
 
   def apply(string: String, decls: ImplLibrary.Decls): DataStructure = {
-    val (ImplLhs(MethodName(dsName), dsConditions), ImplDeclaration(dsParameters), impls) = MainParser.nakedDataStructure.parse(string).get.value
-    build(dsName, dsParameters, dsConditions, impls, decls)
+    val (ImplLhs(MethodName(dsName), dsConditions), ImplDeclaration(dsParameters), extentionOf, impls) = MainParser.nakedDataStructure.parse(string).get.value
+    build(dsName, dsParameters, extentionOf, dsConditions, impls, decls)
   }
 
   def build(name: String,
             parameters: List[MethodName],
+            extensionOf: Set[String],
             conditions: ImplPredicateMap,
             impls: Set[(Impl, ImplDeclaration)],
             decls: ImplLibrary.Decls): DataStructure = {
@@ -67,6 +71,6 @@ object DataStructure {
       }})
     }})
 
-    DataStructure(parameters, conditions, translatedImpls)
+    DataStructure(parameters, conditions, translatedImpls, extensionOf)
   }
 }

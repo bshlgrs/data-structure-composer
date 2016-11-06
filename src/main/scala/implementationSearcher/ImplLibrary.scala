@@ -1,6 +1,7 @@
 package implementationSearcher
 
 import implementationSearcher.ImplLibrary.Decls
+import shared._
 
 import scala.annotation.tailrec
 
@@ -92,6 +93,28 @@ case class ImplLibrary(impls: Set[Impl], decls: Decls, structures: Map[String, D
 //      ???
 //    }}).toMap
     ???
+  }
+
+  lazy val dataStructureChoicePartialOrdering = new DataStructureChoice.DataStructureChoicePartialOrdering(this)
+
+  def partialCompareSetFromExtensionRelations(x: Set[String], y: Set[String]): DominanceRelationship = {
+    val list = for {
+      xChoice <- x
+      yChoice <- y
+    } yield partialCompareFromExtensionRelation(xChoice, yChoice)
+
+    list.reduce(_ supremum _)
+  }
+
+  def partialCompareFromExtensionRelation(x: String, y: String): DominanceRelationship = {
+    if (x == y)
+      NeitherDominates
+    else if (structures(x).extensionOf.contains(y))
+      RightStrictlyDominates
+    else if (structures(y).extensionOf.contains(x))
+      LeftStrictlyDominates
+    else
+      NeitherDominates
   }
 }
 

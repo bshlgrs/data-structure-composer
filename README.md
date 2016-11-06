@@ -185,8 +185,9 @@ https://dzone.com/articles/introduction-probabilistic-0
 - Search algorithm semantics
   - Make it possible to see where the data structures were used in an implementation.
   - Allow me to nest data structures. So it's clearer when we're using an OST vs something else.
+    - nah. Actually allow inheritance.
 - Front end data structure wiki
-  - [x] nah. Instead, make the parser able to handle descriptions 
+  - [x] nah. Instead, make the parser able to handle descriptions.
 
 ---------
 

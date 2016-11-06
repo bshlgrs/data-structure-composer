@@ -100,17 +100,17 @@ object MainParser {
 
   lazy val implLine: P[Option[(Impl, ImplDeclaration)]] = P(impl.map(Some(_)) | ("//" ~ CharsWhile(_ != '\n')).map((_) => None))
 
-  lazy val dataStructure: P[(ImplLhs, ImplDeclaration, Set[(Impl, ImplDeclaration)])] = {
-    ("ds" ~/ implLhs ~/ "{" ~/ "\n".? ~ (" ".rep() ~ implLine).rep(sep=lineSep) ~ lineSep ~ "}").map({
-      case (l: ImplLhs, d: ImplDeclaration, impls: Seq[Option[(Impl, ImplDeclaration)]]) =>
-        (l, d, impls.flatten.toSet)
+  lazy val dataStructure: P[(ImplLhs, ImplDeclaration, Set[String], Set[(Impl, ImplDeclaration)])] = {
+    ("ds" ~/ implLhs ~/ ("extends" ~/ name.rep(sep=",")).? ~/ "{" ~/ "\n".? ~ (" ".rep() ~ implLine).rep(sep=lineSep) ~ lineSep ~ "}").map({
+      case (l: ImplLhs, d: ImplDeclaration, e: Option[Seq[String]], impls: Seq[Option[(Impl, ImplDeclaration)]]) =>
+        (l, d, e.map(_.toSet).getOrElse(Set()), impls.flatten.toSet)
     })
   }
 
 
-  lazy val nakedDataStructure: P[(ImplLhs, ImplDeclaration, Set[(Impl, ImplDeclaration)])] = dataStructure ~ End
+  lazy val nakedDataStructure: P[(ImplLhs, ImplDeclaration, Set[String], Set[(Impl, ImplDeclaration)])] = dataStructure ~ End
 
-  lazy val dataStructureFile: P[Set[(ImplLhs, ImplDeclaration, Set[(Impl, ImplDeclaration)])]] = {
+  lazy val dataStructureFile: P[Set[(ImplLhs, ImplDeclaration, Set[String], Set[(Impl, ImplDeclaration)])]] = {
     P("\n".rep() ~ dataStructure.rep(sep="\n".rep()) ~ "\n".rep() ~ End).map(_.toSet)
   }
 
@@ -173,9 +173,9 @@ object MainParser {
       res <- Try(dataStructureSyntax.groupBy(_._1).map({ case (name, setOfTuples) => {
         assert(setOfTuples.size == 1, s"there were ${setOfTuples.size} data structures named $name")
 
-        val (ImplLhs(MethodName(dsName), dsConditions), ImplDeclaration(dsParameters), impls) = setOfTuples.head
+        val (ImplLhs(MethodName(dsName), dsConditions), ImplDeclaration(dsParameters), extensionOf, impls) = setOfTuples.head
 
-        dsName -> DataStructure.build(dsName, dsParameters, dsConditions, impls, decls)
+        dsName -> DataStructure.build(dsName, dsParameters, extensionOf, dsConditions, impls, decls)
       }}))
     } yield res
   }
@@ -188,9 +188,9 @@ object MainParser {
       dataStructureSyntax <- Try(parseResult.get.value)
 
       (ds, dsName) <- Try {
-        val (ImplLhs(MethodName(dsName), dsConditions), ImplDeclaration(dsParameters), impls) = dataStructureSyntax
+        val (ImplLhs(MethodName(dsName), dsConditions), ImplDeclaration(dsParameters), extensionOf, impls) = dataStructureSyntax
 
-        DataStructure.build(dsName, dsParameters, dsConditions, impls, decls) -> dsName
+        DataStructure.build(dsName, dsParameters, extensionOf, dsConditions, impls, decls) -> dsName
       }
       (startText, endText) <- Success(stuff.splitAt(parseResult.index))
     } yield (dsName, ds, startText, endText)

@@ -17,9 +17,29 @@ sealed abstract class DominanceRelationship {
     case (_, _) => NeitherDominates
   }
 
+  def supremum(other: DominanceRelationship) = (this, other) match {
+    case (x, y) if x == y => x
+    case (BothDominate, _) => BothDominate
+    case (_, BothDominate) => BothDominate
+    case (NeitherDominates, y) => y
+    case (x, NeitherDominates) => x
+    case (_, _) => BothDominate
+  }
+
   def flip = this match {
     case LeftStrictlyDominates => RightStrictlyDominates
     case RightStrictlyDominates => LeftStrictlyDominates
+    case x => x
+  }
+
+  def neitherToBoth: DominanceRelationship = this match {
+    case NeitherDominates => BothDominate
+    case x => x
+  }
+
+  def invert = this match {
+    case BothDominate => NeitherDominates
+    case NeitherDominates => BothDominate
     case x => x
   }
 
@@ -53,6 +73,16 @@ object DominanceRelationship {
       LeftStrictlyDominates
     } else if (lhs == rhs) {
       BothDominate
+    } else {
+      RightStrictlyDominates
+    }
+  }
+
+  def fromOtherTotalOrdering[A <: Ordered[A]](lhs: A, rhs: A): DominanceRelationship = {
+    if (lhs > rhs) {
+      LeftStrictlyDominates
+    } else if (lhs == rhs) {
+      NeitherDominates
     } else {
       RightStrictlyDominates
     }
