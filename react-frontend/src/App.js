@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
+import marked from "marked";
 
 class App extends Component {
   constructor() {
@@ -7,7 +8,8 @@ class App extends Component {
     this.state = {
       selectedMethods: ['insertLast!', 'deleteLast!', 'getLast', 'getMinimum'],
       optimalDataStructures: null,
-      searching: false
+      searching: false,
+      currentlyViewedDataStructure: null
     }
   }
 
@@ -61,6 +63,7 @@ class App extends Component {
   render() {
     var optimalDataStructures = this.state.optimalDataStructures;
     var previousSearchMethods = optimalDataStructures && optimalDataStructures[0] && Object.keys(optimalDataStructures[0].results).sort();
+    var currentlyViewedDataStructure = this.state.currentlyViewedDataStructure;
 
     return (
       <div className="App">
@@ -92,7 +95,20 @@ class App extends Component {
                 {previousSearchMethods.map((m, idx) => <th key={idx}>{m}</th>)}
               </tr>
               {optimalDataStructures.map((ds, idx) => <tr key={idx}>
-                <td>{ds.choices.join(", ")}</td>
+                <td>
+                  {ds.choices.map((choice) =>
+                    <a
+                      className="choice"
+                      key={choice}
+                      onClick={() => this.setState({ currentlyViewedDataStructure: choice })}>
+                      {choice}
+                    </a>
+                  ).reduce((acc, elem) => {
+                    // debugger;
+                    return acc === null ? [elem] : [...acc, ', ', elem]
+                  }, null)
+                }
+                </td>
                 {previousSearchMethods.map((m, idx) => <td key={idx}>{ds.results[m].as_string_for_json}</td>)}
               </tr>)}
             </tbody>
@@ -102,6 +118,17 @@ class App extends Component {
             <p>This is basically just an error in this app; there shouldn't actually be ADTs which can't be implemented.</p>
           </div>
         )}
+
+        {currentlyViewedDataStructure &&
+          <div className="description">
+            <hr />
+            <h2>{currentlyViewedDataStructure}</h2>
+            <pre>{this.props.dataStructureTexts[currentlyViewedDataStructure][0]}</pre>
+            <div
+              dangerouslySetInnerHTML={
+                { __html: marked(this.props.dataStructureTexts[currentlyViewedDataStructure][1]) }} />
+          </div>
+        }
       </div>
     );
   }

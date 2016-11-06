@@ -5,3 +5,12 @@ ds DequeMemoizer[reduction] if reduction.idempotent {
     deleteFirst! <- 1
     reduce[reduction] <- 1
 }
+
+
+Suppose you want to maintain the minimum of a stack. You can do this by maintaining two stacks, as described eg [here](http://stackoverflow.com/a/685074/1360429).
+
+(Incidentally, you can build this data structure for a stack [with only O(1) space](http://www.geeksforgeeks.org/design-a-stack-that-supports-getmin-in-o1-time-and-o1-extra-space/).)
+
+You can make this work for a deque (which lets you push and pop from both ends) the same way that you build a queue out of two stacks. So the DequeMemoizer would be built out of two stacks.
+
+It could also be built out of two linked lists, which would have the same time complexity but requires more memory for pointers.

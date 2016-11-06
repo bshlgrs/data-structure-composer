@@ -18,7 +18,7 @@ object DataStructureChooserCli {
 
   lazy val (impls, decls) = MainParser.parseImplFileString(libraryText).get
 
-  val dataStructuresTexts: Set[String] = {
+  val dataStructuresFiles: Set[String] = {
     new java.io.File("data/data_structures").list().map((fileName: String) => {
       Source.fromFile("data/data_structures/" + fileName)
         .getLines()
@@ -26,9 +26,9 @@ object DataStructureChooserCli {
     }).toSet
   }
 
-  lazy val (dataStructures: Map[String, DataStructure], dataStructureTexts: Map[String, String]) = {
+  lazy val (dataStructures: Map[String, DataStructure], dataStructureTexts: Map[String, (String, String)]) = {
     val dataStructureTuples =
-      dataStructuresTexts.map((x: String) => MainParser.parseSingleDataStructureFileString(x, decls).get)
+      dataStructuresFiles.map((x: String) => MainParser.parseSingleDataStructureFileString(x, decls).get)
 
     val duplicationErrors = dataStructureTuples.groupBy(_._1).filter(_._2.size > 1)
 
@@ -37,7 +37,7 @@ object DataStructureChooserCli {
 
     val dataStructures = dataStructureTuples.map((x) => x._1 -> x._2).toMap
 
-    (dataStructures, dataStructureTuples.map((x) => x._1 -> x._3).toMap)
+    (dataStructures, dataStructureTuples.map((x) => x._1 -> (x._3 -> x._4)).toMap)
   }
 
   lazy val library = ImplLibrary(impls, decls, dataStructures)

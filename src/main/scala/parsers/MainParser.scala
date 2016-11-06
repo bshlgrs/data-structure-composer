@@ -101,9 +101,9 @@ object MainParser {
   lazy val implLine: P[Option[(Impl, ImplDeclaration)]] = P(impl.map(Some(_)) | ("//" ~ CharsWhile(_ != '\n')).map((_) => None))
 
   lazy val dataStructure: P[(ImplLhs, ImplDeclaration, Set[(Impl, ImplDeclaration)])] = {
-    ("ds" ~/ implLhs ~/ "{" ~/ "\n".? ~ (" ".rep() ~ impl).rep(sep=lineSep) ~ lineSep ~ "}").map({
-      case (l: ImplLhs, d: ImplDeclaration, impls: Seq[(Impl, ImplDeclaration)]) =>
-        (l, d, impls.toSet)
+    ("ds" ~/ implLhs ~/ "{" ~/ "\n".? ~ (" ".rep() ~ implLine).rep(sep=lineSep) ~ lineSep ~ "}").map({
+      case (l: ImplLhs, d: ImplDeclaration, impls: Seq[Option[(Impl, ImplDeclaration)]]) =>
+        (l, d, impls.flatten.toSet)
     })
   }
 
@@ -124,19 +124,6 @@ object MainParser {
   lazy val lineSep: P[Unit] = P("\n".rep | ";")
 
   lazy val nakedAdt: P[AbstractDataType] = adt ~ "\n".rep() ~ End
-
-  def main (args: Array[String]) {
-//    println(bigOLiteral.parse("1"))
-//    println(implLhs.parse("m[f]"))
-//    println(implRhs.parse("log(n)"))
-//    println(anonymousFunctionExpr.parse("_[hello,world] <- n * hello + log(n)"))
-//    println(anonymousFunctionExpr.parse("_[hello,world] <- 1"))
-//
-    println(dataStructure.parse("Array {\ngetByIndex <- 1\n}\n").get)
-//    println(impl.parse("each[f] <- getByIndex * n + n * f"))
-//    println(P(implRhs ~ End).parse("getByIndex * n"))
-
-  }
 
   def parseImplFileString(stuff: String): Try[(Set[Impl], ImplLibrary.Decls)] = {
     def blankImplLhs(name: MethodName): ImplLhs = {
@@ -194,7 +181,7 @@ object MainParser {
   }
 
   def parseSingleDataStructureFileString(stuff: String, decls: ImplLibrary.Decls):
-   Try[(String,DataStructure, String)] = {
+   Try[(String, DataStructure, String, String)] = {
 
     for {
       parseResult <- Try(dataStructure.parse(stuff))
@@ -205,7 +192,7 @@ object MainParser {
 
         DataStructure.build(dsName, dsParameters, dsConditions, impls, decls) -> dsName
       }
-      text <- Success(stuff.drop(parseResult.index))
-    } yield (dsName, ds, text)
+      (startText, endText) <- Success(stuff.splitAt(parseResult.index))
+    } yield (dsName, ds, startText, endText)
   }
 }

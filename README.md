@@ -186,7 +186,7 @@ https://dzone.com/articles/introduction-probabilistic-0
   - Make it possible to see where the data structures were used in an implementation.
   - Allow me to nest data structures. So it's clearer when we're using an OST vs something else.
 - Front end data structure wiki
-  - nah. Instead, make the parser able to handle descriptions 
+  - [x] nah. Instead, make the parser able to handle descriptions 
 
 ---------
 

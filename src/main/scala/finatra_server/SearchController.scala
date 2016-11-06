@@ -61,7 +61,7 @@ class SearchController extends Controller {
         "impls" -> DataStructureChooserCli.impls,
         "decls" -> DataStructureChooserCli.decls,
         "dataStructures" -> DataStructureChooserCli.dataStructures,
-        "dataStructureTexts" -> DataStructureChooserCli.dataStructuresTexts
+        "dataStructureTexts" -> DataStructureChooserCli.dataStructureTexts
       )
     )
   }

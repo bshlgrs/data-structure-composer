@@ -5,3 +5,7 @@ ds BinaryHeap[heapOrdering] {
     updateNode! <- log(n)
     insertAtIndex! <- log(n)
 }
+
+Binary heaps are famous.
+
+It's an unordered data structure, so the only looping construct it supports is `unorderedEach`.
