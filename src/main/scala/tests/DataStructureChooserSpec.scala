@@ -29,7 +29,7 @@ class DataStructureChooserSpec extends FunSpec {
       |    updateNode! <- log(n)
       |    getFirstBy[f] <- 1
       |    insertAtIndex! <- log(n)
-      |    unorderedEach[f] <- n + n * f
+      |    unorderedEach <- n
       |    deleteNode! <- log(n)
       |}""".stripMargin, decls)
 
@@ -39,7 +39,7 @@ class DataStructureChooserSpec extends FunSpec {
       |    getMinimum <- 1
       |    updateNode! <- log(n)
       |    insertAtIndex! <- log(n)
-      |    unorderedEach[f] <- n + n * f
+      |    unorderedEach <- n
       |    deleteNode! <- log(n)
       |}""".stripMargin, decls)
 
@@ -114,9 +114,16 @@ class DataStructureChooserSpec extends FunSpec {
           val res = Chooser.getRelevantTimesForDataStructures(library, Set(invertibleReductionMemoizer, linkedList))
 
           assert(res.getNamed("getSum") == Set(Impl("getSum <- 1")))
+
+          // This is because the equals method distinguishes between the maps Map() and Map(f -> Set()).
+          val otherImpl = {
+            val thing = Impl("reduce[f] <- n + n * f")
+            thing.copy(lhs = thing.lhs.copy(conditions = ImplPredicateMap(Map())))
+          }
+
           assert(res.getNamed("reduce") == Set(
             Impl("reduce[f] if f.invertible, f.commutative <- 1"),
-            Impl("reduce[f] <- n * f + n")))
+            otherImpl))
         }
       }
     }

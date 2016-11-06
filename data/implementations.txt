@@ -79,8 +79,8 @@ getNearest[f] <- log(n) * getKthBy[f]
 count <- unorderedEach
 contains <- count
 contains <- getFirstNodeWithValue[f]
-reduce[f] <- each
-reduce[f] if f.commutative <- unorderedEach
+reduce[f] <- each + n * f
+reduce[f] if f.commutative <- unorderedEach + n * f
 
 count <- countOfEquivalenceClass[_]
 countOfEquivalenceClass[f] <- unorderedEach

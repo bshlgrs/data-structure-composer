@@ -3,3 +3,9 @@ ds SparseTableForIdempotentReduction[reduction] if reduction.idempotent {
     insertLast! <- log(n)
     deleteLast! <- 1
 }
+
+This is a data structure for quickly answering queries of the form "what's the minimum of the elements between indexes `i` and `j`". It works for other reductions
+than minimum, but they have to be idempotent.
+
+A complete explanation is available from slide 29 [here](http://web.stanford.edu/class/cs166/lectures/00/Small00.pdf).
+

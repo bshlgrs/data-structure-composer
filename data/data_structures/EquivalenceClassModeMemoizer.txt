@@ -1,0 +1,33 @@
+ds EquivalenceClassModeMemoizer[partitionFunction] {
+    updateNode! <- 1
+    deleteNode! <- 1
+    insertAtIndex! <- 1
+    countOfEquivalenceClass[partitionFunction] <- 1
+    mostNumerousEquivalenceClass[partitionFunction] <- 1
+}
+
+Suppose you want to be able to quickly answer queries like "what's the most common element in this list",
+or, more generally, "what's the most common result of calling the partition function on elements in this list".
+
+You could do this in log time by storing a binary heap of all the different equivalence classes with
+ a hash map from equivalence class to the item in the heap.
+
+But in this case you can actually do it faster than that, by basically storing your equivalence classes in a
+sorted linked list of linked lists. For example, for the frequency distribution `{a: 5, b:4, c:4, d: 2, e:2, f: 1}`,
+you can store the following kind of thing:
+
+
+    DoublyLinkedList(
+        (5, DoublyLinkedList("a")),
+        (4, DoublyLinkedList("b", "c")),
+        (2, DoublyLinkedList("d", "e")),
+        (1, DoublyLinkedList("f"))
+    )
+
+Store a pointer to the head and the tail of the list. And store a hash map from every equivalence class to
+its inner list. Now, you can add new equivalence classes in O(1) by just appending them to the
+lowest list. You can increment and decrement the count in O(1), because that just involves removing
+a node from a doubly linked list and inserting it in another.
+
+I don't have an implementation for this at the moment; it seems kind of fiddly to write. Perhaps
+writing this would be a fun interview question!

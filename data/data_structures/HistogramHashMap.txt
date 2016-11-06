@@ -1,6 +1,10 @@
-ds HistogramHashMap[groupingFunction] {
-    countOfEquivalenceClass[groupingFunction] <- 1
+ds HistogramHashMap[partitionFunction] {
+    countOfEquivalenceClass[partitionFunction] <- 1
     insertAtIndex! <- 1
     updateNode! <- 1
-    deleteAtIndex! <- 1
+    deleteNode! <- 1
 }
+
+A partition function is something which lets you group items into different equivalence classes. If
+you want to be able to quickly count the number of elements in an equivalence class, you can have a
+hash map which stores how many elements are in each of your equivalence classes.

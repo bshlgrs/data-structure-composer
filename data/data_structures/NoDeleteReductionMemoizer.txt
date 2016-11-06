@@ -3,3 +3,5 @@ ds NoDeleteReductionMemoizer[reduction] {
     insertFirst! <- 1
     reduce[reduction] <- 1
 }
+
+If you want to maintain the minimum of an array, and items are never deleted and are only ever inserted on the ends, it's easy: just store it in a variable and update it as things are added. This requires no nice properties of the function to work.

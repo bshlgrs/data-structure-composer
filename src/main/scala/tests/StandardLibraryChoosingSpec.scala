@@ -27,7 +27,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
   describe("regressions") {
     it("knows about how reduce works") {
       val res = Chooser.getRelevantTimesForDataStructures(library, Set(library.structures("ArrayList")))
-      assert(res.getNamed("reduce").contains(Impl("reduce[f] <- n * f + n")))
+      assert(res.getNamed("reduce").exists(_.rhs == Impl.rhs("n * f + n")))
     }
 
     it("knows some things about getFirstBy") {
@@ -94,7 +94,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
-      assert(res.items.map(_.choices).contains(Set("RedBlackOrderStatisticTreeList")))
+      assert(res.items.map(_.choices).contains(Set("OrderStatisticTreeList")))
     }
 
     it("can do a min-stack") {
@@ -144,7 +144,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choices == Set("AugmentedRedBlackOrderStatisticTreeList"))
+      assert(res.items.head.choices == Set("AugmentedOrderStatisticTreeList"))
     }
 
     it("knows how to use RMQ") {
@@ -219,7 +219,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.map(_.choices) == Set(Set("ArrayList", "ValueOrderedRedBlackAugmentedOst")))
+      assert(res.items.map(_.choices) == Set(Set("ArrayList", "ValueOrderedAugmentedOst")))
     }
 
     it("can do min stack with getKthBy") {
@@ -241,7 +241,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.map(_.choices) == Set(Set("ArrayList", "ValueOrderedRedBlackAugmentedOst")))
+      assert(res.items.map(_.choices) == Set(Set("ArrayList", "ValueOrderedAugmentedOst")))
     }
   }
 }

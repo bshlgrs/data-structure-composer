@@ -1,0 +1,17 @@
+ds OrderStatisticTreeList {
+    getByIndex <- log(n)
+    updateNode! <- log(n)
+    getNext <- 1
+    getPrev <- 1
+    insertLast! <- 1
+    insertAfterNode! <- 1
+    insertFirst! <- 1
+    deleteNode! <- log(n)
+    deleteBetweenNodes! <- log(n)
+}
+
+Order statistic trees are binary search trees where every node also stores its number of descendants. Because of that,
+it's fast to traverse them by index.
+
+They are a really useful structure for ordered lists which need to support insertion at arbitrary locations.
+

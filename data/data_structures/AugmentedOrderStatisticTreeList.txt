@@ -1,4 +1,4 @@
-ds AugmentedRedBlackOrderStatisticTreeList[g] {
+ds AugmentedOrderStatisticTreeList[g] {
     getByIndex <- log(n)
     updateNode! <- log(n)
     getNext <- 1

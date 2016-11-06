@@ -1,0 +1,20 @@
+ds ValueOrderedAugmentedOst[f, g] {
+    unorderedEach <- n
+    updateNode! <- log(n)
+    getFirstBy[f] <- 1
+    getLastBy[f] <- 1
+    getKthBy[f] <- log(n)
+    insertAtIndex! <- log(n)
+    getFirstNodeWithValue[f] <- log(n)
+    deleteNode! <- 1
+    countBetweenBy[f] <- log(n)
+    twoSidedValueRangeQuery[g] <- log(n)
+    oneSidedValueRangeQuery[g] <- log(n)
+}
+
+This is a balanced binary search tree ordered on `f`. Every node also maintains how many descendents it has,
+which makes it an order statistic tree. It might also be augmented with some other reduction `g` at each node,
+which speeds up queries about that reduction.
+
+My favorite slides on order statistic trees and BST augmentation are [these ones](http://web.stanford.edu/class/cs166/lectures/06/Small06.pdf):
+read from slide 8.
