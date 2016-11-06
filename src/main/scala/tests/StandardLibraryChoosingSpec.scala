@@ -60,7 +60,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       it("can correctly evaluate the performance of a stack min memoizer and vector list") {
         val res = Chooser.getRelevantTimesForDataStructures(
           library,
-          Set(structures("DequeMemoizer"), structures("ArrayList"))
+          Set(structures("DequeReductionMemoizer"), structures("ArrayList"))
         )
 
         assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
@@ -102,7 +102,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choices == Set("DequeMemoizer", "ArrayList"))
+      assert(res.items.head.choices == Set("StackReductionMemoizer", "ArrayList"))
     }
 
     it("can do a stack with contains") {

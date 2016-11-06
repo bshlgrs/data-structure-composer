@@ -1,0 +1,14 @@
+ds DequeReductionMemoizer[reduction] {
+    insertLast! <- 1
+    deleteLast! <- 1
+    insertFirst! <- 1
+    deleteFirst! <- 1
+    reduce[reduction] <- 1
+}
+
+
+Like a StackReductionMemoizer, but for a deque. You can make this the same way that you build a queue out of two stacks. So the DequeMemoizer
+ would be built out of two stacks.
+
+It could also be built out of two linked lists, which would have the same time
+complexity but requires more memory for pointers.
