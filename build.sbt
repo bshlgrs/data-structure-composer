@@ -4,7 +4,7 @@ version := "1.0"
 
 enablePlugins(ScalaJSPlugin)
 
-mainClass in Compile := Some("webapp.WebApp")
+mainClass in Compile := Some("finatra_server.SearchServerMain")
 
 scalaVersion := "2.11.8"
 

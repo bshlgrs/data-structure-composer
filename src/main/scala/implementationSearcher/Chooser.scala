@@ -115,7 +115,6 @@ object Chooser {
     if (structuresToConsider.isEmpty) {
       Set()
     } else {
-
       val (head, tail) = structuresToConsider.head -> structuresToConsider.tail
 //      println(s"Already chosen [${alreadyChosen.map(_._1).mkString(", ")}]. Looking at ${head._1}")
 
@@ -174,7 +173,7 @@ object Chooser {
         Set[DataStructureChoice]()
     }})
 
-//    println(s"There are ${choicesSet.size} different composite data structures we considered")
+    println(s"There are ${choicesSet.size} different composite data structures we considered")
 //    println(choicesSet)
 
     // A dominance frontier on choices, ranked by:
