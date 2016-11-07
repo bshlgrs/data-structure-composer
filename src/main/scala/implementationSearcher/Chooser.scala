@@ -107,11 +107,11 @@ object Chooser {
 
   def dataStructureComboSearch(library: ImplLibrary,
                                adt: AbstractDataType,
-                               alreadyChosen: Set[(String, DataStructure)],
+                               alreadyChosen: Set[DataStructure],
                                relevantReadMethods: Set[FreeImpl],
-                               structuresToConsider: Set[(String, DataStructure)],
+                               structuresToConsider: Set[DataStructure],
                                previousSearchResult: UnfreeImplSet
-                              ): Set[(Set[(String, DataStructure)], UnfreeImplSet)] = {
+                              ): Set[(Set[DataStructure], UnfreeImplSet)] = {
     if (structuresToConsider.isEmpty) {
       Set()
     } else {
@@ -119,14 +119,14 @@ object Chooser {
 //      println(s"Already chosen [${alreadyChosen.map(_._1).mkString(", ")}]. Looking at ${head._1}")
 
       val result =
-        getRelevantTimesForDataStructures(library, alreadyChosen.map(_._2) + head._2, Some(relevantReadMethods))
+        getRelevantTimesForDataStructures(library, alreadyChosen + head, Some(relevantReadMethods))
 
       // Was adding this data structure useful in any way? If so, we want to continue searching for
       // composite data structures using it.
 //      if (result.partialCompareWithTime(previousSearchResult).leftDominates) {
 //        println("Wow, it was helpful! Recursing!")
-        val filteredTail = tail.filter({ case (dsName: String, ds: DataStructure) =>
-          ! library.oneDsExtendsOther(dsName, head._1)})
+        val filteredTail = tail.filter({ (ds: DataStructure) =>
+          ! library.oneDsExtendsOther(ds, head)})
 
         dataStructureComboSearch(library, adt, alreadyChosen + head, relevantReadMethods, filteredTail, result) ++
           dataStructureComboSearch(library, adt, alreadyChosen, relevantReadMethods, tail, previousSearchResult) ++
@@ -143,7 +143,7 @@ object Chooser {
 
   def allParetoOptimalDataStructureCombosForAdt(library: ImplLibrary,
                                                 adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
-    println(s"Potentially relevant data structures: ${library.potentiallyRelevantDataStructures(adt).map(_._1)}")
+    println(s"Potentially relevant data structures: ${library.potentiallyRelevantDataStructures(adt).map(_.name)}")
 
 //    val results: Set[(Set[(String, DataStructure)], UnfreeImplSet)] = library
 //      .potentiallyRelevantDataStructures(adt)
@@ -161,7 +161,7 @@ object Chooser {
       UnfreeImplSet(Map(), Set(), Map())
     )
 
-    val choicesSet: Set[DataStructureChoice] = results.flatMap({ case (set: Set[(String, DataStructure)], sr: UnfreeImplSet) => {
+    val choicesSet: Set[DataStructureChoice] = results.flatMap({ case (set: Set[DataStructure], sr: UnfreeImplSet) => {
       val methods = adt.methods.keys.map((methodExpr: MethodExpr) => {
         // TODO: let this be a proper dominance frontier
         methodExpr -> sr.implsWhichMatchMethodExpr(methodExpr, ParameterList.empty).headOption.map(_.withName(methodExpr.name))
@@ -169,7 +169,7 @@ object Chooser {
 
       if (methods.forall(_._2.isDefined))
         // methods.mapValues(_.get.rhs.mapKeys(_.getAsNakedName))
-        Set[DataStructureChoice](DataStructureChoice(set.map(_._1), sr, adt))
+        Set[DataStructureChoice](DataStructureChoice(set.map(_.name), sr, adt))
       else
         Set[DataStructureChoice]()
     }})

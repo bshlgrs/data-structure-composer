@@ -39,12 +39,12 @@ case class ImplLibrary(impls: Set[FreeImpl], decls: Decls, structures: Map[Strin
   lazy val closuresOfExtensionArrows: Map[String, Set[String]] =
     GraphSearch.closureOfMap(structures.mapValues(_.extensionOf))
 
-  def oneDsExtendsOther(x: String, y: String): Boolean = {
-    closuresOfExtensionArrows(x).contains(y) || closuresOfExtensionArrows(y).contains(x)
+  def oneDsExtendsOther(x: DataStructure, y: DataStructure): Boolean = {
+    closuresOfExtensionArrows(x.name).contains(y.name) || closuresOfExtensionArrows(y.name).contains(x.name)
   }
 
   def potentiallyRelevantDataStructures(adt: AbstractDataType) = {
-    structures.filter({ case (name: String, structure: DataStructure) => {
+    structures.valuesIterator.filter({ case structure: DataStructure => {
       // This structure is potentially relevant if there's any way for the read methods it contributes
       // to be useful to the implementation of the ADT's methods
 
