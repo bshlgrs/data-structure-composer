@@ -96,16 +96,14 @@ class App extends Component {
               </tr>
               {optimalDataStructures.map((ds, idx) => <tr key={idx}>
                 <td>
-                  {ds.choices.map((choice) =>
+                  {ds.choices.map((choice, idx) =>
                     <a
                       className="choice"
-                      key={choice}
-                      onClick={() => this.setState({ currentlyViewedDataStructure: choice })}>
-                      {choice}
+                      key={idx}
+                      onClick={() => this.setState({ currentlyViewedDataStructure: choice.name })}>
+                      {choice.name}
                     </a>
-                  ).reduce((acc, elem) => {
-                    return acc === null ? [elem] : [...acc, ', ', elem]
-                  }, null)
+                  ).reduce((acc, elem) => (acc === null ? [elem] : [...acc, ', ', elem]), null)
                 }
                 </td>
                 {previousSearchMethods.map((m, idx) => <td key={idx}>{ds.result_times[m].to_short_string}</td>)}

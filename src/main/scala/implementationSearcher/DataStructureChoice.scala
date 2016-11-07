@@ -8,7 +8,10 @@ import scala.PartialOrdering
   * Created by buck on 10/10/16.
   */
 
-case class DataStructureChoice(choices: Set[DataStructure], times: UnfreeImplSet, adt: AbstractDataType, results: Map[MethodExpr, BoundImpl]) {
+case class DataStructureChoice(choices: Set[DataStructure],
+                               times: UnfreeImplSet,
+                               adt: AbstractDataType,
+                               results: Map[MethodExpr, BoundImpl]) {
   lazy val overallTimeForAdt: BigOLiteral = {
 //    assert(results.keys.forall(_.args.isEmpty),
 //       s"While calculating the overall time for an ADT on the data structure choice $this, " +
