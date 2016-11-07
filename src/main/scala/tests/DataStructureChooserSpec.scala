@@ -131,41 +131,39 @@ class DataStructureChooserSpec extends FunSpec {
 
   describe("adt analysis") {
     describe("List adt") {
-      val linkedListResult = DataStructureChoice(
-        Set("LinkedList"),
-        Map(MethodExpr.parse("getFirst") -> AffineBigOCombo(ConstantTime, Map()),
-          MethodExpr.parse("getNext") -> AffineBigOCombo(ConstantTime, Map())))
+      val listAdt = AbstractDataType(Map(), Map(MethodExpr.parse("getFirst") -> ConstantTime, MethodExpr.parse("getNext") -> ConstantTime))
+
+      val linkedListResult =
+        Map(MethodExpr.parse("getFirst") -> ConstantTime,
+          MethodExpr.parse("getNext") -> ConstantTime)
 
       it("can choose the Pareto-optimal options for a List adt") {
-        val listAdt = AbstractDataType(Map(), Map(MethodExpr.parse("getFirst") -> ConstantTime, MethodExpr.parse("getNext") -> ConstantTime))
+
 
         val res = Chooser.allParetoOptimalDataStructureCombosForAdt(library, listAdt)
 
-        assert(res.items == Set(linkedListResult))
+        assert(res.items.map(_.resultTimes) == Set(linkedListResult))
       }
 
       it("can choose the best options for a List adt") {
-        val listAdt = AbstractDataType(Map(), Map(MethodExpr.parse("getFirst") -> ConstantTime, MethodExpr.parse("getNext") -> ConstantTime))
+
 
         val res = Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(library, listAdt)
 
-        assert(res.items == Set(linkedListResult))
+        assert(res.items.map(_.resultTimes) == Set(linkedListResult))
       }
     }
 
     describe("priority queue ADT") {
-      val linkedListPQResult = DataStructureChoice(
-        Set("LinkedList"),
-        Map(MethodExpr.parse("getMinimum") -> AffineBigOCombo(LinearTime, Map()),
-          MethodExpr.parse("insertAnywhere!") -> AffineBigOCombo(ConstantTime, Map()),
-          MethodExpr.parse("deleteNode!") -> AffineBigOCombo(ConstantTime, Map())
-        ))
+      val linkedListPQResult = Map(MethodExpr.parse("getMinimum") -> LinearTime,
+          MethodExpr.parse("insertAnywhere!") -> ConstantTime,
+          MethodExpr.parse("deleteNode!") -> ConstantTime)
 
-      val heapResult = DataStructureChoice(
-        Set("GenericHeap"),
-        Map(MethodExpr.parse("getMinimum") -> AffineBigOCombo(ConstantTime, Map()),
-          MethodExpr.parse("insertAnywhere!") -> AffineBigOCombo(LogTime, Map()),
-          MethodExpr.parse("deleteNode!") -> AffineBigOCombo(LogTime, Map())))
+
+      val heapResult = Map(
+        MethodExpr.parse("getMinimum") -> ConstantTime,
+        MethodExpr.parse("insertAnywhere!") -> LogTime,
+        MethodExpr.parse("deleteNode!") -> LogTime)
 
       val pQueueAdt = AbstractDataType(Map(),
         Map(MethodExpr.parse("getMinimum") -> ConstantTime,
@@ -178,13 +176,13 @@ class DataStructureChooserSpec extends FunSpec {
 
         val res = Chooser.allParetoOptimalDataStructureCombosForAdt(library, pQueueAdt)
 
-        assert(res.items == Set(linkedListPQResult, heapResult))
+        assert(res.items.map(_.resultTimes) == Set(linkedListPQResult, heapResult))
       }
 
       it("can choose the best options for a PriorityQueue adt") {
         val res = Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(library, pQueueAdt)
 
-        assert(res.items == Set(heapResult))
+        assert(res.items.map(_.resultTimes) == Set(heapResult))
       }
     }
   }

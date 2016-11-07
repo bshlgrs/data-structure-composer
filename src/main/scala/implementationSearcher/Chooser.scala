@@ -168,7 +168,8 @@ object Chooser {
       }).toMap
 
       if (methods.forall(_._2.isDefined))
-        Set[DataStructureChoice](DataStructureChoice(set.map(_._1), methods.mapValues(_.get.rhs.mapKeys(_.getAsNakedName))))
+        // methods.mapValues(_.get.rhs.mapKeys(_.getAsNakedName))
+        Set[DataStructureChoice](DataStructureChoice(set.map(_._1), sr, adt))
       else
         Set[DataStructureChoice]()
     }})
@@ -196,9 +197,9 @@ object Chooser {
     val frontier = allParetoOptimalDataStructureCombosForAdt(library, adt)
 
     if (frontier.items.nonEmpty) {
-      val bestTime = frontier.items.map(_.overallTimeForAdt(adt)).min
+      val bestTime = frontier.items.map(_.overallTimeForAdt).min
 
-      frontier.filter(_.overallTimeForAdt(adt) == bestTime)
+      frontier.filter(_.overallTimeForAdt == bestTime)
     } else {
       frontier
     }

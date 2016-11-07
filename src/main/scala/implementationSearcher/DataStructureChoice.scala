@@ -8,14 +8,24 @@ import scala.PartialOrdering
   * Created by buck on 10/10/16.
   */
 
-case class DataStructureChoice(choices: Set[String], results: Map[MethodExpr, AffineBigOCombo[MethodName]]) {
-  def overallTimeForAdt(abstractDataType: AbstractDataType): BigOLiteral = {
+case class DataStructureChoice(choices: Set[String], times: UnfreeImplSet, adt: AbstractDataType) {
+  lazy val overallTimeForAdt: BigOLiteral = {
 //    assert(results.keys.forall(_.args.isEmpty),
 //       s"While calculating the overall time for an ADT on the data structure choice $this, " +
 //         s"I noticed that some of your results ")
 
-    abstractDataType.methods.keys.map((methodName) =>
-      results(methodName).substituteAllVariables(abstractDataType.parameters) * abstractDataType.methods(methodName)).reduce(_ + _)
+    adt.methods.keys.map((methodName) => resultTimes(methodName) * adt.methods(methodName)).reduce(_ + _)
+  }
+
+  lazy val results: Map[MethodExpr, BoundImpl] = {
+    adt.methods.keys.map((methodExpr: MethodExpr) => {
+      // TODO: let this be a proper dominance frontier
+      methodExpr -> times.implsWhichMatchMethodExpr(methodExpr, ParameterList.empty).head.withName(methodExpr.name)
+    }).toMap
+  }
+
+  lazy val resultTimes: Map[MethodExpr, BigOLiteral] = {
+    results.mapValues(_.impl.rhs.mapKeys(_.getAsNakedName).substituteAllVariables(adt.parameters))
   }
 }
 
@@ -25,7 +35,7 @@ object DataStructureChoice {
     def partialCompare(x: DataStructureChoice, y: DataStructureChoice): DominanceRelationship = {
       val timeComparison = PartialOrdering.fromSetOfDominanceRelationships(
         (x.results.keys ++ y.results.keys).map((key) => (x.results.get(key), y.results.get(key)) match {
-          case (Some(xRes), Some(yRes)) => xRes.partialCompare(yRes)
+          case (Some(xRes), Some(yRes)) => xRes.impl.rhs.partialCompare(yRes.impl.rhs)
           case (Some(_), None) => LeftStrictlyDominates
           case (None, Some(_)) => RightStrictlyDominates
           case (None, None) => BothDominate
