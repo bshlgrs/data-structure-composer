@@ -21,23 +21,23 @@ object Chooser {
 //      AffineBigOCombo[MethodExpr](ConstantTime, Map(MethodExpr("x", List(NamedFunctionExpr("g"))) -> ConstantTime)))
 //  )
 
-  def getAllTimesFromEmpty(impls: Set[Impl], library: ImplLibrary, freeVariables: Set[MethodName]): UnfreeImplSet = {
+  def getAllTimesFromEmpty(impls: Set[FreeImpl], library: ImplLibrary, freeVariables: Set[MethodName]): UnfreeImplSet = {
     getAllTimes(UnfreeImplSet(Map(), freeVariables, library.decls), impls, library)
   }
 
   def getAllTimes(initialUnfreeImplSet: UnfreeImplSet,
-                  impls: Set[Impl],
+                  impls: Set[FreeImpl],
                   implLibrary: ImplLibrary): UnfreeImplSet = {
-    val queue = mutable.Set[Impl]()
+    val queue = mutable.Set[BoundImpl]()
 
     var unfreeImplSet = initialUnfreeImplSet
 
-    queue ++= impls.filter(_.unboundCostTuples(unfreeImplSet).isEmpty)
+    queue ++= impls.filter(_.unboundCostTuples(unfreeImplSet).isEmpty).map(_.makeBound(unfreeImplSet))
 
-    def queuePlusSelected: List[Impl] = queue.toList ++ unfreeImplSet.allImpls
+    def queuePlusSelected: List[BoundImpl] = queue.toList ++ unfreeImplSet.allImpls
 
     while (queue.nonEmpty) {
-      val unfreeImpl: Impl = queue.minBy(_.rhs.minCost)
+      val unfreeImpl: BoundImpl = queue.minBy(_.rhs.minCost)
 
       queue.remove(unfreeImpl)
 
@@ -53,9 +53,9 @@ object Chooser {
           val otherImplMethodsUsed = otherImpl.getNames
 
           if (otherImplMethodsUsed.contains(unfreeImpl.lhs.name)) {
-            val neighborUnfreeImpls = otherImpl.bindToAllOptions(unfreeImplSet)
+            val neighborUnfreeImpls: DominanceFrontier[BoundUnnamedImpl] = otherImpl.bindToAllOptions(unfreeImplSet)
 
-            neighborUnfreeImpls.items.foreach((u: UnnamedImpl) =>
+            neighborUnfreeImpls.items.foreach((u: BoundUnnamedImpl) =>
               if (unfreeImplSet.isOtherImplUseful(u.withName(otherImpl.lhs.name))) {
                 val impl = u.withName(otherImpl.lhs.name)
                 assert(impl.unboundCostTuples(unfreeImplSet).isEmpty)
@@ -74,16 +74,16 @@ object Chooser {
     // todo: consider conditions
     getAllTimes(
       UnfreeImplSet(Map(), dataStructure.parameters.toSet, implLibrary.decls),
-      implLibrary.impls.union(dataStructure.impls),
+      implLibrary.impls.union(dataStructure.freeImpls),
       implLibrary)
   }
 
 
   def getRelevantTimesForDataStructures(implLibrary: ImplLibrary,
                                         structures: Set[DataStructure],
-                                        mbRelevantReadMethods: Option[Set[Impl]] = None,
-                                        mbUnfreeImplSet: Option[Set[Impl]] = None): UnfreeImplSet = {
-    val allProvidedReadImplementations: Set[Impl] = structures.flatMap(_.readMethods)
+                                        mbRelevantReadMethods: Option[Set[FreeImpl]] = None,
+                                        mbUnfreeImpls: Option[Set[BoundImpl]] = None): UnfreeImplSet = {
+    val allProvidedReadImplementations: Set[FreeImpl] = structures.flatMap(_.readMethods)
 
     val allFreeVariables = structures.flatMap(_.parameters)
 
@@ -108,7 +108,7 @@ object Chooser {
   def dataStructureComboSearch(library: ImplLibrary,
                                adt: AbstractDataType,
                                alreadyChosen: Set[(String, DataStructure)],
-                               relevantReadMethods: Set[Impl],
+                               relevantReadMethods: Set[FreeImpl],
                                structuresToConsider: Set[(String, DataStructure)],
                                previousSearchResult: UnfreeImplSet
                               ): Set[(Set[(String, DataStructure)], UnfreeImplSet)] = {
@@ -156,7 +156,7 @@ object Chooser {
       library,
       adt,
       Set(),
-      library.readMethods.filter((x) => library.isImplRelevantToAdt(x, adt)),
+      library.readMethods.filter((x) => library.isImplRelevantToAdt(x.impl, adt)),
       library.potentiallyRelevantDataStructures(adt),
       UnfreeImplSet(Map(), Set(), Map())
     )

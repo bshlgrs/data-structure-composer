@@ -18,9 +18,9 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimesFromEmpty(impls, ImplLibrary(impls, decls, Map()), Set())
 
-      assert(res.getNamed("x") == Set(Impl("x <- n")))
-      assert(res.getNamed("y") == Set(Impl("y <- n")))
-      assert(res.getNamed("z") == Set(Impl("z <- n")))
+      assert(res.getNamedWithoutSource("x") == Set(Impl("x <- n")))
+      assert(res.getNamedWithoutSource("y") == Set(Impl("y <- n")))
+      assert(res.getNamedWithoutSource("z") == Set(Impl("z <- n")))
     }
 
     it("does simple parameterized things") {
@@ -31,7 +31,7 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimesFromEmpty(impls, ImplLibrary(impls, decls, Map()), Set())
 
-      assert(res.getNamed("y") == Set(Impl("y <- n")))
+      assert(res.getNamedWithoutSource("y") == Set(Impl("y <- n")))
     }
 
     it("does more complex parameterized things") {
@@ -43,7 +43,7 @@ class ChooserSpec extends FunSpec {
       val res = Chooser.getAllTimesFromEmpty(impls, ImplLibrary(impls, decls, Map()), Set())
 
       val expected = Impl(ImplLhs("y", ImplPredicateMap(Map(MethodName("f") -> Set()))), Impl.rhs("n * f"))
-      assert(res.getNamed("y") == Set(expected))
+      assert(res.getNamedWithoutSource("y") == Set(expected))
     }
 
     it("correctly infers conditions") {
@@ -54,7 +54,7 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimesFromEmpty(impls, ImplLibrary(impls, decls, Map()), Set())
 
-      assert(res.getNamed("y").head == Impl("y[g] if g.foo <- log(n) + g"))
+      assert(res.getNamedWithoutSource("y").head == Impl("y[g] if g.foo <- log(n) + g"))
     }
 
     it("doesn't use methods without necessary conditions") {
@@ -77,7 +77,7 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimesFromEmpty(impls, ImplLibrary(impls, decls, Map()), Set())
 
-      assert(res.getNamed(MethodName("x")) == Set(Impl("x <- n")))
+      assert(res.getNamedWithoutSource(MethodName("x")) == Set(Impl("x <- n")))
     }
 
     it("handles anonymous functions from underscore") {
@@ -93,7 +93,7 @@ class ChooserSpec extends FunSpec {
 
       val res = Chooser.getAllTimesFromEmpty(impls, ImplLibrary(impls, decls, Map()), Set())
 
-      assert(res.getNamed(MethodName("x")) == Set(Impl("x <- n")))
+      assert(res.getNamedWithoutSource(MethodName("x")) == Set(Impl("x <- n")))
     }
   }
 

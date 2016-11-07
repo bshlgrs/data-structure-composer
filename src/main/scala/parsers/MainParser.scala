@@ -125,7 +125,7 @@ object MainParser {
 
   lazy val nakedAdt: P[AbstractDataType] = adt ~ "\n".rep() ~ End
 
-  def parseImplFileString(stuff: String): Try[(Set[Impl], ImplLibrary.Decls)] = {
+  def parseImplFileString(stuff: String): Try[(Set[FreeImpl], ImplLibrary.Decls)] = {
     def blankImplLhs(name: MethodName): ImplLhs = {
       ImplLhs(name, ImplPredicateMap.empty)
     }
@@ -162,7 +162,7 @@ object MainParser {
             m -> s.head._2
         }})
       }
-    } yield (fileImpls, fileDecls)
+    } yield (fileImpls.map(FreeImpl(_, FreeImplSource(None))), fileDecls)
   }
 
   def parseDataStructureFileString(stuff: String, decls: ImplLibrary.Decls):

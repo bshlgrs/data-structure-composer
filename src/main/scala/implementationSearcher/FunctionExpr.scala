@@ -60,20 +60,20 @@ case class NamedFunctionExpr(name: MethodName) extends FunctionExpr {
 
       // Currently I am not allowing higher-order methods here. So there can only be one implementation.
       unfreeImplSet.get(name) match {
-        case x: Set[UnnamedImpl] if x.size == 1 =>
-          val oneImplementation: UnnamedImpl = x.head
+        case x: Set[BoundUnnamedImpl] if x.size == 1 =>
+          val oneImplementation: UnnamedImpl = x.head.impl
 
           if (oneImplementation.predicates.isEmpty) {
             DominanceFrontier.fromSet(Set(oneImplementation))
           } else {
             ???
           }
-        case x: Set[UnnamedImpl] if x.isEmpty => {
+        case x: Set[BoundUnnamedImpl] if x.isEmpty => {
           DominanceFrontier.empty[UnnamedImpl]
         }
 
 
-        case x: Set[UnnamedImpl] if x.size > 1 =>
+        case x: Set[BoundUnnamedImpl] if x.size > 1 =>
           // One day I will extend this code to allow higher-order methods; at that point I'll fill in this part of the code.
           ???
       }
@@ -98,8 +98,8 @@ case class AnonymousFunctionExpr(properties: Set[String], cost: AffineBigOCombo[
         // Maybe f is a globally defined function. So look for it in the searchResult:
         val alreadyChosenImpls = unfreeImplSet.get(name)
         if (alreadyChosenImpls.nonEmpty) {
-          assert(alreadyChosenImpls.forall(_.predicates.isEmpty))
-          alreadyChosenImpls.filter(_.predicates.isEmpty).map(_.cost)
+          assert(alreadyChosenImpls.forall(_.impl.predicates.isEmpty))
+          alreadyChosenImpls.filter(_.impl.predicates.isEmpty).map(_.impl.cost)
         }
         // Otherwise, maybe it's a locally bound variable. So check whether it's in implLhs.parameters.
         else if (list.contains(name)) {

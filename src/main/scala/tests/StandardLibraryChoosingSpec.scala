@@ -19,7 +19,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       getMinimum -> 1
     }""".trim()).get.value
 
-  val impls = DataStructureChooserCli.impls
+  val impls: Set[FreeImpl] = DataStructureChooserCli.impls
   val decls = DataStructureChooserCli.decls
   val structures = DataStructureChooserCli.dataStructures
   val library = ImplLibrary(impls, decls, structures)
@@ -31,7 +31,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
     }
 
     it("knows some things about getFirstBy") {
-      val impl = Impl("getLastBy[f] <- reduce[_{commutative} <- f]")
+      val impl = FreeImpl.parse("getLastBy[f] <- reduce[_{commutative} <- f]")
       val unfreeImplSet = Chooser.getRelevantTimesForDataStructures(library, Set(library.structures("InvertibleReductionMemoizer")))
       val res = impl.bindToAllOptions(unfreeImplSet)
 
@@ -40,8 +40,8 @@ class StandardLibraryChoosingSpec extends FunSpec {
         unfreeImplSet,
         ParameterList.apply(ImplPredicateMap.empty, List(MethodName("f")))) == Set())
 
-      assert(unfreeImplSet.getNamed("getSum") == Set(Impl("getSum <- 1")))
-      assert(unfreeImplSet.getNamed("getLastBy") == Set())
+      assert(unfreeImplSet.getNamedWithoutSource("getSum") == Set(Impl("getSum <- 1")))
+      assert(unfreeImplSet.getNamedWithoutSource("getLastBy") == Set())
     }
   }
 
@@ -53,8 +53,8 @@ class StandardLibraryChoosingSpec extends FunSpec {
           Set(structures("BinaryHeap"), structures("ArrayList"))
         )
 
-        assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
-        assert(res.getNamed("insertLast!") == Set(Impl("insertLast! <- log(n)")))
+        assert(res.getNamedWithoutSource("getMinimum") == Set(Impl("getMinimum <- 1")))
+        assert(res.getNamedWithoutSource("insertLast!") == Set(Impl("insertLast! <- log(n)")))
       }
 
       it("can correctly evaluate the performance of a stack min memoizer and vector list") {
@@ -63,8 +63,8 @@ class StandardLibraryChoosingSpec extends FunSpec {
           Set(structures("DequeReductionMemoizer"), structures("ArrayList"))
         )
 
-        assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
-        assert(res.getNamed("insertLast!") == Set(Impl("insertLast! <- 1")))
+        assert(res.getNamedWithoutSource("getMinimum") == Set(Impl("getMinimum <- 1")))
+        assert(res.getNamedWithoutSource("insertLast!") == Set(Impl("insertLast! <- 1")))
       }
     }
   }
@@ -216,7 +216,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       val res2 = Chooser.getRelevantTimesForDataStructures(library,
               Set(structures("InvertibleReductionMemoizer"), structures("ArrayList"))).filterToAdt(adt)
 
-      assert(res2.getNamed("getMinimum") == Set(Impl("getMinimum <- n")))
+      assert(res2.getNamedWithoutSource("getMinimum") == Set(Impl("getMinimum <- n")))
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
       DataStructureChooserCli.printResults(res)
@@ -238,7 +238,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       val res2 = Chooser.getRelevantTimesForDataStructures(library,
         Set(structures("InvertibleReductionMemoizer"), structures("ArrayList"))).filterToAdt(adt)
 
-      assert(res2.getNamed("getMinimum") == Set(Impl("getMinimum <- n")))
+      assert(res2.getNamedWithoutSource("getMinimum") == Set(Impl("getMinimum <- n")))
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
       DataStructureChooserCli.printResults(res)

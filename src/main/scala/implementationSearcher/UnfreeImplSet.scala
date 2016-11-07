@@ -7,7 +7,7 @@ import shared._
   * Created by buck on 9/10/16.
   */
 case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVariables: Set[MethodName], declarations: Map[MethodName, ImplDeclaration]) {
-  def addImpl(impl: Impl): UnfreeImplSet = {
+  def addImpl(impl: BoundImpl): UnfreeImplSet = {
     if (impls.contains(impl.lhs.name)) {
       this.copy(impls = impls.updated(impl.lhs.name, impls(impl.lhs.name).add(impl)))
     } else {
@@ -15,7 +15,7 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
     }
   }
 
-  def addImpls(impls: Set[Impl]): UnfreeImplSet = {
+  def addImpls(impls: Set[BoundImpl]): UnfreeImplSet = {
     impls.foldLeft(this)((s, u) => s.addImpl(u))
   }
 
@@ -25,7 +25,7 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   def filterToAdt(adt: AbstractDataType): UnfreeImplSet = this.copy(impls =
     impls.filterKeys((x) => adt.methods.keys.toSeq.map(_.name).contains(x)))
 
-  def allImpls: Set[Impl] = {
+  def allImpls: Set[BoundImpl] = {
     impls.flatMap({ case ((name, singleMethodImplSet)) => singleMethodImplSet.impls.map(_.withName(name)) }).toSet
   }
 
@@ -45,7 +45,7 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   // If instead of `myMethod[f]` I was calling this with `myMethod[_{foo}]`:
   // If I see `myMethod[g] if g.foo <- log(n)`, I want to return that.
   // If I see `myMethod[g] if g.bar <- log(n**2)`, I want to not include that one. !!!
-  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, list: ParameterList): Set[UnnamedImpl] = {
+  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, list: ParameterList): Set[BoundUnnamedImpl] = {
     if (impls.contains(methodExpr.name)) {
       impls(methodExpr.name).implsWhichMatchMethodExpr(methodExpr, this, list)
     } else {
@@ -59,9 +59,11 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
       .mkString("\n") + "\n}"
   }
 
-  def get(methodName: MethodName): Set[UnnamedImpl] = impls.get(methodName).map(_.impls).getOrElse(Set())
+  def get(methodName: MethodName): Set[BoundUnnamedImpl] = impls.get(methodName).map(_.impls).getOrElse(Set())
 
-  def getNamed(methodName: MethodName): Set[Impl] = get(methodName).map(_.withName(methodName))
+  def getNamed(methodName: MethodName): Set[BoundImpl] = get(methodName).map(_.withName(methodName))
+
+  def getNamedWithoutSource(methodName: MethodName): Set[Impl] = getNamed(methodName).map(_.impl)
 
   def product(other: UnfreeImplSet): UnfreeImplSet = {
     UnfreeImplSet(this.impls.flatMap({ case ((methodName, singleMethodImplOptions)) =>

@@ -16,7 +16,7 @@ object DataStructureChooserCli {
       .mkString("\n")
   }
 
-  lazy val (impls, decls) = MainParser.parseImplFileString(libraryText).get
+  lazy val (impls, decls): (Set[FreeImpl], ImplLibrary.Decls) = MainParser.parseImplFileString(libraryText).get
 
   val dataStructuresFiles: Set[String] = {
     new java.io.File("data/data_structures").list().map((fileName: String) => {

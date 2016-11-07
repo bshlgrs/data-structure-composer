@@ -8,21 +8,21 @@ import scala.annotation.tailrec
 /**
   * Created by buck on 10/31/16.
   */
-case class ImplLibrary(impls: Set[Impl], decls: Decls, structures: Map[String, DataStructure]) {
+case class ImplLibrary(impls: Set[FreeImpl], decls: Decls, structures: Map[String, DataStructure]) {
   // suppose we had x <- y and y <- z
   // then our arrows would be
   lazy val closuresOfForwardImplArrows: Map[MethodName, Set[MethodName]] = GraphSearch.closureOfMap(forwardImplArrows)
   lazy val closuresOfBackwardImplArrows: Map[MethodName, Set[MethodName]] = GraphSearch.closureOfMap(backwardImplArrows)
 
-  lazy val writeMethods = impls.filter(_.lhs.isMutating)
-  lazy val readMethods = impls.filter(!_.lhs.isMutating)
+  lazy val writeMethods: Set[FreeImpl] = impls.filter(_.lhs.isMutating)
+  lazy val readMethods: Set[FreeImpl] = impls.filter(!_.lhs.isMutating)
 
   // map from MethodNames to all the things that can be used to implement them
   // eg, if we just had `reduce` and `getSum` here, our impls would have `getSum <- reduce[_]` in them,
   // so our map here would be Map(getSum -> reduce)
   lazy val backwardImplArrows: Map[MethodName, Set[MethodName]] = {
-    (impls ++ structures.flatMap(_._2.impls)).groupBy(_.lhs.name).map({ case (m: MethodName, s: Set[Impl]) =>
-      m -> s.flatMap(_.rhs.weights.flatMap(_._1.getNames))
+    (impls ++ structures.flatMap(_._2.freeImpls)).groupBy(_.impl.lhs.name).map({ case (m: MethodName, s: Set[FreeImpl]) =>
+      m -> s.flatMap(_.impl.rhs.weights.keys.flatMap(_.getNames))
     })
   }
 
@@ -50,7 +50,7 @@ case class ImplLibrary(impls: Set[Impl], decls: Decls, structures: Map[String, D
 
       val adtReadMethods = adt.methods.map(_._1.name).toSet
 
-      structure.readMethods.exists((i: Impl) => {
+      structure.readMethods.exists((i: FreeImpl) => {
         val methodNamesThisIsHelpfulFor = closuresOfForwardImplArrows(i.lhs.name)
         (adtReadMethods & methodNamesThisIsHelpfulFor).nonEmpty
       })

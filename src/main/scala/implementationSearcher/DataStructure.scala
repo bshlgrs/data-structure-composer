@@ -4,7 +4,8 @@ import implementationSearcher.ImplLhs.FunctionProperty
 import parsers.MainParser
 import shared.{DominanceRelationship, PartialOrdering}
 
-case class DataStructure(parameters: List[MethodName],
+case class DataStructure(name: String,
+                         parameters: List[MethodName],
                          conditions: ImplPredicateMap,
                          impls: Set[Impl],
                          extensionOf: Set[String]) {
@@ -12,17 +13,19 @@ case class DataStructure(parameters: List[MethodName],
 
 //  def searchResult: UnfreeImplSet = UnfreeImplSet.fromSetOfUnfreeImpls(impls)
 
-  def readMethods: Set[Impl] = {
-    impls.filterNot(_.lhs.name.isMutating)
+  def readMethods: Set[FreeImpl] = {
+    freeImpls.filterNot(_.lhs.name.isMutating)
   }
 
-  def writeMethods: Set[Impl] = {
-    impls.filter(_.lhs.name.isMutating)
+  def writeMethods: Set[FreeImpl] = {
+    freeImpls.filter(_.lhs.name.isMutating)
   }
 
   def namedParameters(sourceName: String): Set[BoundMethodName] = {
     parameters.map((x) => BoundMethodName(x.name, sourceName)).toSet
   }
+
+  lazy val freeImpls: Set[FreeImpl] = impls.map((x) => FreeImpl(x, FreeImplSource(Some(name))))
 
 //  def partialCompareWriteMethods(other: DataStructure): DominanceRelationship = {
 //      (this.writeMethods.groupBy ++ other.writeMethods.keys).map((blah: MethodExpr) =>
@@ -71,6 +74,6 @@ object DataStructure {
       }})
     }})
 
-    DataStructure(parameters, conditions, translatedImpls, extensionOf)
+    DataStructure(name, parameters, conditions, translatedImpls, extensionOf)
   }
 }

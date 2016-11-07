@@ -60,60 +60,60 @@ class DataStructureChooserSpec extends FunSpec {
       it("can do a linked list") {
         val res = Chooser.getAllTimesForDataStructure(library, linkedList)
 
-        assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
-        assert(res.getNamed("getFirst") == Set(Impl("getFirst <- 1")))
-        assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- n")))
-        assert(res.getNamed("getNext") == Set(Impl("getNext <- 1")))
-        assert(res.getNamed("updateNode!") == Set(Impl("updateNode! <- 1")))
+        assert(res.getNamedWithoutSource("getByIndex") == Set(Impl("getByIndex <- n")))
+        assert(res.getNamedWithoutSource("getFirst") == Set(Impl("getFirst <- 1")))
+        assert(res.getNamedWithoutSource("getMinimum") == Set(Impl("getMinimum <- n")))
+        assert(res.getNamedWithoutSource("getNext") == Set(Impl("getNext <- 1")))
+        assert(res.getNamedWithoutSource("updateNode!") == Set(Impl("updateNode! <- 1")))
       }
 
       it("can do a heap") {
         val res = Chooser.getAllTimesForDataStructure(library, heap)
 
-        assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
-        assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
-        assert(res.getNamed("getFirst") == Set(Impl("getFirst <- n")))
-        assert(res.getNamed("updateNode!") == Set(Impl("updateNode! <- log(n)")))
+        assert(res.getNamedWithoutSource("getByIndex") == Set(Impl("getByIndex <- n")))
+        assert(res.getNamedWithoutSource("getMinimum") == Set(Impl("getMinimum <- 1")))
+        assert(res.getNamedWithoutSource("getFirst") == Set(Impl("getFirst <- n")))
+        assert(res.getNamedWithoutSource("updateNode!") == Set(Impl("updateNode! <- log(n)")))
       }
 
       it("can do linked-list + heap") {
         val res =
           Chooser.getRelevantTimesForDataStructures(library, Set(linkedList, heap))
 
-        assert(res.getNamed("getFirst") == Set(Impl("getFirst <- 1")))
-        assert(res.getNamed("insertAnywhere!") == Set(Impl("insertAnywhere! <- log(n)")))
-        assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
+        assert(res.getNamedWithoutSource("getFirst") == Set(Impl("getFirst <- 1")))
+        assert(res.getNamedWithoutSource("insertAnywhere!") == Set(Impl("insertAnywhere! <- log(n)")))
+        assert(res.getNamedWithoutSource("getMinimum") == Set(Impl("getMinimum <- 1")))
       }
 
       describe("doing a generic heap") {
         val res = Chooser.getAllTimesForDataStructure(library, genericHeap)
 
         it("succeeds at the read methods") {
-          assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
-          assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
-          assert(res.getNamed("getFirst") == Set(Impl("getFirst <- n")))
-          assert(res.getNamed("getByIndex") == Set(Impl("getByIndex <- n")))
-          assert(res.getNamed("getNext") == Set(Impl("getNext <- n")))
+          assert(res.getNamedWithoutSource("getByIndex") == Set(Impl("getByIndex <- n")))
+          assert(res.getNamedWithoutSource("getMinimum") == Set(Impl("getMinimum <- 1")))
+          assert(res.getNamedWithoutSource("getFirst") == Set(Impl("getFirst <- n")))
+          assert(res.getNamedWithoutSource("getByIndex") == Set(Impl("getByIndex <- n")))
+          assert(res.getNamedWithoutSource("getNext") == Set(Impl("getNext <- n")))
         }
 
         it("succeeds at the write methods") {
-          assert(res.getNamed("updateNode!") == Set(Impl("updateNode! <- log(n)")))
+          assert(res.getNamedWithoutSource("updateNode!") == Set(Impl("updateNode! <- log(n)")))
         }
       }
 
       it("can do linked-list + generic heap") {
         val res = Chooser.getRelevantTimesForDataStructures(library, Set(linkedList, genericHeap))
 
-        assert(res.getNamed("getFirst") == Set(Impl("getFirst <- 1")))
-        assert(res.getNamed("insertAnywhere!") == Set(Impl("insertAnywhere! <- log(n)")))
-        assert(res.getNamed("getMinimum") == Set(Impl("getMinimum <- 1")))
+        assert(res.getNamedWithoutSource("getFirst") == Set(Impl("getFirst <- 1")))
+        assert(res.getNamedWithoutSource("insertAnywhere!") == Set(Impl("insertAnywhere! <- log(n)")))
+        assert(res.getNamedWithoutSource("getMinimum") == Set(Impl("getMinimum <- 1")))
       }
 
       describe("with invertible reduction memoizer") {
         it("does getRelevantTimes correctly") {
           val res = Chooser.getRelevantTimesForDataStructures(library, Set(invertibleReductionMemoizer, linkedList))
 
-          assert(res.getNamed("getSum") == Set(Impl("getSum <- 1")))
+          assert(res.getNamedWithoutSource("getSum") == Set(Impl("getSum <- 1")))
 
           // This is because the equals method distinguishes between the maps Map() and Map(f -> Set()).
           val otherImpl = {
@@ -121,7 +121,7 @@ class DataStructureChooserSpec extends FunSpec {
             thing.copy(lhs = thing.lhs.copy(conditions = ImplPredicateMap(Map())))
           }
 
-          assert(res.getNamed("reduce") == Set(
+          assert(res.getNamedWithoutSource("reduce") == Set(
             Impl("reduce[f] if f.invertible, f.commutative <- 1"),
             otherImpl))
         }

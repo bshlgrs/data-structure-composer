@@ -26,40 +26,6 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
     Impl(lhs.addConditions(conditions), rhs)
   }
 
-  // Suppose you have an implementation, like
-
-  // f[x] <- g[x]
-
-  // and you have implementations
-
-  // g[y] <- y * n
-  // g[y] if y.foo <- y * log(n)
-
-  // This method returns
-
-  // f[x] <- x * n
-  // f[x] if x.foo <- x * log(n)
-  def bindToAllOptions(searchResult: UnfreeImplSet): DominanceFrontier[UnnamedImpl] =
-    unboundCostTuples(searchResult) match {
-      case Nil => DominanceFrontier.fromSet(Set(this.copy(rhs = this.boundCost(searchResult))))
-      case (methodExpr, methodCostWeight) :: other => {
-        val otherwiseSubbedImpls = this.copy(rhs = rhs.filterKeys(_ != methodExpr)).bindToAllOptions(searchResult)
-
-        val optionsAndConditions =
-          searchResult.implsWhichMatchMethodExpr(methodExpr,
-            ParameterList(lhs.conditions, searchResult.declarations(lhs.name).parameters))
-
-        DominanceFrontier.fromSet(for {
-          unfreeImpl <- otherwiseSubbedImpls.items
-          optionImpl <- optionsAndConditions
-        } yield {
-          UnnamedImpl(
-            lhs.conditions.and(optionImpl.predicates),
-            unfreeImpl.cost + optionImpl.cost * methodCostWeight)
-        })
-      }
-    }
-
 
   // Suppose you have the impl
 
