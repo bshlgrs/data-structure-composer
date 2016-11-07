@@ -1,5 +1,6 @@
 package implementationSearcher
 
+import implementationSearcher.ImplLibrary.Decls
 import shared.DominanceFrontier
 
 /**
@@ -10,8 +11,8 @@ case class FreeImplSource(ds: Option[String]) {
 }
 
 case class FreeImpl(impl: Impl, freeImplSource: FreeImplSource) {
-  def makeBound(unfreeImplSet: UnfreeImplSet) = {
-    assert(impl.unboundCostTuples(unfreeImplSet).isEmpty)
+  def makeBound(unfreeImplSet: UnfreeImplSet, decls: Decls) = {
+    assert(impl.unboundCostTuples(unfreeImplSet, decls).isEmpty)
 
     BoundImpl(impl, BoundSource.build(SingleBoundSource(this, Set())))
   }
@@ -29,16 +30,20 @@ case class FreeImpl(impl: Impl, freeImplSource: FreeImplSource) {
 
   // f[x] <- x * n
   // f[x] if x.foo <- x * log(n)
-  def bindToAllOptions(searchResult: UnfreeImplSet): DominanceFrontier[BoundUnnamedImpl] =
-    impl.unboundCostTuples(searchResult) match {
+  def bindToAllOptions(unfreeImplSet: UnfreeImplSet, decls: ImplLibrary.Decls): DominanceFrontier[BoundUnnamedImpl] =
+    impl.unboundCostTuples(unfreeImplSet, decls) match {
       case Nil => DominanceFrontier.fromSet(
-        Set(this.copy(impl = impl.copy(rhs = impl.boundCost(searchResult))).makeBound(searchResult)))
+        Set(this.copy(impl = impl.copy(rhs = impl.boundCost(unfreeImplSet, decls))).makeBound(unfreeImplSet, decls)))
       case (methodExpr, methodCostWeight) :: other => {
-        val otherwiseSubbedImpls = this.copy(impl=impl.copy(rhs = impl.rhs.filterKeys(_ != methodExpr))).bindToAllOptions(searchResult)
+        val otherwiseSubbedImpls = this.copy(
+          impl=impl.copy(
+            rhs = impl.rhs.filterKeys(_ != methodExpr))
+        ).bindToAllOptions(unfreeImplSet, decls)
 
         val optionsAndConditions =
-          searchResult.implsWhichMatchMethodExpr(methodExpr,
-            ParameterList(impl.lhs.conditions, searchResult.declarations(impl.lhs.name).parameters))
+          unfreeImplSet.implsWhichMatchMethodExpr(methodExpr,
+            ParameterList(impl.lhs.conditions, decls(impl.lhs.name).parameters),
+            decls)
 
         DominanceFrontier.fromSet(for {
           unfreeImpl <- otherwiseSubbedImpls.items

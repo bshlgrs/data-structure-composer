@@ -26,7 +26,7 @@ abstract class BigOLiteral extends Ordered[BigOLiteral] {
 
   override def toString = s"BigO($toShortString)"
 
-  def toShortString: String
+  val toShortString: String
 }
 
 case class PolyAndLogTime(powerOfN: Float, powerOfLogN: Int) extends BigOLiteral {
@@ -43,7 +43,7 @@ case class PolyAndLogTime(powerOfN: Float, powerOfLogN: Int) extends BigOLiteral
     PolyAndLogTime(this.powerOfN + other.powerOfN, this.powerOfLogN + other.powerOfLogN)
   }
 
-  def toShortString = (powerOfN, powerOfLogN) match {
+  lazy val toShortString = (powerOfN, powerOfLogN) match {
     case (0.0, 0) => "1"
     case (1.0, 0) => "n"
     case (0.5, 0) => "sqrt(n)"
@@ -60,5 +60,5 @@ object LogTime extends PolyAndLogTime(0, 1)
 object LinearTime extends PolyAndLogTime(1, 0)
 
 object ZeroTime extends BigOLiteral {
-  def toShortString = "0"
+  val toShortString = "0"
 }

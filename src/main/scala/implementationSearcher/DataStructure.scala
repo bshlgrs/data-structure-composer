@@ -11,8 +11,6 @@ case class DataStructure(name: String,
                          extensionOf: Set[String]) {
   def isSimple: Boolean = parameters.isEmpty
 
-//  def searchResult: UnfreeImplSet = UnfreeImplSet.fromSetOfUnfreeImpls(impls)
-
   def readMethods: Set[FreeImpl] = {
     freeImpls.filterNot(_.lhs.name.isMutating)
   }

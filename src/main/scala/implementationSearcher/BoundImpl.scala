@@ -13,6 +13,8 @@ case class SingleBoundSource(template: Impl, materials: Set[Impl]) {
 
 case class BoundSource(boundSources: Set[SingleBoundSource]) {
   def +(other: BoundSource): BoundSource = BoundSource(boundSources ++ other.boundSources)
+
+  lazy val impls: Set[Impl] = boundSources.flatMap(_.materials)
 }
 
 case class BoundImpl(impl: Impl, boundSource: BoundSource)

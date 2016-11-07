@@ -1,12 +1,13 @@
 package implementationSearcher
 
+import implementationSearcher.ImplLibrary.Decls
 import shared._
 
 
 /**
   * Created by buck on 9/10/16.
   */
-case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVariables: Set[MethodName], declarations: Map[MethodName, ImplDeclaration]) {
+case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVariables: Set[MethodName]) {
   def addImpl(impl: BoundImpl): UnfreeImplSet = {
     if (impls.contains(impl.lhs.name)) {
       this.copy(impls = impls.updated(impl.lhs.name, impls(impl.lhs.name).add(impl)))
@@ -45,9 +46,9 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   // If instead of `myMethod[f]` I was calling this with `myMethod[_{foo}]`:
   // If I see `myMethod[g] if g.foo <- log(n)`, I want to return that.
   // If I see `myMethod[g] if g.bar <- log(n**2)`, I want to not include that one. !!!
-  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, list: ParameterList): Set[BoundUnnamedImpl] = {
+  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, list: ParameterList, decls: Decls): Set[BoundUnnamedImpl] = {
     if (impls.contains(methodExpr.name)) {
-      impls(methodExpr.name).implsWhichMatchMethodExpr(methodExpr, this, list)
+      impls(methodExpr.name).implsWhichMatchMethodExpr(methodExpr, this, list, decls)
     } else {
       Set()
     }
@@ -72,7 +73,7 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
       } else {
         Nil
       }
-    }), boundVariables ++ other.boundVariables, declarations ++ other.declarations)
+    }), boundVariables ++ other.boundVariables)
   }
 
   def partialCompareWithTime(other: UnfreeImplSet): DominanceRelationship = {
@@ -85,10 +86,6 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
       }).toSet
     )
   }
-
-//  def bestFullyGeneralTimes: Map[MethodName, AffineBigOCombo[MethodName]] = {
-//    impls.mapValues((x) => x.bestFullyGeneralTime).filter(_._2.isDefined).mapValues(_.get)
-//  }
 }
 
 

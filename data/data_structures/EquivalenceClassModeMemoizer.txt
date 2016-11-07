@@ -1,4 +1,4 @@
-ds EquivalenceClassModeMemoizer[partitionFunction] {
+ds EquivalenceClassModeMemoizer[partitionFunction] extends HistogramHashMap {
     updateNode! <- 1
     deleteNode! <- 1
     insertAtIndex! <- 1

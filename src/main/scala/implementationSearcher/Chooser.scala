@@ -15,14 +15,9 @@ object Chooser {
   // y[g] <- x[g]
   // should infer
   // y[g] if g.foo <- 1
-//  val testLibrary = Set(
-//    Impl(ImplLhs("x", List("f"), Some(ImplPredicateList(List(Set("foo"))))), AffineBigOCombo[MethodExpr](LogTime)),
-//    Impl(ImplLhs("y", List("g")),
-//      AffineBigOCombo[MethodExpr](ConstantTime, Map(MethodExpr("x", List(NamedFunctionExpr("g"))) -> ConstantTime)))
-//  )
 
   def getAllTimesFromEmpty(impls: Set[FreeImpl], library: ImplLibrary, freeVariables: Set[MethodName]): UnfreeImplSet = {
-    getAllTimes(UnfreeImplSet(Map(), freeVariables, library.decls), impls, library)
+    getAllTimes(UnfreeImplSet(Map(), freeVariables), impls, library)
   }
 
   def getAllTimes(initialUnfreeImplSet: UnfreeImplSet,
@@ -32,7 +27,9 @@ object Chooser {
 
     var unfreeImplSet = initialUnfreeImplSet
 
-    queue ++= impls.filter(_.unboundCostTuples(unfreeImplSet).isEmpty).map(_.makeBound(unfreeImplSet))
+    queue ++= impls
+      .filter(_.unboundCostTuples(unfreeImplSet, implLibrary.decls).isEmpty)
+      .map(_.makeBound(unfreeImplSet, implLibrary.decls))
 
     def queuePlusSelected: List[BoundImpl] = queue.toList ++ unfreeImplSet.allImpls
 
@@ -53,12 +50,12 @@ object Chooser {
           val otherImplMethodsUsed = otherImpl.getNames
 
           if (otherImplMethodsUsed.contains(unfreeImpl.lhs.name)) {
-            val neighborUnfreeImpls: DominanceFrontier[BoundUnnamedImpl] = otherImpl.bindToAllOptions(unfreeImplSet)
+            val neighborUnfreeImpls: DominanceFrontier[BoundUnnamedImpl] = otherImpl.bindToAllOptions(unfreeImplSet, implLibrary.decls)
 
             neighborUnfreeImpls.items.foreach((u: BoundUnnamedImpl) =>
               if (unfreeImplSet.isOtherImplUseful(u.withName(otherImpl.lhs.name))) {
                 val impl = u.withName(otherImpl.lhs.name)
-                assert(impl.unboundCostTuples(unfreeImplSet).isEmpty)
+                assert(impl.unboundCostTuples(unfreeImplSet, implLibrary.decls).isEmpty)
                 queue += impl
               }
             )
@@ -73,7 +70,7 @@ object Chooser {
   def getAllTimesForDataStructure(implLibrary: ImplLibrary, dataStructure: DataStructure): UnfreeImplSet = {
     // todo: consider conditions
     getAllTimes(
-      UnfreeImplSet(Map(), dataStructure.parameters.toSet, implLibrary.decls),
+      UnfreeImplSet(Map(), dataStructure.parameters.toSet),
       implLibrary.impls.union(dataStructure.freeImpls),
       implLibrary)
   }
@@ -90,7 +87,7 @@ object Chooser {
     val relevantImpls = mbRelevantReadMethods.getOrElse(implLibrary.readMethods)
 
     val bestReadImplementations: UnfreeImplSet = getAllTimes(
-      UnfreeImplSet(Map(), allFreeVariables, implLibrary.decls),
+      UnfreeImplSet(Map(), allFreeVariables),
       allProvidedReadImplementations ++ implLibrary.readMethods,
       implLibrary)
 
@@ -100,7 +97,7 @@ object Chooser {
     val combinedWriteImplementations: UnfreeImplSet =
       allWriteImplementations
         .reduceOption(_.product(_))
-        .getOrElse(UnfreeImplSet(Map(), allFreeVariables, implLibrary.decls))
+        .getOrElse(UnfreeImplSet(Map(), allFreeVariables))
 
     bestReadImplementations.addImpls(combinedWriteImplementations.allImpls)
   }
@@ -158,18 +155,19 @@ object Chooser {
       Set(),
       library.readMethods.filter((x) => library.isImplRelevantToAdt(x.impl, adt)),
       library.potentiallyRelevantDataStructures(adt),
-      UnfreeImplSet(Map(), Set(), Map())
+      UnfreeImplSet(Map(), Set())
     )
 
     val choicesSet: Set[DataStructureChoice] = results.flatMap({ case (set: Set[DataStructure], sr: UnfreeImplSet) => {
       val methods = adt.methods.keys.map((methodExpr: MethodExpr) => {
         // TODO: let this be a proper dominance frontier
-        methodExpr -> sr.implsWhichMatchMethodExpr(methodExpr, ParameterList.empty).headOption.map(_.withName(methodExpr.name))
+        methodExpr -> sr.implsWhichMatchMethodExpr(methodExpr, ParameterList.empty, library.decls)
+          .headOption.map(_.withName(methodExpr.name))
       }).toMap
 
       if (methods.forall(_._2.isDefined))
         // methods.mapValues(_.get.rhs.mapKeys(_.getAsNakedName))
-        Set[DataStructureChoice](DataStructureChoice(set.map(_.name), sr, adt))
+        Set[DataStructureChoice](DataStructureChoice.build(set, sr, adt, library))
       else
         Set[DataStructureChoice]()
     }})

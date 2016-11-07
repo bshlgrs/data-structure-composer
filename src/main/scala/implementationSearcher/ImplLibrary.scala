@@ -83,7 +83,7 @@ case class ImplLibrary(impls: Set[FreeImpl], decls: Decls, structures: Map[Strin
 
   lazy val dataStructureChoicePartialOrdering = new DataStructureChoice.DataStructureChoicePartialOrdering(this)
 
-  def partialCompareSetFromExtensionRelations(x: Set[String], y: Set[String]): DominanceRelationship = {
+  def partialCompareSetFromExtensionRelations(x: Set[DataStructure], y: Set[DataStructure]): DominanceRelationship = {
     val list = for {
       xChoice <- x
       yChoice <- y
@@ -92,12 +92,12 @@ case class ImplLibrary(impls: Set[FreeImpl], decls: Decls, structures: Map[Strin
     list.reduce(_ supremum _)
   }
 
-  def partialCompareFromExtensionRelation(x: String, y: String): DominanceRelationship = {
+  def partialCompareFromExtensionRelation(x: DataStructure, y: DataStructure): DominanceRelationship = {
     if (x == y)
       NeitherDominates
-    else if (closuresOfExtensionArrows(x).contains(y))
+    else if (closuresOfExtensionArrows(x.name).contains(y.name))
       RightStrictlyDominates
-    else if (closuresOfExtensionArrows(y).contains(x))
+    else if (closuresOfExtensionArrows(y.name).contains(x.name))
       LeftStrictlyDominates
     else
       NeitherDominates

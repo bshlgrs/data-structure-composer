@@ -16,18 +16,18 @@ class ImplSpec extends FunSpec {
     val emptyLhs = ImplLhs.parse("whatever")
     val basicUnfreeImplSet = UnfreeImplSet(
       Map(),
-      Set(),
-      Map(
-        MethodName("f") -> ImplDeclaration(List("x")),
-        MethodName("getFirstBy") -> ImplDeclaration(List("f")),
-        MethodName("y") -> ImplDeclaration(List("f")),
-        MethodName("g") -> ImplDeclaration(Nil)
-      ))
+      Set())
+    val decls = Map(
+      MethodName("f") -> ImplDeclaration(List("x")),
+      MethodName("getFirstBy") -> ImplDeclaration(List("f")),
+      MethodName("y") -> ImplDeclaration(List("f")),
+      MethodName("g") -> ImplDeclaration(Nil)
+    )
 
     it("does simple constant time test") {
       val impl = Impl("g <- 1")
       val Some(UnnamedImpl(conditions, rhs)) =
-        impl.bindToContext(MethodExpr.parse("g"), basicUnfreeImplSet, ParameterList.empty).headOption
+        impl.bindToContext(MethodExpr.parse("g"), basicUnfreeImplSet, ParameterList.empty, decls).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == Impl.rhs("1"))
@@ -36,7 +36,7 @@ class ImplSpec extends FunSpec {
     it("does simple linear time test") {
       val impl = Impl("g <- n")
       val Some(UnnamedImpl(conditions, rhs)) =
-        impl.bindToContext(MethodExpr.parse("g"), basicUnfreeImplSet, ParameterList.empty).headOption
+        impl.bindToContext(MethodExpr.parse("g"), basicUnfreeImplSet, ParameterList.empty, decls).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == Impl.rhs("n"))
@@ -45,7 +45,7 @@ class ImplSpec extends FunSpec {
     it("correctly passes parameters through") {
       val impl = Impl("f[x] <- n * x")
       val Some(UnnamedImpl(conditions, rhs)) =
-        impl.bindToContext(MethodExpr.parse("f[y]"), basicUnfreeImplSet, ParameterList.easy("y")).headOption
+        impl.bindToContext(MethodExpr.parse("f[y]"), basicUnfreeImplSet, ParameterList.easy("y"), decls).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == Impl.rhs("n * y"))
@@ -54,7 +54,7 @@ class ImplSpec extends FunSpec {
     it("correctly deals with inapplicable anonymous functions") {
       val impl = Impl("f[x] <- x")
       val Some(UnnamedImpl(conditions, rhs)) =
-        impl.bindToContext(MethodExpr.parse("f[_]"), basicUnfreeImplSet, ParameterList.empty).headOption
+        impl.bindToContext(MethodExpr.parse("f[_]"), basicUnfreeImplSet, ParameterList.empty, decls).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == Impl.rhs("1"))
@@ -63,7 +63,7 @@ class ImplSpec extends FunSpec {
     it("correctly deals with applicable anonymous functions") {
       val impl = Impl("f[x] if x.foo <- x")
       val Some(UnnamedImpl(conditions, rhs)) =
-        impl.bindToContext(MethodExpr.parse("f[_{foo}]"), basicUnfreeImplSet, ParameterList.empty).headOption
+        impl.bindToContext(MethodExpr.parse("f[_{foo}]"), basicUnfreeImplSet, ParameterList.empty, decls).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == Impl.rhs("1"))
@@ -72,7 +72,7 @@ class ImplSpec extends FunSpec {
     it("returns sums") {
       val impl = Impl("f[x] <- x + log(n)")
       val Some(UnnamedImpl(conditions, rhs)) =
-        impl.bindToContext(MethodExpr.parse("g[y]"), basicUnfreeImplSet, ParameterList.easy("y")).headOption
+        impl.bindToContext(MethodExpr.parse("g[y]"), basicUnfreeImplSet, ParameterList.easy("y"), decls).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == Impl.rhs("y + log(n)"))
@@ -80,14 +80,18 @@ class ImplSpec extends FunSpec {
 
     it("notices when anonymous functions don't match the impl conditions") {
       val impl = Impl("f[x] if x.foo <- x")
-      val res = impl.bindToContext(MethodExpr.parse("f[_]"), basicUnfreeImplSet, ParameterList.empty).headOption
+      val res = impl.bindToContext(MethodExpr.parse("f[_]"), basicUnfreeImplSet, ParameterList.empty, decls).headOption
 
       assert(res.isEmpty)
     }
 
     it("reports impl conditions for named args") {
       val impl = Impl("f[x] if x.foo <- x")
-      val Some(UnnamedImpl(conditions, rhs)) = impl.bindToContext(MethodExpr.parse("f[y]"), basicUnfreeImplSet, ParameterList.easy("y")).headOption
+      val Some(UnnamedImpl(conditions, rhs)) = impl.bindToContext(
+        MethodExpr.parse("f[y]"),
+        basicUnfreeImplSet,
+        ParameterList.easy("y"),
+        decls).headOption
 
       assert(conditions == ImplPredicateMap(Map(MethodName("y") -> Set("foo"))))
       assert(rhs == Impl.rhs("y"))
@@ -95,7 +99,11 @@ class ImplSpec extends FunSpec {
 
     it ("doesn't screw up an obvious thing (regression test)") {
       val impl = Impl("getFirstBy[f]  <- n * f + n")
-      val Some(UnnamedImpl(conditions, rhs)) = impl.bindToContext(MethodExpr.parse("getFirstBy[y]"), basicUnfreeImplSet, ParameterList.easy("y")).headOption
+      val Some(UnnamedImpl(conditions, rhs)) = impl.bindToContext(
+        MethodExpr.parse("getFirstBy[y]"),
+        basicUnfreeImplSet,
+        ParameterList.easy("y"),
+        decls).headOption
 
       assert(conditions.isEmpty)
       assert(rhs == Impl.rhs("n * y + n"))
@@ -106,7 +114,8 @@ class ImplSpec extends FunSpec {
       val Some(UnnamedImpl(conditions, rhs)) = impl.bindToContext(
         MethodExpr.parse("y[_ <- k]"),
         basicUnfreeImplSet,
-        ParameterList.easy("k")
+        ParameterList.easy("k"),
+        decls
       ).headOption
 
       assert(conditions.isEmpty)

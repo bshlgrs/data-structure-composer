@@ -1,6 +1,7 @@
 package implementationSearcher
 
 import implementationSearcher.ImplLhs._
+import implementationSearcher.ImplLibrary.Decls
 import parsers.MainParser
 import shared._
 
@@ -35,8 +36,8 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
 
   // you get back `if y.foo <- y`
 
-  def bindToContext(methodExpr: MethodExpr, unfreeImplSet: UnfreeImplSet, list: ParameterList): Set[UnnamedImpl] = {
-    val parameters = unfreeImplSet.declarations(lhs.name).parameters
+  def bindToContext(methodExpr: MethodExpr, unfreeImplSet: UnfreeImplSet, list: ParameterList, decls: ImplLibrary.Decls): Set[UnnamedImpl] = {
+    val parameters = decls(lhs.name).parameters
 
     assert(methodExpr.args.length == parameters.length,
       s"Assertion failed: bindToContext called on $this with methodExpr $methodExpr.\n" +
@@ -63,16 +64,16 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
     }
   }
 
-  def unboundCostTuples(unfreeImplSet: UnfreeImplSet): List[(MethodExpr, BigOLiteral)] = {
-    rhs.filterKeys(!this.isMethodExprBound(unfreeImplSet, _)).weights.toList
+  def unboundCostTuples(unfreeImplSet: UnfreeImplSet, decls: Decls): List[(MethodExpr, BigOLiteral)] = {
+    rhs.filterKeys(!this.isMethodExprBound(unfreeImplSet, _, decls)).weights.toList
   }
 
-  def boundCost(unfreeImplSet: UnfreeImplSet): AffineBigOCombo[MethodExpr] = {
-    rhs.filterKeys(this.isMethodExprBound(unfreeImplSet, _))
+  def boundCost(unfreeImplSet: UnfreeImplSet, decls: Decls): AffineBigOCombo[MethodExpr] = {
+    rhs.filterKeys(this.isMethodExprBound(unfreeImplSet, _, decls))
   }
 
-  private def isMethodExprBound(unfreeImplSet: UnfreeImplSet, methodExpr: MethodExpr): Boolean = {
-    (unfreeImplSet.boundVariables ++ unfreeImplSet.declarations(this.lhs.name).parameters).contains(methodExpr.name)
+  private def isMethodExprBound(unfreeImplSet: UnfreeImplSet, methodExpr: MethodExpr, decls: Decls): Boolean = {
+    (unfreeImplSet.boundVariables ++ decls(this.lhs.name).parameters).contains(methodExpr.name)
   }
 
   lazy val getNames: Set[MethodName] = rhs.weights.keys.flatMap(_.getNames).toSet

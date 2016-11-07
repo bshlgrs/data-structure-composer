@@ -5,8 +5,6 @@ import implementationSearcher.ImplLhs.FunctionProperty
 import implementationSearcher.Impl.Rhs
 import shared._
 
-import scala.collection.Searching.SearchResult
-
 /**
   * Created by buck on 7/31/16.
   *
@@ -95,7 +93,7 @@ case class AnonymousFunctionExpr(properties: Set[String], cost: AffineBigOCombo[
       val costsOfParamsInMethodExprNames: List[Set[Rhs]] = cost.weights.map({case (name, weight) => {
         // Suppose that this FunctionExpr is _ <- n * f.
 
-        // Maybe f is a globally defined function. So look for it in the searchResult:
+        // Maybe f is a globally defined function. So look for it in the unfreeImplSet:
         val alreadyChosenImpls = unfreeImplSet.get(name)
         if (alreadyChosenImpls.nonEmpty) {
           assert(alreadyChosenImpls.forall(_.impl.predicates.isEmpty))

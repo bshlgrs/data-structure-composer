@@ -33,12 +33,13 @@ class StandardLibraryChoosingSpec extends FunSpec {
     it("knows some things about getFirstBy") {
       val impl = FreeImpl.parse("getLastBy[f] <- reduce[_{commutative} <- f]")
       val unfreeImplSet = Chooser.getRelevantTimesForDataStructures(library, Set(library.structures("InvertibleReductionMemoizer")))
-      val res = impl.bindToAllOptions(unfreeImplSet)
+      val res = impl.bindToAllOptions(unfreeImplSet, decls)
 
       assert(unfreeImplSet.impls(MethodName("reduce")).implsWhichMatchMethodExpr(
         MethodExpr.parse("reduce[_{commutative} <- f]"),
         unfreeImplSet,
-        ParameterList.apply(ImplPredicateMap.empty, List(MethodName("f")))) == Set())
+        ParameterList.apply(ImplPredicateMap.empty, List(MethodName("f"))),
+        decls) == Set())
 
       assert(unfreeImplSet.getNamedWithoutSource("getSum") == Set(Impl("getSum <- 1")))
       assert(unfreeImplSet.getNamedWithoutSource("getLastBy") == Set())
@@ -81,7 +82,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
-      assert(res.items.head.choices == Set("ArrayList"))
+      assert(res.items.head.choices.map(_.name) == Set("ArrayList"))
     }
 
     it("can do a list") {
@@ -94,7 +95,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
-      assert(res.items.map(_.choices).contains(Set("OrderStatisticTreeList")))
+      assert(res.items.map(_.choiceNames).contains(Set("OrderStatisticTreeList")))
     }
 
     it("can do a min-stack") {
@@ -102,7 +103,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choices == Set("StackReductionMemoizer", "ArrayList"))
+      assert(res.items.head.choices.map(_.name) == Set("StackReductionMemoizer", "ArrayList"))
     }
 
     it("can do a stack with contains") {
@@ -117,7 +118,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
         DataStructureChooserCli.printResults(res)
 
-        assert(res.items.exists(_.choices == Set("HistogramHashMap", "ArrayList")))
+        assert(res.items.exists(_.choiceNames == Set("HistogramHashMap", "ArrayList")))
     }
 
     it("can do a set which you never delete from") {
@@ -129,7 +130,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choices == Set("HistogramHashMap"))
+      assert(res.items.map(_.choiceNames) == Set(Set("HistogramHashMap")))
     }
 
     it("knows how to use parameterized data structures") {
@@ -144,7 +145,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choices == Set("AugmentedOrderStatisticTreeList"))
+      assert(res.items.head.choiceNames == Set("AugmentedOrderStatisticTreeList"))
     }
 
     it("knows how to use RMQ") {
@@ -159,7 +160,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choices == Set("SparseTableForIdempotentReduction", "ArrayList"))
+      assert(res.items.head.choiceNames == Set("SparseTableForIdempotentReduction", "ArrayList"))
     }
 
     it("can solve RMQ and count") {
@@ -177,7 +178,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.exists(_.choices ==
+      assert(res.items.exists(_.choiceNames ==
         Set("SparseTableForIdempotentReduction", "HistogramHashMap", "ArrayList")))
     }
 
@@ -199,7 +200,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choices == Set("ArrayList", "InvertibleReductionMemoizer"))
+      assert(res.items.head.choiceNames == Set("ArrayList", "InvertibleReductionMemoizer"))
     }
 
     it("can do min stack with random modification") {
@@ -221,7 +222,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.map(_.choices) == Set(Set("ArrayList", "ValueOrderedOst")))
+      assert(res.items.map(_.choiceNames) == Set(Set("ArrayList", "ValueOrderedOst")))
     }
 
     it("can do min stack with getKthBy") {
@@ -243,23 +244,26 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.map(_.choices) == Set(Set("ArrayList", "ValueOrderedOst")))
+      assert(res.items.map(_.choiceNames) == Set(Set("ArrayList", "ValueOrderedOst")))
     }
   }
 
   describe("data structure dominance") {
     describe("partialCompareFromExtensionRelation") {
       it("knows how to deal when they're the same") {
-        assert(library.partialCompareFromExtensionRelation("ArrayList", "ArrayList") == NeitherDominates)
+        assert(library.partialCompareFromExtensionRelation(
+          library.structures("ArrayList"), library.structures("ArrayList")) == NeitherDominates)
       }
 
       it("knows how to deal when they're unrelated") {
-        assert(library.partialCompareFromExtensionRelation("ArrayList", "BinaryHeap") == NeitherDominates)
+        assert(library.partialCompareFromExtensionRelation(
+          library.structures("ArrayList"), library.structures("BinaryHeap")) == NeitherDominates)
       }
 
       it("deals when they're related") {
         assert(
-          library.partialCompareFromExtensionRelation("ValueOrderedOst", "ValueOrderedAugmentedOst")
+          library.partialCompareFromExtensionRelation(
+            library.structures("ValueOrderedOst"), library.structures("ValueOrderedAugmentedOst"))
             == LeftStrictlyDominates)
       }
     }
@@ -267,12 +271,12 @@ class StandardLibraryChoosingSpec extends FunSpec {
     describe("partialCompareSetFromExtensionRelations") {
       it("deals with unrelated sets properly") {
         assert(library.partialCompareSetFromExtensionRelations(
-          Set("ArrayList"), Set("BinaryHeap")) == NeitherDominates)
+          Set(library.structures("ArrayList")), Set(library.structures("BinaryHeap"))) == NeitherDominates)
       }
 
       it("deals with related sets properly") {
         assert(library.partialCompareSetFromExtensionRelations(
-          Set("ValueOrderedOst"), Set("ValueOrderedAugmentedOst")) == LeftStrictlyDominates)
+          Set(library.structures("ValueOrderedOst")), Set(library.structures("ValueOrderedAugmentedOst"))) == LeftStrictlyDominates)
       }
     }
   }

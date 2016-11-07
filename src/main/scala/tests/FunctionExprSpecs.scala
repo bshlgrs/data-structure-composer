@@ -18,12 +18,7 @@ class FunctionExprSpecs extends FunSpec {
   // I want to know that g[y] <- x, so I'm running getConditionsAndCosts on that y FunctionExpr in f[y]
   describe("getConditionsAndCosts") {
     it("works in a simple case") {
-      val scope = UnfreeImplSet(Map(), Set(),
-        Map(
-          MethodName("f") -> ImplDeclaration(List("x")),
-          MethodName("g") -> ImplDeclaration(List("y"))
-        )
-      )
+      val scope = UnfreeImplSet(Map(), Set())
 
       val conditionsAndCosts = NamedFunctionExpr("y").getConditionsAndCosts(Set(), scope,
         ParameterList.easy("y"))

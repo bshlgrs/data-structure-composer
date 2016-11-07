@@ -104,12 +104,11 @@ class App extends Component {
                       {choice}
                     </a>
                   ).reduce((acc, elem) => {
-                    // debugger;
                     return acc === null ? [elem] : [...acc, ', ', elem]
                   }, null)
                 }
                 </td>
-                {previousSearchMethods.map((m, idx) => <td key={idx}>{ds.results[m].as_string_for_json}</td>)}
+                {previousSearchMethods.map((m, idx) => <td key={idx}>{ds.result_times[m].to_short_string}</td>)}
               </tr>)}
             </tbody>
           </table> :

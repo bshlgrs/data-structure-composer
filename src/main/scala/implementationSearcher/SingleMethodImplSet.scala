@@ -1,6 +1,7 @@
 package implementationSearcher
 
 import implementationSearcher.ImplLhs._
+import implementationSearcher.ImplLibrary.Decls
 import shared._
 
 /**
@@ -26,11 +27,11 @@ case class SingleMethodImplSet(options: DominanceFrontier[BoundUnnamedImpl]) {
   }
 
   // More impl conditions means that this function returns something better
-  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, scope: UnfreeImplSet, list: ParameterList): Set[BoundUnnamedImpl] =
+  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, scope: UnfreeImplSet, list: ParameterList, decls: Decls): Set[BoundUnnamedImpl] =
     options.items.flatMap({ case BoundUnnamedImpl(option, optionSource) =>
       option
         .withName(methodExpr.name)
-        .bindToContext(methodExpr, scope, list)
+        .bindToContext(methodExpr, scope, list, decls)
         .map((x) => BoundUnnamedImpl(x, optionSource))
     })
 
