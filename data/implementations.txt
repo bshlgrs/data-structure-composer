@@ -75,6 +75,7 @@ getNearest[f] <- unorderedEach
 // using binary search:
 getNearest[f] <- log(n) * getKthBy[f]
 
+
 // other reductions
 count <- unorderedEach
 contains <- count

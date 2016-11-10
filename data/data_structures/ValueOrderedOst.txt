@@ -6,8 +6,9 @@ ds ValueOrderedOst[f] {
     getKthBy[f] <- log(n)
     insertAtIndex! <- log(n)
     getFirstNodeWithValue[f] <- log(n)
-    deleteNode! <- 1
+    deleteNode! <- log(n)
     countBetweenBy[f] <- log(n)
+    getNearest[f] <- log(n)
 }
 
 This is a balanced binary search tree ordered on `f`. Every node also maintains how many descendents it has,
