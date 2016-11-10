@@ -79,6 +79,10 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
   lazy val getNames: Set[MethodName] = rhs.weights.keys.flatMap(_.getNames).toSet
 
   lazy val unnamed = UnnamedImpl(lhs.conditions, rhs)
+
+  lazy val jsHashCode = hashCode()
+
+  lazy val asString = toString
 }
 
 object Impl {

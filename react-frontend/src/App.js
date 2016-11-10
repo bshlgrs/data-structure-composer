@@ -9,7 +9,8 @@ class App extends Component {
       selectedMethods: ['insertLast!', 'deleteLast!', 'getLast', 'getMinimum'],
       optimalDataStructures: null,
       searching: false,
-      currentlyViewedDataStructure: null
+      bottomPanel: null
+
     }
   }
 
@@ -60,10 +61,56 @@ class App extends Component {
     this.setState({ selectedMethods: newSelectedMethods});
   }
 
-  render() {
+  dsChoiceList(ds) {
+    return ds.choices.map((choice, idx) =>
+      <a
+        className="choice"
+        key={idx}
+        onClick={() => this.setState({ bottomPanel: ["ds", choice.name] })}>
+        {choice.name}
+      </a>
+    ).reduce((acc, elem) => (acc === null ? [elem] : [...acc, ', ', elem]), null)
+  }
+
+  renderCombo () {
+    var choice = this.state.bottomPanel[1];
+    return <div>
+      <h2>Composite data structure: {this.dsChoiceList(choice)}</h2>
+
+      <ul>
+        {Object.keys(choice.results).map((methodName, idx) =>
+          this.renderBoundSourceLi(choice.results[methodName], idx)
+        )}
+      </ul>
+    </div>;
+  }
+
+  renderBoundSourceLi(result, idx) {
+    console.log("starting", result);
+    var choice = this.state.bottomPanel[1];
+
+    var finished = <li key={idx}>{result.impl.lhs.name.name} {result.js_hash_code}
+      <ul>
+        {result.bound_source.bound_sources.map((bound_source, idx) => {
+          var freeImpl = choice.js_free_hash_code_map[bound_source.template.js_hash_code];
+          return <li key={idx}>{bound_source.template.as_string}.
+            From {freeImpl.free_impl_source.ds || "thin air"}. Using
+            {false && <ul>
+              {bound_source.materials.map((material, idx) => this.renderBoundSourceLi(material, idx))}
+            </ul>}
+          </li>
+        })}
+      </ul>
+    </li>;
+
+    console.log("starting", result);
+    return finished;
+  }
+
+  render () {
     var optimalDataStructures = this.state.optimalDataStructures;
     var previousSearchMethods = optimalDataStructures && optimalDataStructures[0] && Object.keys(optimalDataStructures[0].results).sort();
-    var currentlyViewedDataStructure = this.state.currentlyViewedDataStructure;
+    var bottomPanel = this.state.bottomPanel;
 
     return (
       <div className="App">
@@ -86,47 +133,48 @@ class App extends Component {
 
         <button onClick={() => this.fetch()}>{this.state.searching ? "Searching..." : "Search!"}</button>
 
-      {optimalDataStructures &&
-        (optimalDataStructures.length ?
-          <table>
-            <tbody>
-              <tr>
-                <th />
-                {previousSearchMethods.map((m, idx) => <th key={idx}>{m}</th>)}
-              </tr>
-              {optimalDataStructures.map((ds, idx) => <tr key={idx}>
-                <td>
-                  {ds.choices.map((choice, idx) =>
-                    <a
-                      className="choice"
-                      key={idx}
-                      onClick={() => this.setState({ currentlyViewedDataStructure: choice.name })}>
-                      {choice.name}
-                    </a>
-                  ).reduce((acc, elem) => (acc === null ? [elem] : [...acc, ', ', elem]), null)
-                }
-                </td>
-                {previousSearchMethods.map((m, idx) => {
-                  var time = ds.result_times[m].to_short_string;
-                  return <td key={idx} className={"time-"+time.replace(/[()*]/g, "")}>{time}</td>
-                })}
-              </tr>)}
-            </tbody>
-          </table> :
-          <div>
-            <p>There were no results found for that ADT!</p>
-            <p>This is basically just an error in this app; there shouldn't actually be ADTs which can't be implemented.</p>
-          </div>
+        {optimalDataStructures &&
+          (optimalDataStructures.length ?
+            <table>
+              <tbody>
+                <tr>
+                  <th />
+                  {previousSearchMethods.map((m, idx) => <th key={idx}>{m}</th>)}
+                </tr>
+                {optimalDataStructures.sort(sortDataStructureChoicesByTotalTime).map((ds, idx) => <tr key={idx}>
+                  <td>
+                    {this.dsChoiceList(ds)}
+
+                    <span style={{paddingLeft: "5px"}}><button onClick={() => this.setState({ bottomPanel: ["combo", ds]})}>show details</button></span>
+                  </td>
+                  {previousSearchMethods.map((m, idx) => {
+                    var time = ds.result_times[m].to_short_string;
+                    return <td key={idx} className={"time-"+time.replace(/[()*]/g, "")}>{time}</td>
+                  })}
+                </tr>)}
+              </tbody>
+            </table> :
+            <div>
+              <p>There were no results found for that ADT!</p>
+              <p>This is basically just an error in this app; there shouldn't actually be ADTs which can't be implemented.</p>
+            </div>
         )}
 
-        {currentlyViewedDataStructure &&
+        {bottomPanel &&
           <div className="description">
             <hr />
-            <h2>{currentlyViewedDataStructure}</h2>
-            <pre>{this.props.dataStructureTexts[currentlyViewedDataStructure][0]}</pre>
-            <div
-              dangerouslySetInnerHTML={
-                { __html: marked(this.props.dataStructureTexts[currentlyViewedDataStructure][1]) }} />
+            {bottomPanel[0] === "ds" &&
+              <div>
+                <h2>{bottomPanel[1]}</h2>
+                <pre>{this.props.dataStructureTexts[bottomPanel[1]][0]}</pre>
+                <div
+                  dangerouslySetInnerHTML={
+                    { __html: marked(this.props.dataStructureTexts[bottomPanel[1]][1]) }} />
+              </div>
+            }
+            {bottomPanel[0] === "combo" &&
+              this.renderCombo()
+            }
           </div>
         }
       </div>
@@ -135,3 +183,17 @@ class App extends Component {
 }
 
 export default App;
+
+function sortByBigO(l, r) {
+  if (l.power_of_n !== r.power_of_n) {
+    return l.power_of_n < r.power_of_n ? -1 : 1;
+  } else {
+    return l.power_of_log_n < r.power_of_log_n ? -1 : 1;
+  }
+}
+
+function sortDataStructureChoicesByTotalTime(l, r) {
+  return sortByBigO(l.overall_time_for_adt, r.overall_time_for_adt);
+}
+
+

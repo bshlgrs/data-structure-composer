@@ -26,6 +26,8 @@ case class ImplLhs(name: MethodName, conditions: ImplPredicateMap) {
   def propertiesForParameter(parameter: MethodName): Set[FunctionProperty] = {
     this.conditions.get(parameter)
   }
+
+  lazy val asString = toString
 }
 
 object ImplLhs {

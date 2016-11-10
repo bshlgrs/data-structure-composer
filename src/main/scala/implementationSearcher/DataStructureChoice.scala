@@ -9,7 +9,7 @@ import scala.PartialOrdering
   */
 
 case class DataStructureChoice(choices: Set[DataStructure],
-                               times: UnfreeImplSet,
+                               times: Set[BoundImpl],
                                adt: AbstractDataType,
                                results: Map[MethodExpr, BoundImpl],
                                freeImpls: Set[FreeImpl]) {
@@ -35,6 +35,13 @@ case class DataStructureChoice(choices: Set[DataStructure],
 //  def getDataStructureSources(m: MethodExpr): Set[String] = {
 //    results(m).boundSource.boundSources
 //  }
+
+  lazy val jsBoundHashCodeMap: Map[Int, BoundImpl] = times.map((x) => x.impl.hashCode() -> x).toMap
+  lazy val jsFreeHashCodeMap: Map[Int, FreeImpl] = freeImpls.map((x) => x.impl.hashCode() -> x).toMap
+
+  // todo: make things output themselves as strings so that it's easy to use some kind
+  // of topological sort in the front end to explain everything.
+  lazy val implStrings: Map[String, BoundImpl] = times.map((x) => x.impl.lhs.toString -> x).toMap
 }
 
 object DataStructureChoice {
@@ -64,6 +71,6 @@ object DataStructureChoice {
       methodExpr -> times.implsWhichMatchMethodExpr(methodExpr, ParameterList.empty, library.decls).head.withName(methodExpr.name)
     }).toMap
 
-    DataStructureChoice(choices, times, adt, results, library.impls ++ choices.flatMap(_.freeImpls))
+    DataStructureChoice(choices, times.allImpls, adt, results, library.impls ++ choices.flatMap(_.freeImpls))
   }
 }
