@@ -8,10 +8,10 @@ import scala.PartialOrdering
   * Created by buck on 10/10/16.
   */
 
-case class DataStructureChoice(choices: Set[DataStructure],
+case class DataStructureChoice(choices: Map[DataStructure, Set[BoundImpl]],
                                times: Set[BoundImpl],
                                adt: AbstractDataType,
-                               results: Map[MethodExpr, BoundImpl],
+                               results: Map[MethodExpr, Impl.Rhs],
                                freeImpls: Set[FreeImpl]) {
   lazy val overallTimeForAdt: BigOLiteral = {
 //    assert(results.keys.forall(_.args.isEmpty),
@@ -22,10 +22,10 @@ case class DataStructureChoice(choices: Set[DataStructure],
   }
 
   lazy val resultTimes: Map[MethodExpr, BigOLiteral] = {
-    results.mapValues(_.impl.rhs.mapKeys(_.getAsNakedName).substituteAllVariables(adt.parameters))
+    results.mapValues(_.mapKeys(_.getAsNakedName).substituteAllVariables(adt.parameters))
   }
 
-  def choiceNames: Set[String] = choices.map(_.name)
+  def choiceNames: Set[String] = choices.keys.map(_.name).toSet
 
   val freeImplSourceMap: Map[String, FreeImplSource] = freeImpls.map((x) => x.impl.toString -> x.freeImplSource).toMap
 //  lazy val mapFromResultsToSources: Map[MethodExpr, Set[String]] = {
@@ -65,7 +65,7 @@ object DataStructureChoice {
     }
   }
 
-  def build(choices: Set[DataStructure], times: UnfreeImplSet, adt: AbstractDataType, library: ImplLibrary): DataStructureChoice = {
+  def build(choices: Map[DataStructure, UnfreeImplSet], times: UnfreeImplSet, adt: AbstractDataType, library: ImplLibrary): DataStructureChoice = {
     val results = adt.methods.keys.map((methodExpr: MethodExpr) => {
       // TODO: let this be a proper dominance frontier
       methodExpr -> times.implsWhichMatchMethodExpr(methodExpr, ParameterList.empty, library.decls).head.withName(methodExpr.name)
