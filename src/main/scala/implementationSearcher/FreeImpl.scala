@@ -17,6 +17,8 @@ case class FreeImpl(impl: Impl, freeImplSource: FreeImplSource) {
     BoundImpl(impl, BoundSource.build(SingleBoundSource(this, Set())))
   }
 
+  lazy val implString = impl.toString
+
   // Suppose you have an implementation, like
 
   // f[x] <- g[x]

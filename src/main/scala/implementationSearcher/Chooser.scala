@@ -55,7 +55,7 @@ object Chooser {
             neighborUnfreeImpls.items.foreach((u: BoundUnnamedImpl) =>
               if (unfreeImplSet.isOtherImplUseful(u.withName(otherImpl.lhs.name))) {
                 val impl = u.withName(otherImpl.lhs.name)
-                assert(impl.unboundCostTuples(unfreeImplSet, implLibrary.decls).isEmpty)
+//                assert(impl.unboundCostTuples(unfreeImplSet, implLibrary.decls).isEmpty)
                 queue += impl
               }
             )
@@ -113,28 +113,24 @@ object Chooser {
       Set()
     } else {
       val (head, tail) = structuresToConsider.head -> structuresToConsider.tail
-//      println(s"Already chosen [${alreadyChosen.map(_._1).mkString(", ")}]. Looking at ${head._1}")
 
-      val result =
-        getRelevantTimesForDataStructures(library, alreadyChosen + head, Some(relevantReadMethods))
+      if (head.impls.exists((impl) => {
+        impl.unboundCostTuples(previousSearchResult, library.decls).nonEmpty ||
+          previousSearchResult.isOtherImplUseful(impl)
+      })) {
+        val result =
+          getRelevantTimesForDataStructures(library, alreadyChosen + head, Some(relevantReadMethods))
 
-      // Was adding this data structure useful in any way? If so, we want to continue searching for
-      // composite data structures using it.
-//      if (result.partialCompareWithTime(previousSearchResult).leftDominates) {
-//        println("Wow, it was helpful! Recursing!")
         val filteredTail = tail.filter({ (ds: DataStructure) =>
           ! library.oneDsExtendsOther(ds, head)})
 
         dataStructureComboSearch(library, adt, alreadyChosen + head, relevantReadMethods, filteredTail, result) ++
           dataStructureComboSearch(library, adt, alreadyChosen, relevantReadMethods, tail, previousSearchResult) ++
           Set((alreadyChosen + head) -> result)
-//      } else {
-//        println("It was not helpful! Going to next option.")
-//        // Otherwise, forget this data structure and just search through other ones.
-//
-//        dataStructureComboSearch(library, adt, alreadyChosen, relevantReadMethods, tail, previousSearchResult) ++
-//          Set((alreadyChosen + head) -> result)
-//      }
+      } else {
+        println("It was not helpful! Going to next option.")
+        Set()
+      }
     }
   }
 

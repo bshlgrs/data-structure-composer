@@ -15,9 +15,13 @@ case class BoundSource(boundSources: Set[SingleBoundSource]) {
   def +(other: BoundSource): BoundSource = BoundSource(boundSources ++ other.boundSources)
 
   lazy val impls: Set[Impl] = boundSources.flatMap(_.materials)
+
+  lazy val stringImpls = impls.map(_.toString)
 }
 
-case class BoundImpl(impl: Impl, boundSource: BoundSource)
+case class BoundImpl(impl: Impl, boundSource: BoundSource) {
+  lazy val jsonValue: Map[String, Any] = Map("valueString" -> impl.toString)
+}
 
 case class BoundUnnamedImpl(impl: UnnamedImpl, boundSource: BoundSource) {
   def withName(name: MethodName) = BoundImpl(impl.withName(name), boundSource)

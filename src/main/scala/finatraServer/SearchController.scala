@@ -1,4 +1,4 @@
-package finatra_server
+package finatraServer
 
 import cli.DataStructureChooserCli
 import com.twitter.finagle.http.Request
@@ -44,7 +44,7 @@ class SearchController extends Controller {
         searchRequest.adtMethods.map((x: String) =>
           MethodExpr.parse(x) -> (ConstantTime: BigOLiteral)).toMap))
       library <- Try(ImplLibrary(impls, decls, dataStructures))
-      searchResults <- Try(Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(library, adt))
+      searchResults <- Try(Chooser.allParetoOptimalDataStructureCombosForAdt(library, adt))
     } yield searchResults
 
     tryResult match {

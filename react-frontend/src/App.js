@@ -106,7 +106,10 @@ class App extends Component {
                   ).reduce((acc, elem) => (acc === null ? [elem] : [...acc, ', ', elem]), null)
                 }
                 </td>
-                {previousSearchMethods.map((m, idx) => <td key={idx}>{ds.result_times[m].to_short_string}</td>)}
+                {previousSearchMethods.map((m, idx) => {
+                  var time = ds.result_times[m].to_short_string;
+                  return <td key={idx} className={"time-"+time.replace(/[()*]/g, "")}>{time}</td>
+                })}
               </tr>)}
             </tbody>
           </table> :

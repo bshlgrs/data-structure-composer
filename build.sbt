@@ -4,7 +4,8 @@ version := "1.0"
 
 enablePlugins(ScalaJSPlugin)
 
-mainClass in Compile := Some("finatra_server.SearchServerMain")
+mainClass in (Compile, run) := Some("finatraServer.SearchServerMain")
+mainClass in (Compile, packageBin) := Some("finatraServer.SearchServerMain")
 
 scalaVersion := "2.11.8"
 
@@ -64,3 +65,4 @@ libraryDependencies ++= Seq(
   "org.mockito" % "mockito-core" % versions.mockito % "test",
   "org.scalatest" %% "scalatest" % versions.scalatest % "test",
   "org.specs2" %% "specs2" % versions.specs2 % "test")
+

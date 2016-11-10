@@ -4,7 +4,7 @@ package shared
   * Created by buck on 10/8/16.
   */
 case class DominanceFrontier[A] private (items: Set[A], ordering: PartialOrdering[A]) {
-  assert(items.forall((x: A) => items.forall((y: A) => ! ordering.partialCompare(x, y).oneStrictlyDominates)))
+//  assert(items.forall((x: A) => items.forall((y: A) => ! ordering.partialCompare(x, y).oneStrictlyDominates)))
 
   def add(newItem: A): DominanceFrontier[A] = {
     // find all the items not strictly dominated by newItem

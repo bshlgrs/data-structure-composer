@@ -1,4 +1,4 @@
-package finatra_server
+package finatraServer
 
 case class SearchRequest(dataStructuresString: Option[String],
                          mbImplsString: Option[String],

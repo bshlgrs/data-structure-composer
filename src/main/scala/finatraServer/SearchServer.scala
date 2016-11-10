@@ -1,4 +1,4 @@
-package finatra_server
+package finatraServer
 
 import com.twitter.finagle.http.{Response, Request}
 import com.twitter.finatra.http.HttpServer

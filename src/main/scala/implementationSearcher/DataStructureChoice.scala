@@ -11,7 +11,8 @@ import scala.PartialOrdering
 case class DataStructureChoice(choices: Set[DataStructure],
                                times: UnfreeImplSet,
                                adt: AbstractDataType,
-                               results: Map[MethodExpr, BoundImpl]) {
+                               results: Map[MethodExpr, BoundImpl],
+                               freeImpls: Set[FreeImpl]) {
   lazy val overallTimeForAdt: BigOLiteral = {
 //    assert(results.keys.forall(_.args.isEmpty),
 //       s"While calculating the overall time for an ADT on the data structure choice $this, " +
@@ -26,6 +27,7 @@ case class DataStructureChoice(choices: Set[DataStructure],
 
   def choiceNames: Set[String] = choices.map(_.name)
 
+  val freeImplSourceMap: Map[String, FreeImplSource] = freeImpls.map((x) => x.impl.toString -> x.freeImplSource).toMap
 //  lazy val mapFromResultsToSources: Map[MethodExpr, Set[String]] = {
 //    results.keys.map((x) => x -> getDataStructureSources(x)).toMap
 //  }
@@ -62,6 +64,6 @@ object DataStructureChoice {
       methodExpr -> times.implsWhichMatchMethodExpr(methodExpr, ParameterList.empty, library.decls).head.withName(methodExpr.name)
     }).toMap
 
-    DataStructureChoice(choices, times, adt, results)
+    DataStructureChoice(choices, times, adt, results, library.impls ++ choices.flatMap(_.freeImpls))
   }
 }
