@@ -6,15 +6,26 @@ import shared.{DominanceRelationship, PartialOrdering}
   * Created by buck on 11/6/16.
   */
 
-case class BoundSource(template: Impl, materials: Set[Impl]) {
-
+abstract class AbstractBoundSource {
+  def mbTemplate: Option[Impl]
+  def materialSet: Set[Impl]
 }
 
-case class BoundImpl(impl: Impl, boundSource: BoundSource) {
+case class BoundSource(template: Impl, materials: Set[Impl]) extends AbstractBoundSource {
+  def mbTemplate = Some(template)
+  def materialSet: Set[Impl] = materials
+}
+
+case object EmptyBoundSource extends AbstractBoundSource {
+  lazy val mbTemplate = None
+  lazy val materialSet = Set[Impl]()
+}
+
+case class BoundImpl(impl: Impl, boundSource: AbstractBoundSource) {
   lazy val jsonValue: Map[String, Any] = Map("valueString" -> impl.toString)
 }
 
-case class BoundUnnamedImpl(impl: UnnamedImpl, boundSource: BoundSource) {
+case class BoundUnnamedImpl(impl: UnnamedImpl, boundSource: AbstractBoundSource) {
   def withName(name: MethodName) = BoundImpl(impl.withName(name), boundSource)
 }
 

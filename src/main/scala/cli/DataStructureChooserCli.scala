@@ -78,7 +78,7 @@ adt List {
   def printResults(res: DominanceFrontier[DataStructureChoice]) = {
     println("Optimal results:")
     println(res.items.map((choice) => {
-      choice.choices.mkString(",") ++ "\n" ++
+      choice.structureWriteMethods.mkString(",") ++ "\n" ++
         choice.results.toList.sortBy(_._1.name.name).map((tuple) => {
           "\t" ++ tuple._1.toString ++ " <- " ++ tuple._2.toString
         }).mkString("\n")

@@ -26,6 +26,8 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   def filterToAdt(adt: AbstractDataType): UnfreeImplSet = this.copy(impls =
     impls.filterKeys((x) => adt.methods.keys.toSeq.map(_.name).contains(x)))
 
+  def filterToReadMethods: UnfreeImplSet = this.copy(impls = impls.filterKeys(! _.isMutating))
+
   def allImpls: Set[BoundImpl] = {
     impls.flatMap({ case ((name, singleMethodImplSet)) => singleMethodImplSet.impls.map(_.withName(name)) }).toSet
   }
@@ -66,16 +68,6 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
 
   def getNamedWithoutSource(methodName: MethodName): Set[Impl] = getNamed(methodName).map(_.impl)
 
-  def product(other: UnfreeImplSet): UnfreeImplSet = {
-    UnfreeImplSet(this.impls.flatMap({ case ((methodName, singleMethodImplOptions)) =>
-      if (other.impls.contains(methodName)) {
-        Some(methodName -> singleMethodImplOptions.product(other.impls(methodName)))
-      } else {
-        Nil
-      }
-    }), boundVariables ++ other.boundVariables)
-  }
-
   def partialCompareWithTime(other: UnfreeImplSet): DominanceRelationship = {
     PartialOrdering.fromSetOfDominanceRelationships(
       (this.impls.keys ++ other.impls.keys).map((key) => (this.impls.get(key), other.impls.get(key)) match {
@@ -86,6 +78,19 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
       }).toSet
     )
   }
+
+  def product(other: UnfreeImplSet): UnfreeImplSet = {
+    UnfreeImplSet(this.impls.flatMap({ case ((methodName, singleMethodImplOptions)) =>
+      if (other.impls.contains(methodName)) {
+        Some(methodName -> singleMethodImplOptions.product(other.impls(methodName)))
+      } else {
+        Nil
+      }
+    }), boundVariables ++ other.boundVariables)
+  }
 }
 
 
+object UnfreeImplSet {
+  def fromCleanSet(impls: Set[BoundImpl], vars: Set[MethodName]) = UnfreeImplSet(Map(), vars).addImpls(impls)
+}
