@@ -6,29 +6,27 @@ import shared.{DominanceRelationship, PartialOrdering}
   * Created by buck on 11/6/16.
   */
 
-// you can have multiple sources if you're eg an insert method
-case class SingleBoundSource(template: Impl, materials: Set[Impl]) {
-
+abstract class AbstractBoundSource {
+  def mbTemplate: Option[Impl]
+  def materialSet: Set[Impl]
 }
 
-case class BoundSource(boundSources: Set[SingleBoundSource]) {
-  def +(other: BoundSource): BoundSource = BoundSource(boundSources ++ other.boundSources)
-
-  lazy val impls: Set[Impl] = boundSources.flatMap(_.materials)
-
-  lazy val stringImpls = impls.map(_.toString)
+case class BoundSource(template: Impl, materials: Set[Impl]) extends AbstractBoundSource {
+  def mbTemplate = Some(template)
+  def materialSet: Set[Impl] = materials
 }
 
-case class BoundImpl(impl: Impl, boundSource: BoundSource) {
+case object EmptyBoundSource extends AbstractBoundSource {
+  lazy val mbTemplate = None
+  lazy val materialSet = Set[Impl]()
+}
+
+case class BoundImpl(impl: Impl, boundSource: AbstractBoundSource) {
   lazy val jsonValue: Map[String, Any] = Map("valueString" -> impl.toString)
 }
 
-case class BoundUnnamedImpl(impl: UnnamedImpl, boundSource: BoundSource) {
+case class BoundUnnamedImpl(impl: UnnamedImpl, boundSource: AbstractBoundSource) {
   def withName(name: MethodName) = BoundImpl(impl.withName(name), boundSource)
-}
-
-object BoundSource {
-  def build(items: SingleBoundSource *): BoundSource = new BoundSource(items.toSet)
 }
 
 object BoundImpl {

@@ -48,7 +48,10 @@ class SearchController extends Controller {
     } yield searchResults
 
     tryResult match {
-      case Success(result) => response.ok.body(result.items)
+      case Success(result) => {
+        println(result.items.map(_.frontendResult))
+        response.ok.body(result.items)
+      }
       case Failure(err) => response.badRequest(err)
     }
   }

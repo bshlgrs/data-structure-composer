@@ -50,15 +50,6 @@ case class SingleMethodImplSet(options: DominanceFrontier[BoundUnnamedImpl]) {
     SingleMethodImplSet(this.options ++ other.options)
   }
 
-  def product(other: SingleMethodImplSet): SingleMethodImplSet =
-    SingleMethodImplSet.fromSet(for {
-      x <- this.impls
-      y <- other.impls
-    } yield {
-      val lhs = x.impl.predicates.and(y.impl.predicates)
-      val rhs = x.impl.cost + y.impl.cost
-      BoundUnnamedImpl(UnnamedImpl(lhs, rhs), x.boundSource + y.boundSource)
-    })
 
   def partialCompare(other: SingleMethodImplSet): DominanceRelationship = {
     (for {
@@ -66,6 +57,18 @@ case class SingleMethodImplSet(options: DominanceFrontier[BoundUnnamedImpl]) {
       y <- other.options.items
     } yield implicitly[PartialOrdering[BoundUnnamedImpl]].partialCompare(x, y)).reduce(_ infimum _)
   }
+
+
+  // TODO: I have made the terrible choice to have the impl source here be wrong.
+  def product(other: SingleMethodImplSet): SingleMethodImplSet =
+    SingleMethodImplSet.fromSet(for {
+      x <- this.impls
+      y <- other.impls
+    } yield {
+      val lhs = x.impl.predicates.and(y.impl.predicates)
+      val rhs = x.impl.cost + y.impl.cost
+      BoundUnnamedImpl(UnnamedImpl(lhs, rhs), EmptyBoundSource)
+    })
 
 //  def bestFullyGeneralTime: Option[AffineBigOCombo[MethodName]] = {
 //    this.bestImplementationForConditions(ImplPredicateList.empty(impls.head.lhs.parameters.length)).map(_.rhs)

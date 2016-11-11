@@ -67,7 +67,7 @@ case class ImplLibrary(impls: Set[FreeImpl], decls: Decls, structures: Map[Strin
 
   // map from data structure names to all of the read methods which that data structure implements faster than every
   // data structure which dominates it on write times
-  lazy val qualifyingReadMethodsForDataStructures: Map[String, Option[Set[MethodName]]] = {
+//  lazy val qualifyingReadMethodsForDataStructures: Map[String, Option[Set[MethodName]]] = {
 //    structures.map({ case (structureName, structure) => {
 //      val otherStructures: Iterable[DataStructure] = structures.filterKeys(_ != structureName)
 //        .values
@@ -78,8 +78,8 @@ case class ImplLibrary(impls: Set[FreeImpl], decls: Decls, structures: Map[Strin
 ////      })
 //      ???
 //    }}).toMap
-    ???
-  }
+//    ???
+//  }
 
   lazy val dataStructureChoicePartialOrdering = new DataStructureChoice.DataStructureChoicePartialOrdering(this)
 

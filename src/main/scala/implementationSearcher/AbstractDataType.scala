@@ -18,4 +18,6 @@ object AbstractDataType {
     // todo
     MainParser.nakedAdt.parse(string).get.value
   }
+
+  def blank =  AbstractDataType(Map(), Map())
 }

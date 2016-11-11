@@ -14,7 +14,7 @@ case class FreeImpl(impl: Impl, freeImplSource: FreeImplSource) {
   def makeBound(unfreeImplSet: UnfreeImplSet, decls: Decls) = {
     assert(impl.unboundCostTuples(unfreeImplSet, decls).isEmpty)
 
-    BoundImpl(impl, BoundSource.build(SingleBoundSource(this, Set())))
+    BoundImpl(impl, BoundSource(this, Set()))
   }
 
   lazy val implString = impl.toString
@@ -51,10 +51,8 @@ case class FreeImpl(impl: Impl, freeImplSource: FreeImplSource) {
           unfreeImpl <- otherwiseSubbedImpls.items
           optionImpl <- optionsAndConditions
         } yield {
-          assert(unfreeImpl.boundSource.boundSources.size == 1)
-          assert(optionImpl.boundSource.boundSources.size == 1)
-          val unfreeSource = unfreeImpl.boundSource.boundSources.head.materials
-          val source = BoundSource.build(SingleBoundSource(impl, unfreeSource + optionImpl.impl.withName(methodExpr.name)))
+          val unfreeSource = unfreeImpl.boundSource.materialSet
+          val source = BoundSource(impl, unfreeSource + optionImpl.impl.withName(methodExpr.name))
 
           BoundUnnamedImpl(
             UnnamedImpl(
