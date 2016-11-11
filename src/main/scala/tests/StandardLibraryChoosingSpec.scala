@@ -200,7 +200,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       assert(res.items.head.structureNames == Set("ArrayList", "InvertibleReductionMemoizer"))
     }
 
-    it("can do min stack with random modification") {
+    it("can do min-stack with random modification") {
       val adt = MainParser.nakedAdt.parse("""
         adt MinStackWithRandomModification {
           insertLast! -> 1
@@ -217,9 +217,10 @@ class StandardLibraryChoosingSpec extends FunSpec {
       assert(res2.readMethods.getNamedWithoutSource("getMinimum") == Set(Impl("getMinimum <- n")))
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
-      DataStructureChooserCli.printResults(res)
-
-      assert(res.items.map(_.structureNames) == Set(Set("ArrayList", "ValueOrderedOst")))
+      assert(res.items.map(_.structureNames) == Set(
+        Set("ArrayList", "ValueOrderedOst"),
+        Set("ArrayList", "BinaryHeap")
+      ))
     }
 
     it("can do min stack with getKthBy") {

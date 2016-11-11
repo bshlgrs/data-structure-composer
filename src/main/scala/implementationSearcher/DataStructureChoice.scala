@@ -97,7 +97,10 @@ object DataStructureChoice {
     }
   }
 
-  def build(choices: Map[DataStructure, UnfreeImplSet], times: UnfreeImplSet, adt: AbstractDataType, library: ImplLibrary): DataStructureChoice = {
+  def build(choices: Map[DataStructure, UnfreeImplSet],
+            times: UnfreeImplSet,
+            adt: AbstractDataType,
+            library: ImplLibrary): DataStructureChoice = {
     DataStructureChoice(choices, times, adt, library.impls ++ choices.keys.flatMap(_.freeImpls), library)
   }
 }

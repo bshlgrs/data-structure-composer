@@ -121,7 +121,6 @@ object Chooser {
         val result: DataStructureChoice =
           getRelevantTimesForDataStructures(library, alreadyChosen + head, adt, Some(relevantReadMethods))
 
-
         val filteredTail = tail.filter({ (ds: DataStructure) =>
           ! library.oneDsExtendsOther(ds, head)})
 
@@ -129,7 +128,7 @@ object Chooser {
           dataStructureComboSearch(library, adt, alreadyChosen, relevantReadMethods, tail, previousReadResult) ++
           (if (result.overallTimeForAdt.isDefined) Set(result) else Set())
       } else {
-        Set()
+        dataStructureComboSearch(library, adt, alreadyChosen, relevantReadMethods, tail, previousReadResult)
       }
     }
   }
@@ -137,13 +136,6 @@ object Chooser {
   def allParetoOptimalDataStructureCombosForAdt(library: ImplLibrary,
                                                 adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
     println(s"Potentially relevant data structures: ${library.potentiallyRelevantDataStructures(adt).map(_.name)}")
-
-//    val results: Set[(Set[(String, DataStructure)], UnfreeImplSet)] = library
-//      .potentiallyRelevantDataStructures(adt)
-//      .subsets()
-//      .map((subset) => {
-//        subset -> getRelevantTimesForDataStructures(library, subset.map(_._2)).filterToAdt(adt)
-//      }).toSet
 
     val results = dataStructureComboSearch(
       library,
@@ -155,7 +147,6 @@ object Chooser {
     )
 
     println(s"There are ${results.size} different composite data structures we considered")
-//    println(results)
 
     // A dominance frontier on choices, ranked by:
     // - simplicity, measured by which data structures are used. Eg Set(a, b, c) is worse than Set(a, b).
