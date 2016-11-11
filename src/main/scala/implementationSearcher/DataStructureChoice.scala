@@ -39,19 +39,9 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
 
   lazy val writeMethods = structureWriteMethods.values.reduce(_ product _)
 
-  def choiceNames: Set[String] = structureWriteMethods.keys.map(_.name).toSet
+  def structureNames: Set[String] = structureWriteMethods.keys.map(_.name).toSet
 
   val freeImplSourceMap: Map[String, FreeImplSource] = freeImpls.map((x) => x.impl.toString -> x.freeImplSource).toMap
-
-//  def unfreeImplSet: UnfreeImplSet = UnfreeImplSet(readMethods, Set())
-
-//  lazy val mapFromResultsToSources: Map[MethodExpr, Set[String]] = {
-//    results.keys.map((x) => x -> getDataStructureSources(x)).toMap
-//  }
-//
-//  def getDataStructureSources(m: MethodExpr): Set[String] = {
-//    results(m).boundSource.boundSources
-//  }
 
   lazy val fullUnfreeImplSet: UnfreeImplSet = readMethods.addImpls(writeMethods.allImpls)
 
@@ -61,6 +51,29 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
   // todo: make things output themselves as strings so that it's easy to use some kind
   // of topological sort in the front end to explain everything.
   lazy val implStrings: Map[String, BoundImpl] = readMethods.allImpls.map((x) => x.impl.lhs.toString -> x).toMap
+
+  lazy val frontendResult = {
+    def getFrontendReadResult(i: BoundImpl): ReadMethodFrontendResult = {
+      assert(i.boundSource.mbTemplate.isDefined, s"impl $i is fucked")
+      ReadMethodFrontendResult(
+        i.boundSource.mbTemplate.get,
+        i.boundSource.materialSet.flatMap((j) =>
+          readMethods.getMatchingImpl(j).map((x) => getFrontendReadResult(x))
+        )
+      )
+    }
+
+    val readMethodFrontendResults = adt.methods.keys.filter(_.name.isRead).map((x) => {
+      readMethods.namedImplsWhichMatchMethodExpr(x, ParameterList.empty, library.decls).headOption match {
+        case None => {
+          throw new RuntimeException(s"There was no implementation for $x for the set $structureNames")
+        }
+        case Some(impl) => getFrontendReadResult(impl)
+      }
+    })
+
+    DataStructureChoiceFrontendResult(readMethodFrontendResults.toSet)
+  }
 }
 
 object DataStructureChoice {
@@ -87,4 +100,12 @@ object DataStructureChoice {
   def build(choices: Map[DataStructure, UnfreeImplSet], times: UnfreeImplSet, adt: AbstractDataType, library: ImplLibrary): DataStructureChoice = {
     DataStructureChoice(choices, times, adt, library.impls ++ choices.keys.flatMap(_.freeImpls), library)
   }
+}
+
+case class DataStructureChoiceFrontendResult(readMethods: Set[ReadMethodFrontendResult]) {
+
+}
+
+case class ReadMethodFrontendResult(template: Impl, materials: Set[ReadMethodFrontendResult]) {
+
 }

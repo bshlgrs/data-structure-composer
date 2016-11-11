@@ -56,6 +56,10 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
     }
   }
 
+  def namedImplsWhichMatchMethodExpr(methodExpr: MethodExpr, list: ParameterList, decls: Decls): Set[BoundImpl] = {
+    implsWhichMatchMethodExpr(methodExpr, list, decls).map(_.withName(methodExpr.name))
+  }
+
   def toLongString: String = {
     "Search Result {\n" + impls.toList.sortBy(_._1.name)
       .map({ case (name, set) => "  " ++ name.name ++ ": " ++ set.toLongString})
@@ -87,6 +91,10 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
         Nil
       }
     }), boundVariables ++ other.boundVariables)
+  }
+
+  def getMatchingImpl(impl: Impl): Option[BoundImpl] = {
+    impls(impl.lhs.name).options.items.find(_.impl == impl).map(_.withName(impl.lhs.name))
   }
 }
 

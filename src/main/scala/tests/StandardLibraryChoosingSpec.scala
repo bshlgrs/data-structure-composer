@@ -94,7 +94,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
-      assert(res.items.map(_.choiceNames).contains(Set("OrderStatisticTreeList")))
+      assert(res.items.map(_.structureNames).contains(Set("OrderStatisticTreeList")))
     }
 
     it("can do a min-stack") {
@@ -115,7 +115,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
         DataStructureChooserCli.printResults(res)
 
-        assert(res.items.exists(_.choiceNames == Set("HistogramHashMap", "ArrayList")))
+        assert(res.items.exists(_.structureNames == Set("HistogramHashMap", "ArrayList")))
     }
 
     it("can do a set which you never delete from") {
@@ -127,7 +127,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.map(_.choiceNames) == Set(Set("HistogramHashMap")))
+      assert(res.items.map(_.structureNames) == Set(Set("HistogramHashMap")))
     }
 
     it("knows how to use parameterized data structures") {
@@ -142,7 +142,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choiceNames == Set("AugmentedOrderStatisticTreeList"))
+      assert(res.items.head.structureNames == Set("AugmentedOrderStatisticTreeList"))
     }
 
     it("knows how to use RMQ") {
@@ -157,7 +157,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choiceNames == Set("SparseTableForIdempotentReduction", "ArrayList"))
+      assert(res.items.head.structureNames == Set("SparseTableForIdempotentReduction", "ArrayList"))
     }
 
     it("can solve RMQ and count") {
@@ -175,7 +175,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.exists(_.choiceNames ==
+      assert(res.items.exists(_.structureNames ==
         Set("SparseTableForIdempotentReduction", "HistogramHashMap", "ArrayList")))
     }
 
@@ -197,7 +197,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.head.choiceNames == Set("ArrayList", "InvertibleReductionMemoizer"))
+      assert(res.items.head.structureNames == Set("ArrayList", "InvertibleReductionMemoizer"))
     }
 
     it("can do min stack with random modification") {
@@ -219,7 +219,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       DataStructureChooserCli.printResults(res)
 
-      assert(res.items.map(_.choiceNames) == Set(Set("ArrayList", "ValueOrderedOst")))
+      assert(res.items.map(_.structureNames) == Set(Set("ArrayList", "ValueOrderedOst")))
     }
 
     it("can do min stack with getKthBy") {
@@ -239,9 +239,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       assert(res2.readMethods.getNamedWithoutSource("getMinimum") == Set(Impl("getMinimum <- n")))
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
-      DataStructureChooserCli.printResults(res)
-
-      assert(res.items.map(_.choiceNames) == Set(Set("ArrayList", "ValueOrderedOst")))
+      assert(res.items.map(_.structureNames) == Set(Set("ArrayList", "ValueOrderedOst")))
     }
   }
 

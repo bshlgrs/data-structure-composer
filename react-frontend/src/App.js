@@ -62,49 +62,24 @@ class App extends Component {
   }
 
   dsChoiceList(ds) {
-    return ds.choices.map((choice, idx) =>
+    return ds.structures.map((structure, idx) =>
       <a
         className="choice"
         key={idx}
-        onClick={() => this.setState({ bottomPanel: ["ds", choice.name] })}>
-        {choice.name}
+        onClick={() => this.setState({ bottomPanel: ["ds", structure.name] })}>
+        {structure.name}
       </a>
     ).reduce((acc, elem) => (acc === null ? [elem] : [...acc, ', ', elem]), null)
   }
 
   renderCombo () {
     var choice = this.state.bottomPanel[1];
+
+    debugger;
+
     return <div>
       <h2>Composite data structure: {this.dsChoiceList(choice)}</h2>
-
-      <ul>
-        {Object.keys(choice.results).map((methodName, idx) =>
-          this.renderBoundSourceLi(choice.results[methodName], idx)
-        )}
-      </ul>
     </div>;
-  }
-
-  renderBoundSourceLi(result, idx) {
-    console.log("starting", result);
-    var choice = this.state.bottomPanel[1];
-
-    var finished = <li key={idx}>{result.impl.lhs.name.name} {result.js_hash_code}
-      <ul>
-        {result.bound_source.bound_sources.map((bound_source, idx) => {
-          var freeImpl = choice.js_free_hash_code_map[bound_source.template.js_hash_code];
-          return <li key={idx}>{bound_source.template.as_string}.
-            From {freeImpl.free_impl_source.ds || "thin air"}. Using
-            {false && <ul>
-              {bound_source.materials.map((material, idx) => this.renderBoundSourceLi(material, idx))}
-            </ul>}
-          </li>
-        })}
-      </ul>
-    </li>;
-
-    console.log("starting", result);
-    return finished;
   }
 
   render () {
