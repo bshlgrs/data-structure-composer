@@ -4,7 +4,7 @@ import implementationSearcher.ImplLhs._
 import implementationSearcher.ImplLibrary.Decls
 import parsers.MainParser
 import shared._
-
+import com.softwaremill.quicklens._
 
 /**
   * Created by buck on 7/25/16.
@@ -49,7 +49,7 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
       val relevantParamName = parameters(idx)
       val weightOfParam = rhs.weights.getOrElse(MethodExpr(relevantParamName, Nil), ZeroTime)
       f.getConditionsAndCosts(lhs.conditions.get(parameters(idx)), unfreeImplSet, list)
-        .items.map((x: UnnamedImpl) => x.copy(cost = x.cost * weightOfParam))
+        .items.map((x: UnnamedImpl) => x.modify(_.cost).using(_ * weightOfParam))
     })
 
     val combinationsOfImpls: Set[List[UnnamedImpl]] = Utils.cartesianProducts(conditionsAndRhses)

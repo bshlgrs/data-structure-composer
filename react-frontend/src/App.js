@@ -170,5 +170,3 @@ function orderByBigO(l, r) {
 function orderDataStructuresByOverallTime(l, r) {
   return orderByBigO(l.overall_time_for_adt, r.overall_time_for_adt);
 }
-
-
