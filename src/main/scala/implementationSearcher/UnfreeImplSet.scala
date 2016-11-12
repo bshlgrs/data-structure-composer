@@ -2,17 +2,17 @@ package implementationSearcher
 
 import implementationSearcher.ImplLibrary.Decls
 import shared._
-
+import com.softwaremill.quicklens._
 
 /**
   * Created by buck on 9/10/16.
   */
 case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVariables: Set[MethodName]) {
   def addImpl(impl: BoundImpl): UnfreeImplSet = {
-    if (impls.contains(impl.lhs.name)) {
-      this.copy(impls = impls.updated(impl.lhs.name, impls(impl.lhs.name).add(impl)))
+    if (impls.contains(impl.name)) {
+      this.modify(_.impls).using(_.updated(impl.name, impls(impl.name).add(impl)))
     } else {
-      this.copy(impls = impls ++ Map(impl.lhs.name -> SingleMethodImplSet.fromSet(Set(impl))))
+      this.modify(_.impls).using(_ ++ Map(impl.name -> SingleMethodImplSet.fromSet(Set(impl))))
     }
   }
 
@@ -21,19 +21,21 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   }
 
   def filterMethods(includedMethods: MethodName*): UnfreeImplSet =
-    this.copy(impls = impls.filterKeys((x) => includedMethods.contains(x)))
+    this.modify(_.impls).using(_.filterKeys((x) => includedMethods.contains(x)))
 
-  def filterToAdt(adt: AbstractDataType): UnfreeImplSet = this.copy(impls =
-    impls.filterKeys((x) => adt.methods.keys.toSeq.map(_.name).contains(x)))
+  def filterToAdt(adt: AbstractDataType): UnfreeImplSet =
+    this.modify(_.impls).using(_.filterKeys((x) =>
+      adt.methods.keys.toSeq.map(_.name).contains(x))
+    )
 
-  def filterToReadMethods: UnfreeImplSet = this.copy(impls = impls.filterKeys(! _.isMutating))
+  def filterToReadMethods: UnfreeImplSet = this.modify(_.impls).using(_.filterKeys(_.isRead))
 
   def allImpls: Set[BoundImpl] = {
     impls.flatMap({ case ((name, singleMethodImplSet)) => singleMethodImplSet.impls.map(_.withName(name)) }).toSet
   }
 
   def isOtherImplUseful(impl: Impl): Boolean = {
-    impls.get(impl.lhs.name) match {
+    impls.get(impl.name) match {
       case Some(set: SingleMethodImplSet) => set.isOtherImplUseful(impl)
       case None => true
     }
@@ -94,7 +96,7 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   }
 
   def getMatchingImpl(impl: Impl): Option[BoundImpl] = {
-    impls(impl.lhs.name).options.items.find(_.impl == impl).map(_.withName(impl.lhs.name))
+    impls(impl.name).options.items.find(_.impl == impl).map(_.withName(impl.name))
   }
 }
 

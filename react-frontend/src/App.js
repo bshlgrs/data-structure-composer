@@ -116,7 +116,7 @@ class App extends Component {
                   <th />
                   {previousSearchMethods.map((m, idx) => <th key={idx}>{m}</th>)}
                 </tr>
-                {optimalDataStructures.sort(sortDataStructureChoicesByTotalTime).map((ds, idx) => <tr key={idx}>
+                {optimalDataStructures.sort(orderDataStructuresByOverallTime).map((ds, idx) => <tr key={idx}>
                   <td>
                     {this.dsChoiceList(ds)}
 
@@ -159,7 +159,7 @@ class App extends Component {
 
 export default App;
 
-function sortByBigO(l, r) {
+function orderByBigO(l, r) {
   if (l.power_of_n !== r.power_of_n) {
     return l.power_of_n < r.power_of_n ? -1 : 1;
   } else {
@@ -167,8 +167,8 @@ function sortByBigO(l, r) {
   }
 }
 
-function sortDataStructureChoicesByTotalTime(l, r) {
-  return sortByBigO(l.overall_time_for_adt, r.overall_time_for_adt);
+function orderDataStructuresByOverallTime(l, r) {
+  return orderByBigO(l.overall_time_for_adt, r.overall_time_for_adt);
 }
 
 

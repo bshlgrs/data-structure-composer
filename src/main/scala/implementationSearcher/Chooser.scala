@@ -49,12 +49,12 @@ object Chooser {
 
           val otherImplMethodsUsed = otherImpl.getNames
 
-          if (otherImplMethodsUsed.contains(unfreeImpl.lhs.name)) {
+          if (otherImplMethodsUsed.contains(unfreeImpl.name)) {
             val neighborUnfreeImpls: DominanceFrontier[BoundUnnamedImpl] = otherImpl.bindToAllOptions(unfreeImplSet, implLibrary.decls)
 
             neighborUnfreeImpls.items.foreach((u: BoundUnnamedImpl) =>
-              if (unfreeImplSet.isOtherImplUseful(u.withName(otherImpl.lhs.name))) {
-                val impl = u.withName(otherImpl.lhs.name)
+              if (unfreeImplSet.isOtherImplUseful(u.withName(otherImpl.name))) {
+                val impl = u.withName(otherImpl.name)
 //                assert(impl.unboundCostTuples(unfreeImplSet, implLibrary.decls).isEmpty)
                 queue += impl
               }
@@ -115,7 +115,7 @@ object Chooser {
       val (head, tail) = structuresToConsider.head -> structuresToConsider.tail
 
       if (head.impls.exists((impl) => {
-        !impl.lhs.name.isMutating && (impl.unboundCostTuples(previousReadResult, library.decls).nonEmpty ||
+        !impl.name.isMutating && (impl.unboundCostTuples(previousReadResult, library.decls).nonEmpty ||
           previousReadResult.isOtherImplUseful(impl))
       })) {
         val result: DataStructureChoice =

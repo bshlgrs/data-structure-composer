@@ -2,6 +2,7 @@ package implementationSearcher
 
 import implementationSearcher.ImplLibrary.Decls
 import shared.DominanceFrontier
+import com.softwaremill.quicklens._
 
 /**
   * Created by buck on 11/6/16.
@@ -35,16 +36,20 @@ case class FreeImpl(impl: Impl, freeImplSource: FreeImplSource) {
   def bindToAllOptions(unfreeImplSet: UnfreeImplSet, decls: ImplLibrary.Decls): DominanceFrontier[BoundUnnamedImpl] =
     impl.unboundCostTuples(unfreeImplSet, decls) match {
       case Nil => DominanceFrontier.fromSet(
-        Set(this.copy(impl = impl.copy(rhs = impl.boundCost(unfreeImplSet, decls))).makeBound(unfreeImplSet, decls)))
+        Set(this.modify(_.impl.rhs)
+                .setTo(impl.boundCost(unfreeImplSet, decls))
+                .makeBound(unfreeImplSet, decls))
+        )
       case (methodExpr, methodCostWeight) :: other => {
-        val otherwiseSubbedImpls = this.copy(
-          impl=impl.copy(
-            rhs = impl.rhs.filterKeys(_ != methodExpr))
-        ).bindToAllOptions(unfreeImplSet, decls)
+
+        val otherwiseSubbedImpls = this
+          .modify(_.impl.rhs)
+          .using(_.filterKeys(_ != methodExpr))
+          .bindToAllOptions(unfreeImplSet, decls)
 
         val optionsAndConditions =
           unfreeImplSet.implsWhichMatchMethodExpr(methodExpr,
-            ParameterList(impl.lhs.conditions, decls(impl.lhs.name).parameters),
+            ParameterList(impl.lhs.conditions, decls(impl.name).parameters),
             decls)
 
         DominanceFrontier.fromSet(for {

@@ -21,7 +21,7 @@ case class ImplLibrary(impls: Set[FreeImpl], decls: Decls, structures: Map[Strin
   // eg, if we just had `reduce` and `getSum` here, our impls would have `getSum <- reduce[_]` in them,
   // so our map here would be Map(getSum -> reduce)
   lazy val backwardImplArrows: Map[MethodName, Set[MethodName]] = {
-    (impls ++ structures.flatMap(_._2.freeImpls)).groupBy(_.impl.lhs.name).map({ case (m: MethodName, s: Set[FreeImpl]) =>
+    (impls ++ structures.flatMap(_._2.freeImpls)).groupBy(_.impl.name).map({ case (m: MethodName, s: Set[FreeImpl]) =>
       m -> s.flatMap(_.impl.rhs.weights.keys.flatMap(_.getNames))
     })
   }
@@ -51,7 +51,7 @@ case class ImplLibrary(impls: Set[FreeImpl], decls: Decls, structures: Map[Strin
       val adtReadMethods = adt.methods.map(_._1.name).toSet
 
       structure.readMethods.exists((i: FreeImpl) => {
-        val methodNamesThisIsHelpfulFor = closuresOfForwardImplArrows(i.lhs.name)
+        val methodNamesThisIsHelpfulFor = closuresOfForwardImplArrows(i.name)
         (adtReadMethods & methodNamesThisIsHelpfulFor).nonEmpty
       })
     }}).toSet
@@ -104,7 +104,7 @@ case class ImplLibrary(impls: Set[FreeImpl], decls: Decls, structures: Map[Strin
   }
 
   def isImplRelevantToAdt(impl: Impl, adt: AbstractDataType): Boolean = {
-    closuresOfForwardImplArrows(impl.lhs.name)
+    closuresOfForwardImplArrows(impl.name)
       .exists((x) => adt.methods.keySet.map(_.name).contains(x))
   }
 }

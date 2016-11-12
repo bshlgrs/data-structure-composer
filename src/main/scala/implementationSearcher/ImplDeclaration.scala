@@ -16,7 +16,7 @@ object ImplDeclaration {
       strings.toSet.map((x: String) => MainParser.nakedImpl.parse(x).get.value).map((x) => FreeImpl.wrap(x._1) -> x._2)
 
     val impls = tuples.map(_._1)
-    val decls = tuples.map({case (impl, decl) => impl.lhs.name -> decl }).toMap
+    val decls = tuples.map({case (impl, decl) => impl.name -> decl }).toMap
 
     (impls, decls)
   }

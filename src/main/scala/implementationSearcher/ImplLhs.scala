@@ -4,13 +4,14 @@ import implementationSearcher.ImplLhs.FunctionProperty
 import implementationSearcher.ImplPredicateMap.ImplPredicateMapPartialOrdering
 import parsers.MainParser
 import shared.{NeitherDominates, DominanceRelationship, PartialOrdering}
+import com.softwaremill.quicklens._
 
 /**
   * Created by buck on 7/25/16.
   */
 case class ImplLhs(name: MethodName, conditions: ImplPredicateMap) {
   def addConditions(conditions: ImplPredicateMap) = {
-    this.copy(conditions = this.conditions.and(conditions))
+    this.modify(_.conditions).using(_.and(conditions))
   }
 
 

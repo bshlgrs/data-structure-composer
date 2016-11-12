@@ -12,11 +12,11 @@ case class DataStructure(name: String,
   def isSimple: Boolean = parameters.isEmpty
 
   def readMethods: Set[FreeImpl] = {
-    freeImpls.filterNot(_.lhs.name.isMutating)
+    freeImpls.filterNot(_.name.isMutating)
   }
 
   def writeMethods: Set[FreeImpl] = {
-    freeImpls.filter(_.lhs.name.isMutating)
+    freeImpls.filter(_.name.isMutating)
   }
 
   def namedParameters(sourceName: String): Set[BoundMethodName] = {
@@ -52,7 +52,7 @@ object DataStructure {
             impls: Set[(Impl, ImplDeclaration)],
             decls: ImplLibrary.Decls): DataStructure = {
     val translatedImpls: Set[Impl] = impls.map({case (impl, implDecl) => {
-      val implName = impl.lhs.name
+      val implName = impl.name
       assert(decls.contains(implName), s"In the data structure $name, you define a method $implName, which doesn't exist")
 
       implDecl.parameters.zip(decls(implName).parameters).foldLeft(impl) ({ case (i: Impl, (nameHere: MethodName, declName: MethodName)) => {

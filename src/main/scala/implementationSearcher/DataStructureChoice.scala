@@ -57,8 +57,10 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
       assert(i.boundSource.mbTemplate.isDefined, s"impl $i is fucked")
       ReadMethodFrontendResult(
         i.boundSource.mbTemplate.get,
-        i.boundSource.materialSet.flatMap((j) =>
-          readMethods.getMatchingImpl(j).map((x) => getFrontendReadResult(x))
+        i.boundSource.materialSet.map((j) =>
+          readMethods.getMatchingImpl(j).map((x) => getFrontendReadResult(x)).getOrElse({
+            throw new RuntimeException(s"In the bound source for $i, there was no matching impl for $j")
+          })
         )
       )
     }

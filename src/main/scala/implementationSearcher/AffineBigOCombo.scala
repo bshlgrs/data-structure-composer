@@ -3,6 +3,7 @@ package implementationSearcher
 import shared._
 
 import scala.PartialOrdering
+import com.softwaremill.quicklens._
 
 /**
   * Created by buck on 9/18/16.
@@ -28,7 +29,7 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
   }
 
   def addPair(key: A, value: BigOLiteral): AffineBigOCombo[A] = {
-    this.copy(weights = weights.updated(key, this.weights.getOrElse(key, ZeroTime) + value))
+    this.modify(_.weights).using(_.updated(key, this.weights.getOrElse(key, ZeroTime) + value))
   }
 
   def get(key: A): BigOLiteral = {
@@ -56,7 +57,7 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
   }
 
   def filterKeys(p: A => Boolean): AffineBigOCombo[A] = {
-    this.copy(weights = weights.filterKeys(p))
+    this.modify(_.weights).using(_.filterKeys(p))
   }
 
   lazy val keys: Set[A] = weights.keys.toSet

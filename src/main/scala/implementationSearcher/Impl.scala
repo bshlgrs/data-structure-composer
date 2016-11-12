@@ -37,7 +37,7 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
   // you get back `if y.foo <- y`
 
   def bindToContext(methodExpr: MethodExpr, unfreeImplSet: UnfreeImplSet, list: ParameterList, decls: ImplLibrary.Decls): Set[UnnamedImpl] = {
-    val parameters = decls(lhs.name).parameters
+    val parameters = decls(name).parameters
 
     assert(methodExpr.args.length == parameters.length,
       s"Assertion failed: bindToContext called on $this with methodExpr $methodExpr.\n" +
@@ -73,7 +73,7 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
   }
 
   private def isMethodExprBound(unfreeImplSet: UnfreeImplSet, methodExpr: MethodExpr, decls: Decls): Boolean = {
-    (unfreeImplSet.boundVariables ++ decls(this.lhs.name).parameters).contains(methodExpr.name)
+    (unfreeImplSet.boundVariables ++ decls(this.name).parameters).contains(methodExpr.name)
   }
 
   lazy val getNames: Set[MethodName] = rhs.weights.keys.flatMap(_.getNames).toSet
@@ -83,6 +83,8 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
   lazy val jsHashCode = hashCode()
 
   lazy val asString = toString
+
+  def name: MethodName = lhs.name
 }
 
 object Impl {
@@ -104,7 +106,7 @@ object Impl {
 
   implicit object ImplPartialOrdering extends PartialOrdering[Impl] {
     def partialCompare(x: Impl, y: Impl): DominanceRelationship = {
-      if (x.lhs.name != y.lhs.name) {
+      if (x.name != y.name) {
         NeitherDominates
       } else {
         UnnamedImpl.UnnamedImplPartialOrdering.partialCompare(x.unnamed, y.unnamed)

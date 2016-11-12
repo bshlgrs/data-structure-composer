@@ -139,7 +139,7 @@ object MainParser {
         Try(fileImpls.flatMap(_.rhs.keys.flatMap((x) =>
           // If the method is used, but was never defined, add it to the list of ImplDeclarations
           // with some dummy information
-          tuples.find(_._1.lhs.name == x.name) match {
+          tuples.find(_._1.name == x.name) match {
             case Some(tuple) => {
               assert(x.args.length == tuple._2.parameters.length,
               s"You used the method expression $x, which has a different number of arguments from the" +

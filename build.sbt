@@ -20,7 +20,8 @@ libraryDependencies ++= Seq(
   "com.chuusai" %% "shapeless" % "2.3.1",
   "org.scalatest" % "scalatest_2.11" % "3.0.0",
   "com.lihaoyi" %%% "fastparse" % "0.4.1",
-  "org.scalacheck" %% "scalacheck" % "1.13.2"
+  "org.scalacheck" %% "scalacheck" % "1.13.2",
+  "com.softwaremill.quicklens" %% "quicklens" % "1.4.8"
 )
 
 libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0"
