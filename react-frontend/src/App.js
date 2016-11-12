@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import marked from "marked";
+import { Router, Route, IndexRoute, Link, hashHistory } from 'react-router';
 
 class App extends Component {
   constructor() {
@@ -8,9 +9,7 @@ class App extends Component {
     this.state = {
       selectedMethods: ['insertLast!', 'deleteLast!', 'getLast', 'getMinimum'],
       optimalDataStructures: null,
-      searching: false,
-      bottomPanel: null
-
+      searching: false
     }
   }
 
