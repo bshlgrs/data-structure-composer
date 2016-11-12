@@ -40,7 +40,7 @@ class App extends Component {
 
       // Examine the text in the response
       response.json().then((result) => {
-        this.setState({ optimalDataStructures: result, searching: false });
+        this.setState({ optimalDataStructures: result.sort(orderDataStructuresByOverallTime), searching: false });
       });
     });
   }
@@ -146,7 +146,7 @@ class App extends Component {
                   <th />
                   {previousSearchMethods.map((m, idx) => <th key={idx}>{m}</th>)}
                 </tr>
-                {optimalDataStructures.sort(orderDataStructuresByOverallTime).map((ds, idx) => <tr key={idx}>
+                {optimalDataStructures.map((ds, idx) => <tr key={idx}>
                   <td>
                     {this.dsChoiceList(ds)}
 
@@ -193,11 +193,10 @@ function orderByBigO(l, r) {
   if (l.power_of_n !== r.power_of_n) {
     return l.power_of_n < r.power_of_n ? -1 : 1;
   } else {
-    return l.power_of_log_n < r.power_of_log_n ? -1 : 1;
+    return r.power_of_log_n - l.power_of_log_n;
   }
 }
 
 function orderDataStructuresByOverallTime(l, r) {
-  return orderByBigO(l.overall_time_for_adt, r.overall_time_for_adt) ||
-    (l.structure_names < r.structure_names ? -1 : 1);
+  return orderByBigO(l.overall_time_for_adt, r.overall_time_for_adt);
 }
