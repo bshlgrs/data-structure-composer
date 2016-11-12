@@ -1,0 +1,17 @@
+ds QueueFromTwoStacks extends ArrayList {
+    getByIndex <- 1
+    updateNode! <- 1
+
+    insertAtIndex! <- n
+    insertLast! <- 1
+    insertFirst! <- 1
+
+    deleteAtIndex! <- n
+    deleteBetweenNodes! <- n
+
+    // you can delete at both ends easily
+    deleteLast! <- 1
+    deleteFirst! <- 1
+}
+
+A queue, [built from two stacks](http://stackoverflow.com/questions/69192/how-to-implement-a-queue-using-two-stacks).

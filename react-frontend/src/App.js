@@ -26,7 +26,11 @@ class App extends Component {
       })
     });
 
-    this.setState({ searching: true });
+    this.setState({
+      searching: true,
+      optimalDataStructures: null,
+      bottomPanel: null
+    });
 
     fetch('/api/search', { headers: {
       'Accept': 'application/json',

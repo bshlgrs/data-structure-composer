@@ -114,7 +114,7 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
             case Some(implBindResultTuple) => getFrontendReadResult(
               implBindResultTuple._3,
               writeMethods,
-              freeImpls ++ structure.freeImpls)
+              structure.freeImpls ++ freeImpls)
           })
         }).toMap
 
@@ -151,7 +151,7 @@ object DataStructureChoice {
             times: UnfreeImplSet,
             adt: AbstractDataType,
             library: ImplLibrary): DataStructureChoice = {
-    DataStructureChoice(choices, times, adt, library.impls ++ choices.keys.flatMap(_.freeImpls), library)
+    DataStructureChoice(choices, times, adt, library.impls ++ choices.keys.flatMap(_.freeImpls.filter(_.impl.name.isRead)), library)
   }
 }
 

@@ -17,7 +17,7 @@ object MainParser {
   import fastparse.noApi._
   import White._
 
-  lazy val name: P[String] = P(!bigOLiteral ~ (CharIn('a'to'z','A'to'Z').rep(1) ~ "!".?).!)
+  lazy val name: P[String] = P(!bigOLiteral ~ (CharIn('a' to 'z', 'A' to 'Z').repX(1) ~ "!".?).!)
 
   lazy val implLhs: P[(ImplLhs, ImplDeclaration)] = P(methodName ~ ("[" ~ methodName.rep(1, sep=",") ~ "]").? ~ ("if " ~ implConditions).?).map({
     case (funcName, mbParameters, mbConditions) => {
