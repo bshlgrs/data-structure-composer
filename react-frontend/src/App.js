@@ -61,25 +61,55 @@ class App extends Component {
     this.setState({ selectedMethods: newSelectedMethods});
   }
 
+  dsChoiceLink(structure) {
+    return <a
+      className="choice"
+      onClick={() => this.setState({ bottomPanel: ["ds", structure.name] })}>
+      {structure.name}
+    </a>
+  }
+
   dsChoiceList(ds) {
     return ds.structures.map((structure, idx) =>
-      <a
-        className="choice"
-        key={idx}
-        onClick={() => this.setState({ bottomPanel: ["ds", structure.name] })}>
-        {structure.name}
-      </a>
+      <span key={idx}>{this.dsChoiceLink(structure)}</span>
     ).reduce((acc, elem) => (acc === null ? [elem] : [...acc, ', ', elem]), null)
   }
 
   renderCombo () {
     var choice = this.state.bottomPanel[1];
-
-    debugger;
+    var frontendResult = choice.frontend_result.value;
 
     return <div>
       <h2>Composite data structure: {this.dsChoiceList(choice)}</h2>
+
+      <h3>Read methods</h3>
+      <ul>
+        {frontendResult.read_methods.map((method, idx) => this.renderMethod(method, idx))}
+      </ul>
+
+      <h3>Write methods</h3>
+      <ul>
+        {frontendResult.write_methods.map((method, idx) => <li key={idx}>
+          {method.method_name.name}
+          <ul>
+            {Object.keys(method.impls).map((dsName, idx) => <li key={idx}>
+              {dsName}: <ul>{this.renderMethod(method.impls[dsName])}</ul>
+            </li>)}
+          </ul>
+        </li>)}
+      </ul>
     </div>;
+  }
+
+  renderMethod(method, idx) {
+    return <li key={idx}>
+      {method.template.impl_string}
+      {method.template.free_impl_source.ds &&
+        <span> (from {this.dsChoiceLink(this.props.dataStructures[method.template.free_impl_source.ds])})</span>}
+      <ul>
+        {method.materials.map((material, idx2) => this.renderMethod(material, idx2))}
+      </ul>
+    </li>
   }
 
   render () {
@@ -168,5 +198,6 @@ function orderByBigO(l, r) {
 }
 
 function orderDataStructuresByOverallTime(l, r) {
-  return orderByBigO(l.overall_time_for_adt, r.overall_time_for_adt);
+  return orderByBigO(l.overall_time_for_adt, r.overall_time_for_adt) ||
+    (l.structure_names < r.structure_names ? -1 : 1);
 }

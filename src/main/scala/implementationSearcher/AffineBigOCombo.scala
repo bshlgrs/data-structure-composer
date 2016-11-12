@@ -2,8 +2,8 @@ package implementationSearcher
 
 import shared._
 
-import scala.PartialOrdering
 import com.softwaremill.quicklens._
+import org.scalactic.TypeCheckedTripleEquals._
 
 /**
   * Created by buck on 9/18/16.
@@ -42,7 +42,7 @@ class AffineBigOCombo[A](val bias: BigOLiteral, val weights: Map[A, BigOLiteral]
     lazy val variableCostString = weights
       .toList
       .filter(_._2 != ZeroTime)
-      .map({ case (m, c: BigOLiteral) => if (c == ConstantTime) m.toString else s"${c.toShortString} * $m"})
+      .map({ case (m, c: BigOLiteral) => if (c === ConstantTime) m.toString else s"${c.toShortString} * $m"})
       .mkString(" + ")
 
 
@@ -89,7 +89,7 @@ class AffineBigOCombo[A](val bias: BigOLiteral, val weights: Map[A, BigOLiteral]
   lazy val minCost: BigOLiteral = (bias +: (if (weights.values.isEmpty) Nil else List(weights.values.max))).max
 
   override def equals(other: Any) = other match {
-    case otherBigOCombo: AffineBigOCombo[A] => otherBigOCombo.weights == weights && otherBigOCombo.bias == bias
+    case otherBigOCombo: AffineBigOCombo[A] => otherBigOCombo.weights === weights && otherBigOCombo.bias === bias
     case _ => false
   }
 

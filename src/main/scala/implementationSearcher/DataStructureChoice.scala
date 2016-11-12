@@ -2,8 +2,7 @@ package implementationSearcher
 
 import scala.util.Try
 import shared._
-
-import scala.PartialOrdering
+import org.scalactic.TypeCheckedTripleEquals._
 
 /**
   * Created by buck on 10/10/16.
@@ -17,7 +16,7 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
 
   readMethods.allImpls.foreach((i) => {
     val BoundSource(template, materials) = i.boundSource
-    assert(freeImpls.exists(_.impl == template))
+    assert(freeImpls.exists(_.impl === template))
     materials.foreach((j) => {
       readMethods.getMatchingImpl(j).isDefined
     })
@@ -65,32 +64,33 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
 
 //  readMethods.allImpls.foreach((i) => {
 //    val BoundSource(template, materials) = i.boundSource
-//    assert(freeImpls.exists(_.impl == template))
+//    assert(freeImpls.exists(_.impl === template))
 //    materials.foreach((j) => {
 //      readMethods.getMatchingImpl(j).isDefined
 //    })
 //  })
 
-
-  val frontendResult: Try[DataStructureChoiceFrontendResult] = {
-    def getFrontendReadResult(i: BoundImpl): ReadMethodFrontendResult = {
-      assert(readMethods.allImpls.contains(i), s"weird: the read methods don't include $i")
+  lazy val frontendResult: Try[DataStructureChoiceFrontendResult] = {
+    def getFrontendReadResult(i: BoundImpl, unfreeImplSet: UnfreeImplSet, localFreeImpls: Set[FreeImpl]): SingleMethodFrontendResult = {
+      assert(unfreeImplSet.contains(i), {
+        s"weird: the methods don't include $i"
+      })
       val that = this
       val BoundSource(template, materials) = i.boundSource
       assert(i.boundSource.mbTemplate.isDefined, s"impl $i is fucked")
 
-      ReadMethodFrontendResult(
-        freeImpls.find(_.impl == template).getOrElse({
+      SingleMethodFrontendResult(
+        localFreeImpls.find(_.impl === template).getOrElse({
           throw new RuntimeException(s"oh dear, with i = $i")
         }),
         materials.map((j) => {
-          val sourceImpl = readMethods.getMatchingImpl(j).getOrElse({
+          val sourceImpl = unfreeImplSet.getMatchingImpl(j).getOrElse({
             throw new RuntimeException(
               s"In the bound source for $i, in the DSC $structureNames, " +
                 s"there was no matching impl for $j")
           })
 
-          getFrontendReadResult(sourceImpl)
+          getFrontendReadResult(sourceImpl, unfreeImplSet, localFreeImpls)
         })
       )
     }
@@ -101,10 +101,27 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
           case None => {
             throw new RuntimeException(s"There was no implementation for $x for the set $structureNames")
           }
-          case Some(implBindResultTuple) => getFrontendReadResult(implBindResultTuple._3)
+          case Some(implBindResultTuple) => getFrontendReadResult(implBindResultTuple._3, readMethods, freeImpls)
         }
       })
-      DataStructureChoiceFrontendResult(readMethodFrontendResults.toSet)
+
+      val writeMethodFrontendResults = adt.methods.keys.filter(_.name.isMutating).map((x) => {
+        val structureMap: Map[String, SingleMethodFrontendResult] = structures.map((structure) => {
+          val writeMethods = structureWriteMethods(structure)
+          structure.name -> (writeMethods.namedImplsWhichMatchMethodExpr(x, ParameterList.empty, library.decls).headOption match {
+            case None =>
+              throw new RuntimeException(s"There was no implementation for $x for the set $structureNames")
+            case Some(implBindResultTuple) => getFrontendReadResult(
+              implBindResultTuple._3,
+              writeMethods,
+              freeImpls ++ structure.freeImpls)
+          })
+        }).toMap
+
+        WriteMethodFrontendResult(x.name.name, structureMap)
+      }).toSet
+
+      DataStructureChoiceFrontendResult(readMethodFrontendResults.toSet, writeMethodFrontendResults)
     }
   }
 }
@@ -138,10 +155,12 @@ object DataStructureChoice {
   }
 }
 
-case class DataStructureChoiceFrontendResult(readMethods: Set[ReadMethodFrontendResult]) {
+case class DataStructureChoiceFrontendResult(readMethods: Set[SingleMethodFrontendResult], writeMethods: Set[WriteMethodFrontendResult]) {
 
 }
 
-case class ReadMethodFrontendResult(template: FreeImpl, materials: Set[ReadMethodFrontendResult]) {
+case class SingleMethodFrontendResult(template: FreeImpl, materials: Set[SingleMethodFrontendResult]) {
 
 }
+
+case class WriteMethodFrontendResult(methodName: MethodName, impls: Map[String, SingleMethodFrontendResult])

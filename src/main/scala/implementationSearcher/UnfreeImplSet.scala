@@ -3,7 +3,7 @@ package implementationSearcher
 import implementationSearcher.ImplLibrary.Decls
 import shared._
 import com.softwaremill.quicklens._
-
+import org.scalactic.TypeCheckedTripleEquals._
 /**
   * Created by buck on 9/10/16.
   */
@@ -28,9 +28,11 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
       adt.methods.keys.toSeq.map(_.name).contains(x))
     )
 
+  def contains(impl: Impl): Boolean = impls.get(impl.name).exists(_.impls.exists(_.impl === impl.unnamed))
+
   def filterToReadMethods: UnfreeImplSet = this.modify(_.impls).using(_.filterKeys(_.isRead))
 
-  def allImpls: Set[BoundImpl] = {
+  lazy val allImpls: Set[BoundImpl] = {
     impls.flatMap({ case ((name, singleMethodImplSet)) => singleMethodImplSet.impls.map(_.withName(name)) }).toSet
   }
 
@@ -96,7 +98,7 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   }
 
   def getMatchingImpl(impl: Impl): Option[BoundImpl] = {
-    impls(impl.name).options.items.find(_.impl == impl.unnamed).map(_.withName(impl.name))
+    impls(impl.name).options.items.find(_.impl === impl.unnamed).map(_.withName(impl.name))
   }
 }
 

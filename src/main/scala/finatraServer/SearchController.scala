@@ -44,7 +44,9 @@ class SearchController extends Controller {
         searchRequest.adtMethods.map((x: String) =>
           MethodExpr.parse(x) -> (ConstantTime: BigOLiteral)).toMap))
       library = ImplLibrary(impls, decls, dataStructures)
-      searchResults <- Try(Chooser.allParetoOptimalDataStructureCombosForAdt(library, adt))
+      searchResults <- Try(
+        Chooser.allParetoOptimalDataStructureCombosForAdt(library, adt))
+      _ <- Try(searchResults.items.map(_.frontendResult.get))
     } yield searchResults
 
     tryResult match {
