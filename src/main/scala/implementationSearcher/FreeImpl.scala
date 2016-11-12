@@ -47,22 +47,23 @@ case class FreeImpl(impl: Impl, freeImplSource: FreeImplSource) {
           .using(_.filterKeys(_ != methodExpr))
           .bindToAllOptions(unfreeImplSet, decls)
 
-        val optionsAndConditions =
-          unfreeImplSet.implsWhichMatchMethodExpr(methodExpr,
+        val optionsAndConditions: Set[(ImplPredicateMap, Impl.Rhs, BoundImpl)] =
+          unfreeImplSet.namedImplsWhichMatchMethodExpr(methodExpr,
             ParameterList(impl.lhs.conditions, decls(impl.name).parameters),
             decls)
 
         DominanceFrontier.fromSet(for {
           unfreeImpl <- otherwiseSubbedImpls.items
-          optionImpl <- optionsAndConditions
+          (optionConditions, optionCost, optionSourceImpl) <- optionsAndConditions
         } yield {
           val unfreeSource = unfreeImpl.boundSource.materialSet
-          val source = BoundSource(impl, unfreeSource + optionImpl.impl.withName(methodExpr.name))
+          val source = BoundSource(impl,
+            unfreeSource + optionSourceImpl.impl)
 
           BoundUnnamedImpl(
             UnnamedImpl(
-              impl.lhs.conditions.and(optionImpl.impl.predicates),
-              unfreeImpl.impl.cost + optionImpl.impl.cost * methodCostWeight),
+              impl.lhs.conditions.and(optionConditions),
+              unfreeImpl.impl.cost + optionCost * methodCostWeight),
             source
           )
         })

@@ -1,9 +1,11 @@
 package implementationSearcher
 
 import implementationSearcher.ImplLhs.FunctionProperty
-import shared.{PartialOrdering, DominanceRelationship}
+import shared.{DominanceRelationship, PartialOrdering}
 
-case class ImplPredicateMap(map: Map[MethodName, Set[FunctionProperty]]) {
+class ImplPredicateMap(dirtyMap: Map[MethodName, Set[FunctionProperty]]) {
+  val map: Map[MethodName, Set[FunctionProperty]] = dirtyMap.filter(_._2.nonEmpty)
+
   def and(other: ImplPredicateMap): ImplPredicateMap = {
     ImplPredicateMap(
       (map.keys ++ other.map.keys).map((parameterName: MethodName) =>
@@ -18,6 +20,13 @@ case class ImplPredicateMap(map: Map[MethodName, Set[FunctionProperty]]) {
 
   lazy val toNiceString: String =
     map.flatMap({ case (name: MethodName, y: Set[FunctionProperty]) => y.map((z) => s"${name.name}.$z") }).mkString(", ")
+
+  override def equals(obj: scala.Any): Boolean = obj match {
+    case x: ImplPredicateMap => x.map == map
+    case _ => false
+  }
+
+  override def hashCode(): Int = map.hashCode() ^ ImplPredicateMap.hashCode()
 }
 
 object ImplPredicateMap {
@@ -29,7 +38,11 @@ object ImplPredicateMap {
 
     val map2: Map[MethodName, Set[FunctionProperty]] = map1.mapValues(_.map(_._2))
 
-    ImplPredicateMap(map2)
+    ImplPredicateMap.apply(map2)
+  }
+
+  def apply(map: Map[MethodName, Set[FunctionProperty]]): ImplPredicateMap = {
+    new ImplPredicateMap(map.filter(_._2.nonEmpty))
   }
 
   def empty: ImplPredicateMap = ImplPredicateMap(Map())

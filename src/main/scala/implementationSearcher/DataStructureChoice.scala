@@ -1,5 +1,6 @@
 package implementationSearcher
 
+import scala.util.Try
 import shared._
 
 import scala.PartialOrdering
@@ -13,6 +14,15 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
                                adt: AbstractDataType,
                                freeImpls: Set[FreeImpl],
                                library: ImplLibrary) {
+
+  readMethods.allImpls.foreach((i) => {
+    val BoundSource(template, materials) = i.boundSource
+    assert(freeImpls.exists(_.impl == template))
+    materials.foreach((j) => {
+      readMethods.getMatchingImpl(j).isDefined
+    })
+  })
+
   lazy val overallTimeForAdt: Option[BigOLiteral] = {
 //    assert(results.keys.forall(_.args.isEmpty),
 //       s"While calculating the overall time for an ADT on the data structure choice $this, " +
@@ -28,7 +38,7 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
   lazy val results = adt.methods.keySet.flatMap((methodExpr: MethodExpr) => {
     // TODO: let this be a proper dominance frontier
     fullUnfreeImplSet.implsWhichMatchMethodExpr(methodExpr, ParameterList.empty, library.decls)
-      .headOption.map((x) => methodExpr -> x.impl.cost)
+      .headOption.map((x) => methodExpr -> x._2)
   }).toMap
 
   lazy val resultTimes: Map[MethodExpr, BigOLiteral] = {
@@ -52,29 +62,50 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
   // of topological sort in the front end to explain everything.
   lazy val implStrings: Map[String, BoundImpl] = readMethods.allImpls.map((x) => x.impl.lhs.toString -> x).toMap
 
-  lazy val frontendResult = {
+
+//  readMethods.allImpls.foreach((i) => {
+//    val BoundSource(template, materials) = i.boundSource
+//    assert(freeImpls.exists(_.impl == template))
+//    materials.foreach((j) => {
+//      readMethods.getMatchingImpl(j).isDefined
+//    })
+//  })
+
+
+  val frontendResult: Try[DataStructureChoiceFrontendResult] = {
     def getFrontendReadResult(i: BoundImpl): ReadMethodFrontendResult = {
+      assert(readMethods.allImpls.contains(i), s"weird: the read methods don't include $i")
+      val that = this
+      val BoundSource(template, materials) = i.boundSource
       assert(i.boundSource.mbTemplate.isDefined, s"impl $i is fucked")
+
       ReadMethodFrontendResult(
-        i.boundSource.mbTemplate.get,
-        i.boundSource.materialSet.map((j) =>
-          readMethods.getMatchingImpl(j).map((x) => getFrontendReadResult(x)).getOrElse({
-            throw new RuntimeException(s"In the bound source for $i, there was no matching impl for $j")
+        freeImpls.find(_.impl == template).getOrElse({
+          throw new RuntimeException(s"oh dear, with i = $i")
+        }),
+        materials.map((j) => {
+          val sourceImpl = readMethods.getMatchingImpl(j).getOrElse({
+            throw new RuntimeException(
+              s"In the bound source for $i, in the DSC $structureNames, " +
+                s"there was no matching impl for $j")
           })
-        )
+
+          getFrontendReadResult(sourceImpl)
+        })
       )
     }
 
-    val readMethodFrontendResults = adt.methods.keys.filter(_.name.isRead).map((x) => {
-      readMethods.namedImplsWhichMatchMethodExpr(x, ParameterList.empty, library.decls).headOption match {
-        case None => {
-          throw new RuntimeException(s"There was no implementation for $x for the set $structureNames")
+    Try {
+      val readMethodFrontendResults = adt.methods.keys.filter(_.name.isRead).map((x) => {
+        readMethods.namedImplsWhichMatchMethodExpr(x, ParameterList.empty, library.decls).headOption match {
+          case None => {
+            throw new RuntimeException(s"There was no implementation for $x for the set $structureNames")
+          }
+          case Some(implBindResultTuple) => getFrontendReadResult(implBindResultTuple._3)
         }
-        case Some(impl) => getFrontendReadResult(impl)
-      }
-    })
-
-    DataStructureChoiceFrontendResult(readMethodFrontendResults.toSet)
+      })
+      DataStructureChoiceFrontendResult(readMethodFrontendResults.toSet)
+    }
   }
 }
 
@@ -111,6 +142,6 @@ case class DataStructureChoiceFrontendResult(readMethods: Set[ReadMethodFrontend
 
 }
 
-case class ReadMethodFrontendResult(template: Impl, materials: Set[ReadMethodFrontendResult]) {
+case class ReadMethodFrontendResult(template: FreeImpl, materials: Set[ReadMethodFrontendResult]) {
 
 }

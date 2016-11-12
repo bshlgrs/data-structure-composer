@@ -8,7 +8,7 @@ import com.softwaremill.quicklens._
 /**
   * Created by buck on 9/18/16.
   */
-case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = Map()) {
+class AffineBigOCombo[A](val bias: BigOLiteral, val weights: Map[A, BigOLiteral] = Map()) {
   def +(other: AffineBigOCombo[A]): AffineBigOCombo[A] = {
     val combinedCosts = weights.foldLeft(other.weights) {
       case (currCosts: Map[_, BigOLiteral], (methodExpr, bigOLiteral: BigOLiteral)) => {
@@ -17,6 +17,8 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
     }
     AffineBigOCombo(this.bias + other.bias, combinedCosts)
   }
+
+  def copy(bias: BigOLiteral = bias, weights: Map[A, BigOLiteral] = weights) = AffineBigOCombo[A](bias, weights)
 
   def +(other: BigOLiteral): AffineBigOCombo[A] = {
     AffineBigOCombo(bias + other, weights)
@@ -85,6 +87,13 @@ case class AffineBigOCombo[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = 
 
   // todo: this might be stupid
   lazy val minCost: BigOLiteral = (bias +: (if (weights.values.isEmpty) Nil else List(weights.values.max))).max
+
+  override def equals(other: Any) = other match {
+    case otherBigOCombo: AffineBigOCombo[A] => otherBigOCombo.weights == weights && otherBigOCombo.bias == bias
+    case _ => false
+  }
+
+  override def hashCode(): Int = AffineBigOCombo.hashCode() ^ weights.hashCode() << 1 ^ bias.hashCode() << 2
 }
 
 object AffineBigOCombo {
@@ -92,5 +101,9 @@ object AffineBigOCombo {
     implicit def partialCompare(x: AffineBigOCombo[A], y: AffineBigOCombo[A]): DominanceRelationship = {
       x.partialCompare(y)
     }
+  }
+
+  def apply[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = Map()): AffineBigOCombo[A] = {
+    new AffineBigOCombo(bias, weights.filter(_._2 != ZeroTime))
   }
 }

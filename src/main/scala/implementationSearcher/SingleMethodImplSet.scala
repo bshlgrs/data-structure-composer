@@ -27,12 +27,14 @@ case class SingleMethodImplSet(options: DominanceFrontier[BoundUnnamedImpl]) {
   }
 
   // More impl conditions means that this function returns something better
-  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, scope: UnfreeImplSet, list: ParameterList, decls: Decls): Set[BoundUnnamedImpl] =
-    options.items.flatMap({ case BoundUnnamedImpl(option, optionSource) =>
+  def implsWhichMatchMethodExpr(methodExpr: MethodExpr,
+                                scope: UnfreeImplSet,
+                                list: ParameterList,
+                                decls: Decls): Set[(ImplPredicateMap, Impl.Rhs, BoundUnnamedImpl)] =
+    options.items.flatMap({ case b@BoundUnnamedImpl(option, optionSource) =>
       option
         .withName(methodExpr.name)
-        .bindToContext(methodExpr, scope, list, decls)
-        .map((x) => BoundUnnamedImpl(x, optionSource))
+        .bindToContext(methodExpr, scope, list, decls).map((x) => (x._1, x._2, b))
     })
 
   // More impl conditions means that this function returns something better

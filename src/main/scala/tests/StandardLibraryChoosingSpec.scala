@@ -82,6 +82,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
       assert(res.items.head.structures.map(_.name) == Set("ArrayList"))
+      res.items.foreach(_.frontendResult.get)
     }
 
     it("can do a list") {
@@ -95,12 +96,14 @@ class StandardLibraryChoosingSpec extends FunSpec {
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
       assert(res.items.map(_.structureNames).contains(Set("OrderStatisticTreeList")))
+      res.items.foreach(_.frontendResult.get)
     }
 
     it("can do a min-stack") {
       val res = DataStructureChooserCli.chooseDataStructures(minStackAdt)
 
       assert(res.items.map(_.structures.map(_.name)) == Set(Set("StackReductionMemoizer", "ArrayList")))
+      res.items.foreach(_.frontendResult.get)
     }
 
     it("can do a stack with contains") {
@@ -113,9 +116,13 @@ class StandardLibraryChoosingSpec extends FunSpec {
           contains -> 1
         }""".trim()).get.value)
 
-        DataStructureChooserCli.printResults(res)
+      assert(res.items.exists(_.structureNames == Set("HistogramHashMap", "ArrayList")))
 
-        assert(res.items.exists(_.structureNames == Set("HistogramHashMap", "ArrayList")))
+      val List(firstChoice) = res.items.toList
+      val containsImpl: BoundImpl = firstChoice.readMethods.getNamed(MethodName("contains")).head
+
+      assert(firstChoice.readMethods.getMatchingImpl(containsImpl.impl).isDefined)
+      res.items.foreach(_.frontendResult.get)
     }
 
     it("can do a set which you never delete from") {
@@ -125,9 +132,8 @@ class StandardLibraryChoosingSpec extends FunSpec {
           contains -> 1
         }""".trim()))
 
-      DataStructureChooserCli.printResults(res)
-
       assert(res.items.map(_.structureNames) == Set(Set("HistogramHashMap")))
+      res.items.foreach(_.frontendResult.get)
     }
 
     it("knows how to use parameterized data structures") {
@@ -140,9 +146,8 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
-      DataStructureChooserCli.printResults(res)
-
       assert(res.items.head.structureNames == Set("AugmentedOrderStatisticTreeList"))
+      res.items.foreach(_.frontendResult.get)
     }
 
     it("knows how to use RMQ") {
@@ -155,9 +160,8 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
-      DataStructureChooserCli.printResults(res)
-
       assert(res.items.head.structureNames == Set("SparseTableForIdempotentReduction", "ArrayList"))
+      res.items.foreach(_.frontendResult.get)
     }
 
     it("can solve RMQ and count") {
@@ -173,10 +177,10 @@ class StandardLibraryChoosingSpec extends FunSpec {
         ImplLibrary(impls, decls, DataStructureChooserCli.dataStructures.filterKeys(List("SparseTableForIdempotentReduction", "HistogramHashMap", "ArrayList").contains(_))),
         adt)
 
-      DataStructureChooserCli.printResults(res)
-
       assert(res.items.exists(_.structureNames ==
         Set("SparseTableForIdempotentReduction", "HistogramHashMap", "ArrayList")))
+
+      res.items.foreach(_.frontendResult.get)
     }
 
     it("can do sum stack with random modification") {
@@ -195,9 +199,9 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
-      DataStructureChooserCli.printResults(res)
-
       assert(res.items.head.structureNames == Set("ArrayList", "InvertibleReductionMemoizer"))
+
+      res.items.foreach(_.frontendResult.get)
     }
 
     it("can do min-stack with random modification") {
@@ -221,6 +225,8 @@ class StandardLibraryChoosingSpec extends FunSpec {
         Set("ArrayList", "ValueOrderedOst"),
         Set("ArrayList", "BinaryHeap")
       ))
+
+      res.items.foreach(_.frontendResult.get)
     }
 
     it("can do min stack with getKthBy") {
@@ -241,6 +247,8 @@ class StandardLibraryChoosingSpec extends FunSpec {
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
       assert(res.items.map(_.structureNames) == Set(Set("ArrayList", "ValueOrderedOst")))
+
+      res.items.foreach(_.frontendResult.get)
     }
   }
 

@@ -36,7 +36,7 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
 
   // you get back `if y.foo <- y`
 
-  def bindToContext(methodExpr: MethodExpr, unfreeImplSet: UnfreeImplSet, list: ParameterList, decls: ImplLibrary.Decls): Set[UnnamedImpl] = {
+  def bindToContext(methodExpr: MethodExpr, unfreeImplSet: UnfreeImplSet, list: ParameterList, decls: ImplLibrary.Decls): Set[(ImplPredicateMap, Impl.Rhs)] = {
     val parameters = decls(name).parameters
 
     assert(methodExpr.args.length == parameters.length,
@@ -60,7 +60,7 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
       val (conditionsList, rhsList) = conditionsAndRhses.map((x) => x.predicates -> x.cost).unzip
       val finalConditionsMap = conditionsList.reduceOption(_.and(_)).getOrElse(ImplPredicateMap.empty)
       val finalRhs = rhsList.reduceOption(_ + _).getOrElse(rhs) + rhs.bias
-      UnnamedImpl(finalConditionsMap, finalRhs)
+      finalConditionsMap -> finalRhs
     }
   }
 
@@ -73,7 +73,8 @@ case class Impl(lhs: ImplLhs, rhs: AffineBigOCombo[MethodExpr]) {
   }
 
   private def isMethodExprBound(unfreeImplSet: UnfreeImplSet, methodExpr: MethodExpr, decls: Decls): Boolean = {
-    (unfreeImplSet.boundVariables ++ decls(this.name).parameters).contains(methodExpr.name)
+    (unfreeImplSet.boundVariables ++ decls(this.name).parameters)
+      .contains(methodExpr.name)
   }
 
   lazy val getNames: Set[MethodName] = rhs.weights.keys.flatMap(_.getNames).toSet

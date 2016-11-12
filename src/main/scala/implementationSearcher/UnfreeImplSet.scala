@@ -50,7 +50,7 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   // If instead of `myMethod[f]` I was calling this with `myMethod[_{foo}]`:
   // If I see `myMethod[g] if g.foo <- log(n)`, I want to return that.
   // If I see `myMethod[g] if g.bar <- log(n**2)`, I want to not include that one. !!!
-  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, list: ParameterList, decls: Decls): Set[BoundUnnamedImpl] = {
+  def implsWhichMatchMethodExpr(methodExpr: MethodExpr, list: ParameterList, decls: Decls): Set[(ImplPredicateMap, Impl.Rhs, BoundUnnamedImpl)] = {
     if (impls.contains(methodExpr.name)) {
       impls(methodExpr.name).implsWhichMatchMethodExpr(methodExpr, this, list, decls)
     } else {
@@ -58,8 +58,8 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
     }
   }
 
-  def namedImplsWhichMatchMethodExpr(methodExpr: MethodExpr, list: ParameterList, decls: Decls): Set[BoundImpl] = {
-    implsWhichMatchMethodExpr(methodExpr, list, decls).map(_.withName(methodExpr.name))
+  def namedImplsWhichMatchMethodExpr(methodExpr: MethodExpr, list: ParameterList, decls: Decls): Set[(ImplPredicateMap, Impl.Rhs, BoundImpl)] = {
+    implsWhichMatchMethodExpr(methodExpr, list, decls).map((x) => (x._1, x._2, x._3.withName(methodExpr.name)))
   }
 
   def toLongString: String = {
@@ -96,7 +96,7 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   }
 
   def getMatchingImpl(impl: Impl): Option[BoundImpl] = {
-    impls(impl.name).options.items.find(_.impl == impl).map(_.withName(impl.name))
+    impls(impl.name).options.items.find(_.impl == impl.unnamed).map(_.withName(impl.name))
   }
 }
 
