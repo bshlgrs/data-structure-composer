@@ -9,33 +9,21 @@ import scala.util.{Failure, Success, Try}
 import parsers.MainParser
 import shared.{BigOLiteral, ConstantTime, DominanceFrontier}
 
-class SearchController extends Controller {
-//  get("/compile") { compilationRequest: CompilationRequest =>
-//    val result = for {
-//      javaClass <- Try(JavaParserWrapper.parseJavaClassToAst(compilationRequest.contents))
-//      querified <- Try(javaClass.querify())
-//      auxiliaryDataStructures <- Try(querified.queries().map({ (x) =>
-//        x -> UnorderedDataStructureLibrary.getBestStructureForClass(x, querified)
-//      }).toMap)
-//      optimizedClass <- if (compilationRequest.optimization)
-//        Try(querified.actualizeQueries(auxiliaryDataStructures))
-//      else
-//        Try(querified.actualizeQueries(Map()))
-//      out <- Try(RubyOutputter.outputClass(optimizedClass))
-//    } yield out
-//
-//    result match {
-//      case Success(out) => out
-//      case Failure(exception) => exception.toString ++ "\n\n" ++ exception.getStackTrace.map(_.toString).mkString("\n")
-//    }
-//  }
+import scala.collection.mutable
 
-  post("/search") { searchRequest: SearchRequest =>
-    val tryResult: Try[DominanceFrontier[DataStructureChoice]] = for {
+class SearchController extends Controller {
+  // todo: make this an LRU cache
+  val cache: mutable.Map[SearchRequest, Try[DominanceFrontier[DataStructureChoice]]] = {
+    mutable.Map()
+  }
+
+  def search(searchRequest: SearchRequest):Try[DominanceFrontier[DataStructureChoice]] = {
+    println(searchRequest)
+    for {
       (impls, decls) <- (searchRequest.mbImplsString match {
         case None => Success(DataStructureChooserCli.impls, DataStructureChooserCli.decls)
         case Some(text) => MainParser.parseImplFileString(text)
-      }) : Try[(Set[FreeImpl], ImplLibrary.Decls)]
+      }): Try[(Set[FreeImpl], ImplLibrary.Decls)]
       dataStructures <- searchRequest.dataStructuresString match {
         case None => Success(DataStructureChooserCli.dataStructures)
         case Some(text) => MainParser.parseDataStructureFileString(text, decls)
@@ -44,19 +32,38 @@ class SearchController extends Controller {
         searchRequest.adtMethods.map((x: String) =>
           MethodExpr.parse(x) -> (ConstantTime: BigOLiteral)).toMap))
       library = ImplLibrary(impls, decls, dataStructures)
+      _ = println("Everything was parsed correctly")
       searchResults <- Try(
-        Chooser.allParetoOptimalDataStructureCombosForAdt(library, adt))
+        Searcher.allParetoOptimalDataStructureCombosForAdt(library, adt))
+      _ = println("Search happened correctly")
       _ <- Try(searchResults.items.map(_.frontendResult.get))
     } yield searchResults
+  }
 
-    tryResult match {
+
+  post("/search") { (searchRequest: SearchRequest) => {
+    val caching = false
+
+    val resultTry: Try[DominanceFrontier[DataStructureChoice]] = if (caching) {
+      if (cache.contains(searchRequest)) {
+        cache(searchRequest)
+      } else {
+        val computedResult = search(searchRequest)
+        cache(searchRequest) = computedResult
+        computedResult
+      }
+    } else {
+      search(searchRequest)
+    }
+
+    resultTry match {
       case Success(result) => {
         println(result.items.map(_.frontendResult))
         response.ok.body(result.items)
       }
       case Failure(err) => response.badRequest(err)
     }
-  }
+  }}
 
   get("/start-data") { request: Request =>
 //    response.ok.body(ImplLhs.parse("f[y] if y.foo"))

@@ -100,6 +100,14 @@ case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVaria
   def getMatchingImpl(impl: Impl): Option[BoundImpl] = {
     impls(impl.name).options.items.find(_.impl === impl.unnamed).map(_.withName(impl.name))
   }
+
+  def getMatchingImplFromLhs(implLhs: ImplLhs): Option[BoundImpl] = {
+    impls(implLhs.name)
+      .options
+      .items
+      .find(_.impl.predicates === implLhs.conditions)
+      .map(_.withName(implLhs.name))
+  }
 }
 
 

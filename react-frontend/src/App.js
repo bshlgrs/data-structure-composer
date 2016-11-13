@@ -10,7 +10,6 @@ class App extends Component {
       optimalDataStructures: null,
       searching: false,
       bottomPanel: null
-
     }
   }
 

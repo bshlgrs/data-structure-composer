@@ -3,6 +3,7 @@ package implementationSearcher
 import scala.util.Try
 import shared._
 import org.scalactic.TypeCheckedTripleEquals._
+import com.softwaremill.quicklens._
 
 /**
   * Created by buck on 10/10/16.
@@ -18,7 +19,7 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
     val BoundSource(template, materials) = i.boundSource
     assert(freeImpls.exists(_.impl === template))
     materials.foreach((j) => {
-      readMethods.getMatchingImpl(j).isDefined
+      readMethods.getMatchingImplFromLhs(j.lhs).isDefined
     })
   })
 
@@ -66,7 +67,7 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
 //    val BoundSource(template, materials) = i.boundSource
 //    assert(freeImpls.exists(_.impl === template))
 //    materials.foreach((j) => {
-//      readMethods.getMatchingImpl(j).isDefined
+//      readMethods.getMatchingImplFromLhs(j).isDefined
 //    })
 //  })
 
@@ -84,7 +85,7 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
           throw new RuntimeException(s"oh dear, with i = $i")
         }),
         materials.map((j) => {
-          val sourceImpl = unfreeImplSet.getMatchingImpl(j).getOrElse({
+          val sourceImpl = unfreeImplSet.getMatchingImplFromLhs(j.lhs).getOrElse({
             throw new RuntimeException(
               s"In the bound source for $i, in the DSC $structureNames, " +
                 s"there was no matching impl for $j")

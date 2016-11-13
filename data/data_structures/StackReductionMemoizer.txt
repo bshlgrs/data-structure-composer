@@ -2,6 +2,7 @@ ds StackReductionMemoizer[reduction] {
     insertLast! <- 1
     deleteLast! <- 1
     reduce[reduction] <- 1
+    oneSidedIndexRangeQuery[reduction] <- 1
 }
 
 

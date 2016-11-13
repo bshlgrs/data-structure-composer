@@ -44,7 +44,7 @@ object DataStructureChooserCli {
 
   def chooseDataStructures(adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
     time {
-      Chooser.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
+      Searcher.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
         ImplLibrary(impls, decls, dataStructures),
         adt)
     }
@@ -52,7 +52,7 @@ object DataStructureChooserCli {
 
   def chooseAllDataStructures(adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
     time {
-      Chooser.allParetoOptimalDataStructureCombosForAdt(
+      Searcher.allParetoOptimalDataStructureCombosForAdt(
         ImplLibrary(impls, decls, dataStructures),
         adt
       )

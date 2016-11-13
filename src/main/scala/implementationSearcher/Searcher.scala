@@ -10,7 +10,7 @@ import scala.io.Source
 /**
   * Created by buck on 7/25/16.
   */
-object Chooser {
+object Searcher {
   // x[f] if x.foo <- 1
   // y[g] <- x[g]
   // should infer
