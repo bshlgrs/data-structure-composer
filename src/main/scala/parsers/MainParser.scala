@@ -136,7 +136,7 @@ object MainParser {
 
       // these are the methods which are never defined, but which are used in other definitions
       implicitDeclarationLhses <-
-        Try(fileImpls.flatMap(_.rhs.keys.flatMap((x) =>
+        Try(fileImpls.flatMap((y) => y.rhs.keys.flatMap((x) =>
           // If the method is used, but was never defined, add it to the list of ImplDeclarations
           // with some dummy information
           tuples.find(_._1.name == x.name) match {
@@ -148,9 +148,13 @@ object MainParser {
               None
             }
             case None => {
-              Some(blankImplLhs(x.name) -> ImplDeclaration(x.args.zipWithIndex.map({ case (f, int) =>
-                MethodName(s"arg$int")
-              })))
+              if (tuples.find(_._1.lhs.name == y.name).exists(_._2.parameters.contains(x.name))) {
+                None
+              } else {
+                Some(blankImplLhs(x.name) -> ImplDeclaration(x.args.zipWithIndex.map({ case (f, int) =>
+                  MethodName(s"arg$int")
+                })))
+              }
             }
           }
         )))
