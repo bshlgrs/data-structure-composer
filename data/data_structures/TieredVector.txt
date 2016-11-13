@@ -1,4 +1,4 @@
-ds TieredVector {
+ds TieredVector extends ArrayList {
     getByIndex <- 1
     updateNode! <- 1
 
