@@ -1,4 +1,4 @@
-ds ValueOrderedOst[f] {
+ds ValueOrderedOrderStatisticTree[f] {
     unorderedEach <- n
     updateNode! <- log(n)
 

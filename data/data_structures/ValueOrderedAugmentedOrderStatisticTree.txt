@@ -1,4 +1,4 @@
-ds ValueOrderedAugmentedOst[f, g] extends ValueOrderedOst {
+ds ValueOrderedAugmentedOrderStatisticTree[f, g] extends ValueOrderedOrderStatisticTree {
     unorderedEach <- n
     updateNode! <- log(n)
     getFirstBy[f] <- 1

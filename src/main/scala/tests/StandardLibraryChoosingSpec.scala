@@ -235,7 +235,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
       assert(res.items.map(_.structureNames) == Set(
-        Set("ArrayList", "ValueOrderedOst"),
+        Set("ArrayList", "ValueOrderedOrderStatisticTree"),
         Set("ArrayList", "BinaryHeap")
       ))
 
@@ -259,7 +259,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       assert(res2.readMethods.getNamedWithoutSource("getMinimum") == Set(Impl("getMinimum <- n")))
       val res = DataStructureChooserCli.chooseDataStructures(adt)
 
-      assert(res.items.map(_.structureNames) == Set(Set("ArrayList", "ValueOrderedOst")))
+      assert(res.items.map(_.structureNames) == Set(Set("ArrayList", "ValueOrderedOrderStatisticTree")))
 
       res.items.foreach(_.frontendResult.get)
 
@@ -282,7 +282,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
       it("deals when they're related") {
         assert(
           library.partialCompareFromExtensionRelation(
-            library.structures("ValueOrderedOst"), library.structures("ValueOrderedAugmentedOst"))
+            library.structures("ValueOrderedOrderStatisticTree"), library.structures("ValueOrderedAugmentedOrderStatisticTree"))
             == LeftStrictlyDominates)
       }
     }
@@ -295,7 +295,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
       it("deals with related sets properly") {
         assert(library.partialCompareSetFromExtensionRelations(
-          Set(library.structures("ValueOrderedOst")), Set(library.structures("ValueOrderedAugmentedOst"))) == LeftStrictlyDominates)
+          Set(library.structures("ValueOrderedOrderStatisticTree")), Set(library.structures("ValueOrderedAugmentedOrderStatisticTree"))) == LeftStrictlyDominates)
       }
     }
   }
