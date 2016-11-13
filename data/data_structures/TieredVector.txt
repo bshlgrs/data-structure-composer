@@ -1,0 +1,24 @@
+ds TieredVector {
+    getByIndex <- 1
+    updateNode! <- 1
+
+    insertAtIndex! <- sqrt(n)
+    insertLast! <- 1
+
+    // in the original paper, it doesn't make insertFirst! fast. But you can always just
+    // do the banker's queue trick
+    insertFirst! <- 1
+
+    deleteAtIndex! <- sqrt(n)
+
+    // you can delete at the ends easily
+    deleteLast! <- 1
+    deleteFirst! <- 1
+}
+
+A tiered vector is a fun data structure made from an array of arrays.
+[Here's the original paper about it.](http://www.ics.uci.edu/~goodrich/pubs/wads99.pdf)
+The basic idea is that when you have n items,
+you have a single layer of indirection to sqrt(n) arrays of size approximately sqrt(n). Inserting
+or deleting from those takes O(sqrt(n)) amortized.
+

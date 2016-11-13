@@ -12,4 +12,4 @@ ds ArrayList {
     deleteLast! <- 1
 }
 
-This is a list backed by a dynamically resizing array.
+This is a list backed by a [dynamic array](https://en.wikipedia.org/wiki/Dynamic_array).

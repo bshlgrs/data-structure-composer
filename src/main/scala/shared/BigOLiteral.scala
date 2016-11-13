@@ -29,7 +29,7 @@ abstract class BigOLiteral extends Ordered[BigOLiteral] {
   val toShortString: String
 }
 
-case class PolyAndLogTime(powerOfN: Float, powerOfLogN: Int) extends BigOLiteral {
+case class PolyAndLogTime(powerOfN: Double, powerOfLogN: Int) extends BigOLiteral {
   def compareToPolyAndLogTime(other: PolyAndLogTime): Int = {
     val differenceInPowerOfN = this.powerOfN - other.powerOfN
 

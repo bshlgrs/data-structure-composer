@@ -9,5 +9,9 @@ ds StackReductionMemoizer[reduction] {
 Suppose you want to maintain the minimum of a stack. You can do this by maintaining two
  stacks, as described eg [here](http://stackoverflow.com/a/685074/1360429).
 
+Here's an animated GIF:
+
+![animation of stack reduction memoizer](http://i.makeagif.com/media/11-13-2016/Xld7DV.gif)
+
 (Incidentally, you can build this data structure for a stack
 [with only O(1) space](http://www.geeksforgeeks.org/design-a-stack-that-supports-getmin-in-o1-time-and-o1-extra-space/).)
