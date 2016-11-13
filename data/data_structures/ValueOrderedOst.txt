@@ -1,6 +1,8 @@
 ds ValueOrderedOst[f] {
     unorderedEach <- n
     updateNode! <- log(n)
+
+    // You can get the first and last elements in O(1) by storing a pointer to them
     getFirstBy[f] <- 1
     getLastBy[f] <- 1
     getKthBy[f] <- log(n)

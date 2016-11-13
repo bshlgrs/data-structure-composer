@@ -5,8 +5,11 @@ import marked from "marked";
 class App extends Component {
   constructor() {
     super();
+    var methods = location.hash.substring(1).split(",");
+    console.log(methods)
+
     this.state = {
-      selectedMethods: ['insertLast!', 'deleteLast!', 'getLast', 'getMinimum'],
+      selectedMethods: methods[0].length ? methods : ['insertLast!', 'deleteLast!', 'getLast', 'getMinimum'],
       optimalDataStructures: null,
       searching: false,
       bottomPanel: null
@@ -30,6 +33,8 @@ class App extends Component {
       optimalDataStructures: null,
       bottomPanel: null
     });
+
+    location.hash = this.state.selectedMethods.join(",")
 
     fetch('/api/search', { headers: {
       'Accept': 'application/json',
