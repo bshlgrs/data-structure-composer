@@ -47,7 +47,7 @@ deleteFirstNodeWithValue! <- getFirstNodeWithValue[valueOrdering] + deleteNode!
 // updates
 updateFirstNode! <- getFirst + updateNodeWhichIsFirst!
 updateNodeWhichIsFirst! <- updateNode!
-updateFirstNode! <- deleteFirst! + insertAfterFrontNode!
+updateFirstNode! <- deleteFirst! + insertBeforeFrontNode!
 
 updateLastNode! <- getLast + updateNodeWhichIsLast!
 updateNodeWhichIsLast! <- updateNode!
