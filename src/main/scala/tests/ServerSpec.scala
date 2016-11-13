@@ -34,6 +34,21 @@ class ServerSpec extends FunSpec {
 
       result.get
     }
+
+    it("does not fail a third regression test, thanks Claire for spotting this one!") {
+      val result = controller.search(
+        SearchRequest(None, None,
+          Set("insertLast!",
+            "deleteLast!",
+            "getLast",
+            "insertBeforeFrontNode!",
+            "reduce",
+            "updateNode!")))
+
+      result.get
+    }
+
+
   }
 
 }

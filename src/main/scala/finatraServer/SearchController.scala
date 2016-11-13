@@ -29,8 +29,13 @@ class SearchController extends Controller {
         case Some(text) => MainParser.parseDataStructureFileString(text, decls)
       }
       adt <- Try(AbstractDataType(Map(),
-        searchRequest.adtMethods.map((x: String) =>
-          MethodExpr.parse(x) -> (ConstantTime: BigOLiteral)).toMap))
+        searchRequest.adtMethods.map((x: String) => {
+          val methodName = MethodName(x)
+          val args = List.fill(decls(methodName).parameters.length)(UnderscoreFunctionExpr: FunctionExpr)
+
+          MethodExpr(methodName, args) -> (ConstantTime: BigOLiteral)
+        }).toMap))
+
       library = ImplLibrary(impls, decls, dataStructures)
       _ = println("Everything was parsed correctly")
       searchResults <- Try(
