@@ -5,7 +5,7 @@ import org.scalatest.FunSpec
 import shared._
 import org.scalatest.prop.Checkers
 
-class ImplLibrarySpecs extends FunSpec {
+class ImplLibrarySpecs extends FunSpec with Checkers {
   describe("arrows and closures") {
     it("works in a simple case") {
       val (impls, decls) = ImplDeclaration.parseMany("x <- y", "y <- z")

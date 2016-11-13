@@ -5,10 +5,10 @@ package tests
   */
 
 import finatraServer.{SearchController, SearchRequest}
-import implementationSearcher._
 import org.scalatest.FunSpec
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-class ServerSpec extends FunSpec {
+class ServerSpec extends FunSpec with GeneratorDrivenPropertyChecks {
   val controller = new SearchController
   describe("Search") {
     it("does not fail a regression test") {
@@ -45,10 +45,7 @@ class ServerSpec extends FunSpec {
             "reduce[_]",
             "updateNode!")))
 
-      assert(result.get.items.size > 0)
+      assert(result.get.items.nonEmpty)
     }
-
-
   }
-
 }
