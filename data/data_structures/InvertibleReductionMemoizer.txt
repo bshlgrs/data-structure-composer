@@ -1,8 +1,12 @@
-ds InvertibleReductionMemoizer[f] if f.invertible, f.commutative {
+ds InvertibleReductionMemoizer[f] if f.invertible {
     reduce[f] <- 1
-    insertAtIndex! <- 1
-    updateNode! <- 1
-    deleteNode! <- 1
+    insertAtIndex! if f.commutative <- 1
+    insertFirst! <- 1
+    insertLast! <- 1
+    deleteFirst! <- 1
+    deleteLast! <- 1
+    updateNode! if f.commutative <- 1
+    deleteNode! if f.commutative <- 1
 }
 
 If you want to maintain the sum of an array, it's super easy to do: just store it in a variable somewhere,
@@ -10,4 +14,6 @@ and add new items to it as they're added to the array, and subtract items as the
 
 This works because addition is invertible and commutative.
 
-This data structure does that for any invertible and commutative function `f`.
+This data structure does that for any invertible function `f`.
+
+If `f` is commutative, you can also insert, update, and delete anywhere in the list.

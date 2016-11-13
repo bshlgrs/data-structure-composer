@@ -1,10 +1,14 @@
 # Data structure composer
 
-This is my latest attempt to write software which automatically chooses a good data structure for you, given an API which you need to support. I want the Quora user who asked [How can I design an efficient data structure that supports findMin, findMax, deleteMin, deleteMax, insert, and delete?](https://www.quora.com/How-can-I-design-an-efficient-data-structure-that-supports-findMin-findMax-deleteMin-deleteMax-Insert-and-delete) to be able to just go to a webpage, select those six methods from a checkbox, click "Choose", and get back the correct recommendation.
+**[deployed here](ds.shlegeris.com)**
 
-Here's how my software will do that.
+This is my latest attempt to write software which automatically chooses a good data structure for you, given an API which you need to support.
 
-The user might have some fancy UI, but my software will probably take an input that looks something like the following:
+The Quora user who asked [How can I design an efficient data structure that supports findMin, findMax, deleteMin, deleteMax, insert, and delete?](https://www.quora.com/How-can-I-design-an-efficient-data-structure-that-supports-findMin-findMax-deleteMin-deleteMax-Insert-and-delete) could, instead of using Quora, just go to a webpage, select those six methods from a checkbox, click "Choose", and [get back the correct recommendation](http://ds.shlegeris.com/#getMinimum,getMaximum,deleteMaximum!,deleteMinimum!,deleteFirstNodeWithValue!,insertAnywhere!).
+
+Here's how my software does that.
+
+My software takes an input that looks something like the following:
 
 ```
 adt MinAndMaxSet {
@@ -20,7 +24,7 @@ adt MinAndMaxSet {
 
 In this syntax, `adt` stands for "abstract data type".
 
-I have a library of method implementations and data structures. Everything is a method on an ordered collection. Method implementations look like this--you can see all of them in `materials/MainImplementations.txt`:
+I have a library of method implementations and data structures. Everything is a method on an ordered collection. Method implementations look like this--you can see all of them in `data/implementations.txt`:
 
 ```
 // access by index
@@ -74,7 +78,7 @@ So I define a bunch of different data structures in terms of these different met
 
 ### Composed data structures
 
-you can compose data structures
+Data structures can be composed, blah blah, more detail to come...
 
 ### Partial data structures
 
@@ -108,97 +112,23 @@ but can also do other things...
 
 ### Things that my v0.1 should be able to solve:
 
-- min stack (Implement a stack data structure which supports `insert`, `pop`, and `findMinimumValue`, all in constant time)
-- min queue (like the above, but a queue)
-- List with getIndexOfMax
-- List with getMax
-- Design a data structure that supports the following operations: insert_back(), remove_front() and find_mode(), all in O(1)
-- Is there a data structure for key-value pairs that allows insert, update, deletion and finding the minimal value all in log(n)?
-- [What data structures support insertion, deletion and selection of a random element with a O(1)O(1) time complexity bound?](https://www.quora.com/What-data-structures-support-insertion-deletion-and-selection-of-a-random-element-with-a-math-O-1-math-time-complexity-bound)
-- [How can I design an efficient data structure that supports findMin, findMax, deleteMin, deleteMax, Insert, and delete?](https://www.quora.com/How-can-I-design-an-efficient-data-structure-that-supports-findMin-findMax-deleteMin-deleteMax-Insert-and-delete)
-- [What data structures support insertion, deletion and selection of a random element with a O(1) time complexity bound which allow duplicates?](https://www.quora.com/What-data-structures-support-insertion-deletion-and-selection-of-a-random-element-with-a-O-1-time-complexity-bound-which-allow-duplicates)
-- [Does a data structure exist which supports logarithmic insertion/removal and constant-time query for the Kth smallest element?](https://www.quora.com/Does-a-data-structure-exist-which-supports-logarithmic-insertion-removal-and-constant-time-query-for-the-Kth-smallest-element)
+- [x] min stack (Implement a stack data structure which supports `insert`, `pop`, and `findMinimumValue`, all in constant time)
+- [x] min queue (like the above, but a queue)
+- [ ] List with getIndexOfMax
+    - this one is ambiguous. My software is able to solve it, but it isn't clear to users how you'd solve it.
+- [x] List with getMax
+- [x] Design a data structure that supports the following operations: insert_back(), remove_front() and find_mode(), all in O(1)
+- [x] Is there a data structure for key-value pairs that allows insert, update, deletion and finding the minimal value all in log(n)?
+- [x] [What data structures support insertion, deletion and selection of a random element with a O(1)O(1) time complexity bound?](https://www.quora.com/What-data-structures-support-insertion-deletion-and-selection-of-a-random-element-with-a-math-O-1-math-time-complexity-bound)
+- [x] [How can I design an efficient data structure that supports findMin, findMax, deleteMin, deleteMax, Insert, and delete?](https://www.quora.com/How-can-I-design-an-efficient-data-structure-that-supports-findMin-findMax-deleteMin-deleteMax-Insert-and-delete)
+- [x] [What data structures support insertion, deletion and selection of a random element with a O(1) time complexity bound which allow duplicates?](https://www.quora.com/What-data-structures-support-insertion-deletion-and-selection-of-a-random-element-with-a-O-1-time-complexity-bound-which-allow-duplicates)
+- [x] [Does a data structure exist which supports logarithmic insertion/removal and constant-time query for the Kth smallest element?](https://www.quora.com/Does-a-data-structure-exist-which-supports-logarithmic-insertion-removal-and-constant-time-query-for-the-Kth-smallest-element)
 - What data structure would allow adding an element, removing an element, and querying for the number of elements in the range (a, b), all in O(logn) time?
-- [Can I delete an element from the middle of an array using queue in data structures?](https://www.quora.com/Can-I-delete-an-element-from-the-middle-of-an-array-using-queue-in-data-structures)
+- [x] [Can I delete an element from the middle of an array using queue in data structures?](https://www.quora.com/Can-I-delete-an-element-from-the-middle-of-an-array-using-queue-in-data-structures)
 
-These are all eminently doable.
-
-There might be some trickiness in making it easy for users to find all those methods--maybe they won't guess the name of `find_mode` or `pop!` or something like that. I will probably make a web app with descriptions for each method and data structure, and then send them to be backend with each request.
-
-----
-
-## Todo list:
-
-immediate:
-
-- [x] Handle parameterized data structures
-
-then:
-
-- [ ] Write Scalacheck tests to test that my parser can invert my toString methods
-- [x] Parse ADT descriptions
-- [x] Choose fastest data structure combination for a simple ADT
-  - [x] initially, this can be done without the ability to introspect on what data structure is doing the work
-  - [ ] then that introspection needs to be done.
-- [ ] Store the chains of logic for every implementation, so that you can see what everything's relying on.
-- [ ] generalize to parameterized ADTs.
-- [ ] optimize the compiler to only consider composite data structures that could theoretically be better than simpler versions of themselves.
-
-Interface things:
-
-- [ ] Make a webpage
-- [ ] Make a command line tool
-
-new list of todos:
-
-- [ ] figure out the data structure domination thing
-- [ ] pass previous results of searching for read impls into the Chooser.getAllTimes method
-
-### Things to include
-
-- min stack memoizer
-
-## Other crazy notes
-
-- It might be nice to have higher-order data structures. example?
-- My code assumes everything is an ordered list. Is there an elegant way of handling multiple different types (and conversions between them)?
-- Do I have to do anything fancy to get things like `union` or `intersection` to work?
-- The frontend might let you select between methods in multiple languages.
-
-## more things
-
-https://dzone.com/articles/introduction-probabilistic-0
-
-
-----------
-
-## Current tasks
-
-- Front-end
-  - [x] Let you specify non-primitive methods
-  - Let you see which data structures correspond to which methods. (blocked by the search algorithm semantics one)
-  - better search interface
-- Search algorithm efficiency
-  - Store an upper bound on cost required to be competitive with the best solutions, stop early on uncompetitive data structures
-  - Better automatic reasoning on data structures not being helpful
-  - As you add on data structures, auto-enqueing all the previous read methods found.
-- Search algorithm semantics
-  - [x] Make it possible to see where the data structures were used in an implementation.
-  - Allow me to nest data structures. So it's clearer when we're using an OST vs something else.
-    - [x] nah. Actually allow inheritance.
-- Front end data structure wiki
-  - [x] nah. Instead, make the parser able to handle descriptions.
-
----------
 
 ## Crazy extensions
 
 work with more complex data? eg multiple columns?
 
-output code???
-
-- How hard would this be?
-  - I think not that hard.
-    - It relies on me knowing which method comes from where.
-  - Key idea: just output all impls that were selected, except for the primitive insertions, which need to be done some other way.
-
+output code??? i don't think this would be impossibly hard.
