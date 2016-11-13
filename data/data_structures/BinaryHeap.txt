@@ -6,6 +6,8 @@ ds BinaryHeap[heapOrdering] {
     insertAtIndex! <- log(n)
 }
 
-Binary heaps are famous.
+Binary heaps are a well know data structure. They are not asymptotically faster than BSTs for
+most of their operations, but they're significantly faster in practice, and they're much more
+space-efficient.
 
 It's an unordered data structure, so the only looping construct it supports is `unorderedEach`.
