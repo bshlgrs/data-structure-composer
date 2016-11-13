@@ -3,4 +3,57 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+.App {
+  text-align: center;
+}
 
+.App-header {
+  background-color: #222;
+  height: 50px;
+  padding: 20px;
+  color: white;
+}
+
+h2 a {
+  color: lightblue;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+table {
+  width: 100%;
+  text-align: center;
+}
+
+.choice {
+    color: blue;
+    text-decoration: underline;
+}
+
+.description {
+  text-align: left;
+  margin: 40px;
+}
+
+.time-1 {
+  background-color: lightgreen;
+}
+
+.time-logn {
+  background-color: yellow;
+}
+
+.time-logn2 {
+  background-color: #ffd600;
+}
+
+
+.time-sqrtn {
+  background-color: #ffcc3c;
+}
+
+.time-n {
+  background-color: #ff8100;
+}

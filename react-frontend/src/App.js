@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import './App.css';
 import marked from "marked";
 
 class App extends Component {
@@ -125,10 +124,7 @@ class App extends Component {
     var bottomPanel = this.state.bottomPanel;
 
     return (
-      <div className="App">
-        <div className="App-header">
-          <h2>Data structure chooser</h2>
-        </div>
+      <div>
         <p className="App-body">
           Choose the methods you want
         </p>
