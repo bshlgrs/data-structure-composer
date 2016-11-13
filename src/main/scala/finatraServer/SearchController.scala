@@ -42,7 +42,7 @@ class SearchController extends Controller {
 
 
   post("/search") { (searchRequest: SearchRequest) => {
-    val caching = false
+    val caching = true
 
     val resultTry: Try[DominanceFrontier[DataStructureChoice]] = if (caching) {
       if (cache.contains(searchRequest)) {
