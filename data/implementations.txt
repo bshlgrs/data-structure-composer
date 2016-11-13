@@ -21,7 +21,10 @@ insertFirst! <- getFirst + insertBeforeFrontNode!
 insertAtIndex! <- getByIndex + insertAfterNode!
 insertAtIndex! <- getByIndex + insertBeforeNode!
 insertAfterNode! <- insertNextToNode!
+insertAfterFrontNode! <- insertAfterNode!
 insertBeforeNode! <- insertNextToNode!
+insertBeforeFrontNode! <- insertBeforeNode!
+insertNextToNode! <- insertAtIndex!
 extend! <- getLast + n * insertAfterEndNode!
 insertAnywhere! <- insertAtIndex!
 insertAnywhere! <- insertFirst!

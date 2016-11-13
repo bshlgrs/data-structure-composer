@@ -30,10 +30,10 @@ class SearchController extends Controller {
       }
       adt <- Try(AbstractDataType(Map(),
         searchRequest.adtMethods.map((x: String) => {
-          val methodName = MethodName(x)
-          val args = List.fill(decls(methodName).parameters.length)(UnderscoreFunctionExpr: FunctionExpr)
+//          val methodName = MethodName(x)
+//          val args = List.fill(decls(methodName).parameters.length)(UnderscoreFunctionExpr: FunctionExpr)
 
-          MethodExpr(methodName, args) -> (ConstantTime: BigOLiteral)
+          MethodExpr.parse(x) -> (ConstantTime: BigOLiteral)
         }).toMap))
 
       library = ImplLibrary(impls, decls, dataStructures)

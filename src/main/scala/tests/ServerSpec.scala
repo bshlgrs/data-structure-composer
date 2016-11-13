@@ -42,10 +42,10 @@ class ServerSpec extends FunSpec {
             "deleteLast!",
             "getLast",
             "insertBeforeFrontNode!",
-            "reduce",
+            "reduce[_]",
             "updateNode!")))
 
-      result.get
+      assert(result.get.items.size > 0)
     }
 
 

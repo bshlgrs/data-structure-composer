@@ -11,6 +11,7 @@ ds ValueOrderedAugmentedOst[f, g] extends ValueOrderedOst {
     twoSidedValueRangeQuery[g] <- log(n)
     oneSidedValueRangeQuery[g] <- log(n)
     getNearest[f] <- log(n)
+    reduce[g] <- 1
 }
 
 This is a balanced binary search tree ordered on `f`. Every node also maintains how many descendents it has,

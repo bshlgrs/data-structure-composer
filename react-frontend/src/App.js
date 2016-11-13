@@ -6,7 +6,6 @@ class App extends Component {
   constructor() {
     super();
     var methods = location.hash.substring(1).split(",");
-    console.log(methods)
 
     this.state = {
       selectedMethods: methods[0].length ? methods : ['insertLast!', 'deleteLast!', 'getLast', 'getMinimum'],
