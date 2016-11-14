@@ -14,7 +14,7 @@ Order statistic trees are binary search trees where every node also stores its n
 it's fast to traverse them by index. Here's a picture
 (taken from [these notes](http://www.cs.cornell.edu/courses/cs211/2004su/slides/Topic20b.pdf)):
 
-![picture of OST](http://shlegeris.com/img/ost)
+![picture of OST](http://shlegeris.com/img/ost.png)
 
 They are a really useful structure for ordered lists which need to support insertion at arbitrary locations.
 
