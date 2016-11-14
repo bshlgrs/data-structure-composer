@@ -126,7 +126,9 @@ class App extends Component {
     return (
       <div>
         <p className="App-body">
-          Choose the methods you want
+          Select the methods you want and press "search". You can also <a href="http://shlegeris.com/2016/11/13/ds.html">read about how this works
+          </a> or <a href="https://github.com/bshlgrs/data-structure-composer">read the source code</a>.&nbsp;
+           <a href="mailto:bshlegeris@gmail.com">Email me</a> if you spot interesting bugs or have any comments.
         </p>
 
         {this.state.selectedMethods.map((x, idx) => <div key={idx}>
