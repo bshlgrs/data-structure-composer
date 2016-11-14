@@ -2,6 +2,8 @@
 
 **[deployed here](ds.shlegeris.com)**
 
+**Read [here](http://shlegeris.com/2016/11/13/ds.html) for a better description of this project!**
+
 This is my latest attempt to write software which automatically chooses a good data structure for you, given an API which you need to support.
 
 The Quora user who asked [How can I design an efficient data structure that supports findMin, findMax, deleteMin, deleteMax, insert, and delete?](https://www.quora.com/How-can-I-design-an-efficient-data-structure-that-supports-findMin-findMax-deleteMin-deleteMax-Insert-and-delete) could, instead of using Quora, just go to a webpage, select those six methods from a checkbox, click "Choose", and [get back the correct recommendation](http://ds.shlegeris.com/#getMinimum,getMaximum,deleteMaximum!,deleteMinimum!,deleteFirstNodeWithValue!,insertAnywhere!).
