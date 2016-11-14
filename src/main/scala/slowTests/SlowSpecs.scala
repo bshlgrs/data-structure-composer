@@ -14,12 +14,13 @@ import org.scalacheck.Gen
 class SlowSpecs extends FunSpec with GeneratorDrivenPropertyChecks {
   val controller = new SearchController
 
+
+  val allMethodExprs = DataStructureChooserCli.decls.map({ case (name, decl) =>
+    MethodExpr(name, decl.parameters.map((x) => UnderscoreFunctionExpr))
+  })
+
   describe("random tests") {
     it("works") {
-      val allMethodExprs = DataStructureChooserCli.decls.map({ case (name, decl) =>
-        MethodExpr(name, decl.parameters.map((x) => UnderscoreFunctionExpr))
-      })
-
       forAll (Gen.someOf(allMethodExprs)) { (exprs) =>
         println(exprs)
 
@@ -27,6 +28,17 @@ class SlowSpecs extends FunSpec with GeneratorDrivenPropertyChecks {
 
         searchResult.items.foreach(_.frontendResult)
       }
+    }
+  }
+
+  describe("slow, methodical tests") {
+    it("works") {
+      allMethodExprs.foreach((m) => {
+        val searchResult = controller.search(SearchRequest(None, None, Set(m.toString, "getByIndex"))).get
+
+        assert(searchResult.items.nonEmpty, s"no implementation for $m")
+        searchResult.items.foreach(_.frontendResult)
+      })
     }
   }
 }

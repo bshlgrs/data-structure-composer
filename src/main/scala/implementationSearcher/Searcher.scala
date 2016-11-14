@@ -164,6 +164,7 @@ object Searcher {
         s"Your ADT referred to ${x.name}, which doesn't exist")
     })
 
+    implicit val ordering = new DataStructureChoice.DataStructureChoicePartialOrdering(library)
 
     val frontier = allParetoOptimalDataStructureCombosForAdt(library, adt)
 
@@ -172,7 +173,7 @@ object Searcher {
 
       frontier.filter(_.overallTimeForAdt.get == bestTime)
     } else {
-      frontier
+      DominanceFrontier.empty[DataStructureChoice]
     }
   }
 }
