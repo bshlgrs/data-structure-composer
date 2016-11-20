@@ -1,31 +1,26 @@
-//package webapp
-//
-//import implementationSearcher._
-//import parsers.MainParser
-//
-//import scala.scalajs.js
-//import scala.scalajs.js.JSApp
-//import org.scalajs.dom
-//import dom.document
-//
-//import scala.scalajs.js.annotation.JSExport
-//
-///**
-//  * Created by buck on 9/15/16.
-//  */
-//object WebApp extends JSApp {
-//  def main(): Unit = {
-//
-//  }
-//
-//  def appendPar(targetNode: dom.Node, text: String): Unit = {
-//    val parNode = document.createElement("p")
-//    val textNode = document.createTextNode(text)
-//    parNode.appendChild(textNode)
-//    targetNode.appendChild(parNode)
-//  }
-//
-//  @JSExport
+package webapp
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import implementationSearcher._
+import parsers.MainParser
+
+import scala.scalajs.js
+import scala.scalajs.js.JSApp
+import org.scalajs.dom
+import dom.document
+
+import scala.scalajs.js.annotation.JSExport
+
+/**
+  * Created by buck on 9/15/16.
+  */
+object WebApp extends JSApp {
+  def main(): Unit = {
+
+  }
+
+  //  @JSExport
 //  def makeChoices(implString: String, dsString: String, adtString: String): js.Array[js.Dictionary[js.Any]] = {
 //    val (impls, decls) = MainParser.parseImplFileString(implString).get
 //    val structures = MainParser.parseDataStructureFileString(dsString, decls).get
@@ -42,4 +37,11 @@
 //      )
 //    }).toList: _*)
 //  }
-//}
+  @JSExport
+  def makeInferencesFromMethods(inputs: String): UnfreeImplSet = {
+    val (impls, decls) = MainParser.parseImplFileString(inputs).get
+    val library = ImplLibrary(impls, decls, Map())
+
+    Searcher.getAllTimes(UnfreeImplSet(Map(), Set()), impls, library)
+  }
+}

@@ -176,5 +176,7 @@ object Searcher {
       DominanceFrontier.empty[DataStructureChoice]
     }
   }
+
+
 }
 

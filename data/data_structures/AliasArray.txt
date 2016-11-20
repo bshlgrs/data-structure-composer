@@ -1,0 +1,8 @@
+ds AliasArray {
+    getUniformlyRandomlyChosenElement <- 1
+    extend! <- n
+}
+
+This uses the Alias method...
+
+

@@ -1,5 +1,51 @@
 import React, { Component } from 'react';
 import marked from "marked";
+import 'whatwg-fetch';
+
+const PublicMethods = [
+  "getFirst",
+  "getByIndex",
+  "getNext",
+  "getLast",
+  "insertLast!",
+  "insertAtIndex!",
+  "insertFirst!",
+  "insertNextToNode!",
+  "insertAnywhere!",
+  "deleteAtIndex!",
+  "deleteFirst!",
+  "deleteLast!",
+  "deleteBetweenNodes!",
+  "deleteFirstNodeWithValue!",
+  "updateFirstNode!",
+  "updateLastNode!",
+  "updateByIndex!",
+  "getKthBy",
+  "getFirstBy",
+  "getLastBy",
+  "countBetweenBy",
+  "getMaximum",
+  "getMinimum",
+  "deleteFirstBy!",
+  "deleteLastBy!",
+  "deleteMinimum!",
+  "deleteMaximum!",
+  "getFirstNodeWithValue",
+  "getNearest",
+  "getUniformlyRandomlyChosenElement",
+  "count",
+  "contains",
+  "reduce",
+  "countOfEquivalenceClass",
+  "mostNumerousEquivalenceClass",
+  "getMode",
+  "twoSidedIndexRangeQuery",
+  "oneSidedIndexRangeQuery",
+  "rangeMinimumQuery",
+  "twoSidedValueRangeQuery",
+  "oneSidedValueRangeQuery",
+  "getSum"
+];
 
 class App extends Component {
   constructor() {
@@ -55,6 +101,20 @@ class App extends Component {
     var newSelectedMethods = [...this.state.selectedMethods];
     newSelectedMethods[idx] = e.target.value;
     this.setState({ selectedMethods: newSelectedMethods });
+  }
+
+  randomizeSelectedMethods() {
+    function getRandomMethod () {
+      return PublicMethods[Math.floor(Math.random()*PublicMethods.length)];
+    }
+
+    var obj = {};
+
+    for (var i = 0; i < 4; i++) {
+      obj[getRandomMethod()] = true;
+    }
+
+    this.setState({ selectedMethods: Object.keys(obj) });
   }
 
   addSelectedMethod(e, idx) {
@@ -139,6 +199,7 @@ class App extends Component {
           <button onClick={() => this.removeSelectedMethod(idx)}>remove</button>
         </div>)}
 
+        <button onClick={() => this.randomizeSelectedMethods()}>randomize!</button>
         <button onClick={() => this.addSelectedMethod()}>add method</button>
 
         <button onClick={() => this.fetch()}>{this.state.searching ? "Searching..." : "Search!"}</button>
