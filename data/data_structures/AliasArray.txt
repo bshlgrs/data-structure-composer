@@ -1,5 +1,5 @@
 ds AliasArray {
-    getUniformlyRandomlyChosenElement <- 1
+    getRandomlyChosenElementWeightedByValue <- 1
     extend! <- n
 }
 

@@ -78,7 +78,7 @@ getNearest[f] <- unorderedEach
 // using binary search:
 getNearest[f] <- log(n) * getKthBy[f]
 
-getUniformlyRandomlyChosenElement <- getByIndex
+getRandomlyChosenElementWeightedByValue <- getSum + unorderedEach
 
 // other reductions
 count <- unorderedEach
