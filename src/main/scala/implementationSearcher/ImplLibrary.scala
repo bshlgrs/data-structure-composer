@@ -1,9 +1,11 @@
 package implementationSearcher
 
 import implementationSearcher.ImplLibrary.Decls
+import parsers.MainParser
 import shared._
 
 import scala.annotation.tailrec
+import scala.util.Try
 
 /**
   * Created by buck on 10/31/16.
@@ -111,4 +113,23 @@ case class ImplLibrary(impls: Set[FreeImpl], decls: Decls, structures: Map[Strin
 
 object ImplLibrary {
   type Decls = Map[MethodName, ImplDeclaration]
+
+  def buildFromStrings(implsString: String, structuresStrings: Set[String]): Try[(ImplLibrary, LibraryText)] = Try {
+    lazy val (impls, decls): (Set[FreeImpl], ImplLibrary.Decls) = MainParser.parseImplFileString(implsString).get
+
+    lazy val (structures, structureDescriptions) = {
+      val dataStructureTuples =
+        structuresStrings.map((x: String) => MainParser.parseSingleDataStructureFileString(x, decls).get)
+
+      val duplicationErrors = dataStructureTuples.groupBy(_._1).filter(_._2.size > 1)
+
+      assert(duplicationErrors.isEmpty,
+        s"There were data structures with duplicate names: ${duplicationErrors.keys.mkString(", ")}")
+
+      dataStructureTuples.map((x) => x._1 -> x._2).toMap ->
+        dataStructureTuples.map((x) => x._1 -> (x._3 -> x._4)).toMap
+    }
+
+    ImplLibrary(impls, decls, structures) -> LibraryText(structureDescriptions)
+  }
 }

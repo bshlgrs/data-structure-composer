@@ -17,7 +17,7 @@ import shared._
   * are all examples
   */
 
-abstract class FunctionExpr {
+sealed abstract class FunctionExpr {
   def properties(conditions: Map[String, Set[FunctionProperty]]): Set[FunctionProperty] = this match {
     case NamedFunctionExpr(name) => conditions(name.name)
     case AnonymousFunctionExpr(defaultProperties, _) => defaultProperties

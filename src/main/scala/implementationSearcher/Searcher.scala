@@ -85,6 +85,8 @@ object Searcher {
                                         adt: AbstractDataType,
                                         mbRelevantReadMethods: Option[Set[FreeImpl]] = None,
                                         mbUnfreeImpls: Option[Set[BoundImpl]] = None): DataStructureChoice = {
+    println(s"Getting relevant times! $structures")
+
     val allProvidedReadImplementations: Set[FreeImpl] = structures.flatMap(_.readMethods)
 
     val allFreeVariables = structures.flatMap(_.parameters)

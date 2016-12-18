@@ -1,14 +1,15 @@
 package implementationSearcher
 
 import shared._
-
 import com.softwaremill.quicklens._
 import org.scalactic.TypeCheckedTripleEquals._
+import upickle.default
+import upickle.Js
 
 /**
   * Created by buck on 9/18/16.
   */
-class AffineBigOCombo[A](val bias: BigOLiteral, val weights: Map[A, BigOLiteral] = Map()) {
+final class AffineBigOCombo[A](val bias: BigOLiteral, val weights: Map[A, BigOLiteral] = Map[A, BigOLiteral]()) {
   def +(other: AffineBigOCombo[A]): AffineBigOCombo[A] = {
     val combinedCosts = weights.foldLeft(other.weights) {
       case (currCosts: Map[_, BigOLiteral], (methodExpr, bigOLiteral: BigOLiteral)) => {
@@ -106,4 +107,12 @@ object AffineBigOCombo {
   def apply[A](bias: BigOLiteral, weights: Map[A, BigOLiteral] = Map()): AffineBigOCombo[A] = {
     new AffineBigOCombo(bias, weights.filter(_._2 != ZeroTime))
   }
+
+  def unapply[A](arg: AffineBigOCombo[A]): Option[(BigOLiteral, Map[A, BigOLiteral])] = Some((arg.bias, arg.weights))
+
+  implicit def thing2Writer[A] = upickle.default.Writer[AffineBigOCombo[A]]{
+    case t: AffineBigOCombo[A] => Js.Str(t.toString)
+  }
+
+
 }

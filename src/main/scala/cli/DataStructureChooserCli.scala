@@ -10,13 +10,11 @@ import scala.io.Source
   * Created by buck on 10/11/16.
   */
 object DataStructureChooserCli {
-  lazy val libraryText = {
+  lazy val implsText = {
     Source.fromFile("data/implementations.txt")
       .getLines()
       .mkString("\n")
   }
-
-  lazy val (impls, decls): (Set[FreeImpl], ImplLibrary.Decls) = MainParser.parseImplFileString(libraryText).get
 
   val dataStructuresFiles: Set[String] = {
     new java.io.File("data/data_structures").list().map((fileName: String) => {
@@ -26,26 +24,15 @@ object DataStructureChooserCli {
     }).toSet
   }
 
-  lazy val (dataStructures: Map[String, DataStructure], dataStructureTexts: Map[String, (String, String)]) = {
-    val dataStructureTuples =
-      dataStructuresFiles.map((x: String) => MainParser.parseSingleDataStructureFileString(x, decls).get)
 
-    val duplicationErrors = dataStructureTuples.groupBy(_._1).filter(_._2.size > 1)
+  lazy val (library, libraryText) = ImplLibrary.buildFromStrings(implsText, dataStructuresFiles).get
 
-    assert(duplicationErrors.isEmpty,
-      s"There were data structures with duplicate names: ${duplicationErrors.keys.mkString(", ")}")
-
-    val dataStructures = dataStructureTuples.map((x) => x._1 -> x._2).toMap
-
-    (dataStructures, dataStructureTuples.map((x) => x._1 -> (x._3 -> x._4)).toMap)
-  }
-
-  lazy val library = ImplLibrary(impls, decls, dataStructures)
+  val ImplLibrary(impls, decls, structures) = library
 
   def chooseDataStructures(adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
     time {
       Searcher.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
-        ImplLibrary(impls, decls, dataStructures),
+        library,
         adt)
     }
   }
@@ -53,7 +40,7 @@ object DataStructureChooserCli {
   def chooseAllDataStructures(adt: AbstractDataType): DominanceFrontier[DataStructureChoice] = {
     time {
       Searcher.allParetoOptimalDataStructureCombosForAdt(
-        ImplLibrary(impls, decls, dataStructures),
+        library,
         adt
       )
     }

@@ -4,10 +4,12 @@ import implementationSearcher.ImplLibrary.Decls
 import shared._
 import com.softwaremill.quicklens._
 import org.scalactic.TypeCheckedTripleEquals._
+
+import scala.scalajs.js.annotation.JSExport
 /**
   * Created by buck on 9/10/16.
   */
-case class UnfreeImplSet(impls: Map[MethodName, SingleMethodImplSet], boundVariables: Set[MethodName]) {
+case class UnfreeImplSet(@JSExport impls: Map[MethodName, SingleMethodImplSet], @JSExport boundVariables: Set[MethodName]) {
   def addImpl(impl: BoundImpl): UnfreeImplSet = {
     if (impls.contains(impl.name)) {
       this.modify(_.impls).using(_.updated(impl.name, impls(impl.name).add(impl)))

@@ -3,7 +3,7 @@ package shared
 /**
   * Created by buck on 5/1/16.
   */
-abstract class BigOLiteral extends Ordered[BigOLiteral] {
+sealed abstract class BigOLiteral extends Ordered[BigOLiteral] {
   def compare(other: BigOLiteral): Int = (this, other) match {
     case (x: PolyAndLogTime, y: PolyAndLogTime) => x.compareToPolyAndLogTime(y)
     case (ZeroTime, ZeroTime) => 0

@@ -25,7 +25,7 @@ class SearchController extends Controller {
         case Some(text) => MainParser.parseImplFileString(text)
       }): Try[(Set[FreeImpl], ImplLibrary.Decls)]
       dataStructures <- searchRequest.dataStructuresString match {
-        case None => Success(DataStructureChooserCli.dataStructures)
+        case None => Success(DataStructureChooserCli.structures)
         case Some(text) => MainParser.parseDataStructureFileString(text, decls)
       }
       adt <- Try(AbstractDataType(Map(),
@@ -77,8 +77,8 @@ class SearchController extends Controller {
         "implText" -> DataStructureChooserCli.libraryText,
         "impls" -> DataStructureChooserCli.impls,
         "decls" -> DataStructureChooserCli.decls,
-        "dataStructures" -> DataStructureChooserCli.dataStructures,
-        "dataStructureTexts" -> DataStructureChooserCli.dataStructureTexts
+        "dataStructures" -> DataStructureChooserCli.structures,
+        "dataStructureTexts" -> DataStructureChooserCli.dataStructuresFiles
       )
     )
   }

@@ -20,7 +20,7 @@ object WebApp extends JSApp {
 
   }
 
-  //  @JSExport
+//  @JSExport
 //  def makeChoices(implString: String, dsString: String, adtString: String): js.Array[js.Dictionary[js.Any]] = {
 //    val (impls, decls) = MainParser.parseImplFileString(implString).get
 //    val structures = MainParser.parseDataStructureFileString(dsString, decls).get
@@ -37,6 +37,13 @@ object WebApp extends JSApp {
 //      )
 //    }).toList: _*)
 //  }
+
+  @JSExport
+  def getChooser(implsString: String, dataStructuresString: js.Array[String]): WebChooser = {
+    WebChooser.build(implsString, dataStructuresString.toSet).get
+  }
+
+
   @JSExport
   def makeInferencesFromMethods(inputs: String): UnfreeImplSet = {
     val (impls, decls) = MainParser.parseImplFileString(inputs).get

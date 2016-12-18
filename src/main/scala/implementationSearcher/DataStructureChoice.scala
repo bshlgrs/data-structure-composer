@@ -5,14 +5,17 @@ import shared._
 import org.scalactic.TypeCheckedTripleEquals._
 import com.softwaremill.quicklens._
 
+import scala.scalajs.js.annotation.JSExport
+
 /**
   * Created by buck on 10/10/16.
   */
 
-case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeImplSet],
-                               readMethods: UnfreeImplSet,
+@JSExport
+case class DataStructureChoice(@JSExport structureWriteMethods: Map[DataStructure, UnfreeImplSet],
+                               @JSExport readMethods: UnfreeImplSet,
                                adt: AbstractDataType,
-                               freeImpls: Set[FreeImpl],
+                               @JSExport freeImpls: Set[FreeImpl],
                                library: ImplLibrary) {
 
   readMethods.allImpls.foreach((i) => {
@@ -45,21 +48,24 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
     results.mapValues(_.mapKeys(_.getAsNakedName).substituteAllVariables(adt.parameters))
   }
 
+  @JSExport
   lazy val structures: Set[DataStructure] = structureWriteMethods.keys.toSet
 
   lazy val writeMethods = structureWriteMethods.values.reduce(_ product _)
 
   def structureNames: Set[String] = structureWriteMethods.keys.map(_.name).toSet
 
+  @JSExport
   val freeImplSourceMap: Map[String, FreeImplSource] = freeImpls.map((x) => x.impl.toString -> x.freeImplSource).toMap
+
 
   lazy val fullUnfreeImplSet: UnfreeImplSet = readMethods.addImpls(writeMethods.allImpls)
 
+  @JSExport
   lazy val jsBoundHashCodeMap: Map[Int, BoundImpl] = readMethods.allImpls.map((x) => x.impl.hashCode() -> x).toMap
+  @JSExport
   lazy val jsFreeHashCodeMap: Map[Int, FreeImpl] = freeImpls.map((x) => x.impl.hashCode() -> x).toMap
 
-  // todo: make things output themselves as strings so that it's easy to use some kind
-  // of topological sort in the front end to explain everything.
   lazy val implStrings: Map[String, BoundImpl] = readMethods.allImpls.map((x) => x.impl.lhs.toString -> x).toMap
 
 
@@ -71,6 +77,7 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
 //    })
 //  })
 
+  @JSExport
   lazy val frontendResult: Try[DataStructureChoiceFrontendResult] = {
     def getFrontendReadResult(i: BoundImpl, unfreeImplSet: UnfreeImplSet, localFreeImpls: Set[FreeImpl]): SingleMethodFrontendResult = {
       assert(unfreeImplSet.contains(i), {
@@ -156,8 +163,10 @@ object DataStructureChoice {
   }
 }
 
-case class DataStructureChoiceFrontendResult(readMethods: Set[SingleMethodFrontendResult], writeMethods: Set[WriteMethodFrontendResult]) {
-
+@JSExport
+case class DataStructureChoiceFrontendResult(@JSExport readMethods: Set[SingleMethodFrontendResult],
+                                             @JSExport writeMethods: Set[WriteMethodFrontendResult]) {
+  
 }
 
 case class SingleMethodFrontendResult(template: FreeImpl, materials: Set[SingleMethodFrontendResult]) {

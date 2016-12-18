@@ -27,6 +27,8 @@ class ImplPredicateMap(dirtyMap: Map[MethodName, Set[FunctionProperty]]) {
   }
 
   override def hashCode(): Int = map.hashCode() ^ ImplPredicateMap.hashCode()
+
+
 }
 
 object ImplPredicateMap {
@@ -56,4 +58,6 @@ object ImplPredicateMap {
       ).flip
     }
   }
+
+  def unapply(arg: ImplPredicateMap): Option[(Map[MethodName, Set[FunctionProperty]])] = Some(arg.map)
 }

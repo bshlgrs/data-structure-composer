@@ -21,7 +21,7 @@ class StandardLibraryChoosingSpec extends FunSpec {
 
   val impls: Set[FreeImpl] = DataStructureChooserCli.impls
   val decls = DataStructureChooserCli.decls
-  val structures = DataStructureChooserCli.dataStructures
+  val structures = DataStructureChooserCli.structures
   val library = ImplLibrary(impls, decls, structures)
 
   describe("regressions") {
@@ -175,7 +175,8 @@ class StandardLibraryChoosingSpec extends FunSpec {
         }""".trim()).get.value
 
       val res = Searcher.allMinTotalCostParetoOptimalDataStructureCombosForAdt(
-        ImplLibrary(impls, decls, DataStructureChooserCli.dataStructures.filterKeys(List("SparseTableForIdempotentReduction", "HistogramHashMap", "ArrayList").contains(_))),
+        ImplLibrary(impls, decls, DataStructureChooserCli.structures.filterKeys(
+          List("SparseTableForIdempotentReduction", "HistogramHashMap", "ArrayList").contains(_))),
         adt)
 
       assert(res.items.exists(_.structureNames ==

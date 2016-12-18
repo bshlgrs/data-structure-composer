@@ -48,9 +48,11 @@ const PublicMethods = [
 ];
 
 class App extends Component {
+
   constructor() {
     super();
-    var methods = location.hash.substring(1).split(",");
+
+    let methods = location.hash.substring(1).split(",");
 
     this.state = {
       selectedMethods: methods[0].length ? methods : ['insertLast!', 'deleteLast!', 'getLast', 'getMinimum'],
@@ -60,10 +62,10 @@ class App extends Component {
     }
   }
 
-  fetch() {
-    var body = JSON.stringify({
+  searchWithAjax() {
+    let body = JSON.stringify({
       adt_methods: this.state.selectedMethods.map((methodName) => {
-        var parameters = this.props.decls[methodName].parameters;
+        let parameters = this.props.decls[methodName].parameters;
         if (parameters.length) {
           return methodName + "[" + parameters.map((p) => "_") + "]";
         } else {
@@ -97,8 +99,15 @@ class App extends Component {
     });
   }
 
+  fetch() {
+    console.log(new Date());
+    let res = this.props.chooser.choose(this.state.selectedMethods);
+    console.log(new Date());
+    debugger;
+  }
+
   changeSelectedMethod(e, idx) {
-    var newSelectedMethods = [...this.state.selectedMethods];
+    let newSelectedMethods = [...this.state.selectedMethods];
     newSelectedMethods[idx] = e.target.value;
     this.setState({ selectedMethods: newSelectedMethods });
   }
@@ -108,9 +117,9 @@ class App extends Component {
       return PublicMethods[Math.floor(Math.random()*PublicMethods.length)];
     }
 
-    var obj = {};
+    let obj = {};
 
-    for (var i = 0; i < 4; i++) {
+    for (let i = 0; i < 4; i++) {
       obj[getRandomMethod()] = true;
     }
 
@@ -122,7 +131,7 @@ class App extends Component {
   }
 
   removeSelectedMethod(idx) {
-    var newSelectedMethods = [...this.state.selectedMethods];
+    let newSelectedMethods = [...this.state.selectedMethods];
     newSelectedMethods.splice(idx, 1);
     this.setState({ selectedMethods: newSelectedMethods});
   }
@@ -142,8 +151,8 @@ class App extends Component {
   }
 
   renderCombo () {
-    var choice = this.state.bottomPanel[1];
-    var frontendResult = choice.frontend_result.value;
+    let choice = this.state.bottomPanel[1];
+    let frontendResult = choice.frontend_result.value;
 
     return <div>
       <h2>Composite data structure: {this.dsChoiceList(choice)}</h2>
@@ -179,9 +188,9 @@ class App extends Component {
   }
 
   render () {
-    var optimalDataStructures = this.state.optimalDataStructures;
-    var previousSearchMethods = optimalDataStructures && optimalDataStructures[0] && Object.keys(optimalDataStructures[0].results).sort();
-    var bottomPanel = this.state.bottomPanel;
+    let optimalDataStructures = this.state.optimalDataStructures;
+    let previousSearchMethods = optimalDataStructures && optimalDataStructures[0] && Object.keys(optimalDataStructures[0].results).sort();
+    let bottomPanel = this.state.bottomPanel;
 
     return (
       <div>
@@ -213,7 +222,7 @@ class App extends Component {
                     <span style={{paddingLeft: "5px"}}><button onClick={() => this.setState({ bottomPanel: ["combo", ds]})}>show details</button></span>
                   </td>
                   {previousSearchMethods.map((m, idx) => {
-                    var time = ds.result_times[m].to_short_string;
+                    let time = ds.result_times[m].to_short_string;
                     return <td key={idx} className={"time-"+time.replace(/[()*]/g, "")}>{time}</td>
                   })}
                 </tr>)}
@@ -247,8 +256,6 @@ class App extends Component {
   }
 }
 
-export default App;
-
 function orderByBigO(l, r) {
   if (l.power_of_n !== r.power_of_n) {
     return l.power_of_n < r.power_of_n ? -1 : 1;
@@ -260,3 +267,5 @@ function orderByBigO(l, r) {
 function orderDataStructuresByOverallTime(l, r) {
   return orderByBigO(l.overall_time_for_adt, r.overall_time_for_adt);
 }
+
+export default App;

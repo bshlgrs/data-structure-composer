@@ -22,7 +22,8 @@ libraryDependencies ++= Seq(
   "com.lihaoyi" %%% "fastparse" % "0.4.1",
   "org.scalacheck" %% "scalacheck" % "1.13.2",
   "com.softwaremill.quicklens" %%% "quicklens" % "1.4.8",
-  "org.scalactic" %%% "scalactic" % "3.0.0"
+  "org.scalactic" %%% "scalactic" % "3.0.0",
+  "com.lihaoyi" %%% "upickle" % "0.4.3"
 )
 
 libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0"
@@ -48,6 +49,7 @@ lazy val versions = new {
 
 libraryDependencies ++= Seq(
   "com.twitter" %% "finatra-http" % versions.finatra,
+  "com.twitter" %% "finatra-jackson" % versions.finatra,
   "ch.qos.logback" % "logback-classic" % versions.logback,
   "ch.qos.logback" % "logback-classic" % versions.logback % "test",
 

@@ -6,7 +6,7 @@ import shared.{DominanceRelationship, PartialOrdering}
   * Created by buck on 11/6/16.
   */
 
-abstract class AbstractBoundSource {
+sealed abstract class AbstractBoundSource {
   def mbTemplate: Option[Impl]
   def materialSet: Set[Impl]
 }

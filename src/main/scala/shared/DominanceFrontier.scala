@@ -1,9 +1,12 @@
 package shared
 
+import scala.scalajs.js.annotation.JSExport
+
 /**
   * Created by buck on 10/8/16.
   */
-case class DominanceFrontier[A] private (items: Set[A], ordering: PartialOrdering[A]) {
+
+case class DominanceFrontier[A] private (@JSExport items: Set[A], ordering: PartialOrdering[A]) {
 //  assert(items.forall((x: A) => items.forall((y: A) => ! ordering.partialCompare(x, y).oneStrictlyDominates)))
 
   def add(newItem: A): DominanceFrontier[A] = {
