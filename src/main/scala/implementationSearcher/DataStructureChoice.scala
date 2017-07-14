@@ -76,22 +76,22 @@ case class DataStructureChoice(structureWriteMethods: Map[DataStructure, UnfreeI
       assert(unfreeImplSet.contains(i), {
         s"weird: the methods don't include $i"
       })
-      val that = this
       val BoundSource(template, materials) = i.boundSource
-      assert(i.boundSource.mbTemplate.isDefined, s"impl $i is fucked")
+      assert(i.boundSource.mbTemplate.isDefined, s"impl $i is messed up")
 
       SingleMethodFrontendResult(
         localFreeImpls.find(_.impl === template).getOrElse({
           throw new RuntimeException(s"oh dear, with i = $i")
         }),
         materials.map((j) => {
-          val sourceImpl = unfreeImplSet.getMatchingImplFromLhs(j.lhs).getOrElse({
-            throw new RuntimeException(
-              s"In the bound source for $i, in the DSC $structureNames, " +
-                s"there was no matching impl for $j")
-          })
-
-          getFrontendReadResult(sourceImpl, unfreeImplSet, localFreeImpls)
+          unfreeImplSet.getMatchingImplFromLhs(j.lhs) match {
+            case None => {
+              throw new RuntimeException(
+                s"In the bound source for $i, in the DSC $structureNames, " +
+                  s"there was no matching impl for $j")
+            }
+            case Some(sourceImpl) => getFrontendReadResult(sourceImpl, unfreeImplSet, localFreeImpls)
+          }
         })
       )
     }

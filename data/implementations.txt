@@ -30,7 +30,6 @@ insertAnywhere! <- insertAtIndex!
 insertAnywhere! <- insertFirst!
 insertAnywhere! <- insertLast!
 
-
 // deletions
 deleteAtIndex! <- getByIndex + deleteNode!
 deleteFirst! <- deleteAtIndex!
@@ -94,6 +93,7 @@ getMode <- mostNumerousEquivalenceClass[_]
 
 // eg, querying for the sum of the elements between indexes i and j
 twoSidedIndexRangeQuery[reduction] <- unorderedEach
+reduce[f] <- twoSidedIndexRangeQuery[f]
 
 // eg, querying for the sum of the elements between index 0 and index i
 oneSidedIndexRangeQuery[reduction] <- unorderedEach

@@ -14,7 +14,6 @@ case class ImplLhs(name: MethodName, conditions: ImplPredicateMap) {
     this.modify(_.conditions).using(_.and(conditions))
   }
 
-
   override def toString: String = {
     val conditionsString = if (conditions.isEmpty) "" else s"if ${conditions.toNiceString}"
 

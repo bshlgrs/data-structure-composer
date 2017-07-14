@@ -17,7 +17,7 @@ class SearchController extends Controller {
     mutable.Map()
   }
 
-  def search(searchRequest: SearchRequest):Try[DominanceFrontier[DataStructureChoice]] = {
+  def search(searchRequest: SearchRequest): Try[DominanceFrontier[DataStructureChoice]] = {
     println(searchRequest)
     for {
       (impls, decls) <- (searchRequest.mbImplsString match {
@@ -63,7 +63,7 @@ class SearchController extends Controller {
 
     resultTry match {
       case Success(result) => {
-        println(result.items.map(_.frontendResult))
+//        println(result.items.map(_.frontendResult))
         response.ok.body(result.items)
       }
       case Failure(err) => response.badRequest(err)
@@ -78,7 +78,8 @@ class SearchController extends Controller {
         "impls" -> DataStructureChooserCli.impls,
         "decls" -> DataStructureChooserCli.decls,
         "dataStructures" -> DataStructureChooserCli.dataStructures,
-        "dataStructureTexts" -> DataStructureChooserCli.dataStructureTexts
+        "dataStructureTexts" -> DataStructureChooserCli.dataStructureTexts,
+        "publicMethods" -> DataStructureChooserCli.publicMethods.map(_.name)
       )
     )
   }
@@ -86,5 +87,9 @@ class SearchController extends Controller {
   get("/:*") { request: Request =>
     response.ok.file(
       request.params("*"))
+  }
+
+  get("/random-questions") { request: Request =>
+    DataStructureChooserCli.randomMethods()
   }
 }

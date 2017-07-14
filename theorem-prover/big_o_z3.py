@@ -2,30 +2,6 @@ from z3 import *
 
 set_param(proof=True)
 
-
-UsingLinkedList = Const('UsingLinkedList', BoolSort())
-
-GetNext = Const('GetNext', IntSort())
-CanGetNext = Const('CanGetNext', BoolSort())
-
-UsingLinkedListForGetNext = Const('UsingLinkedListForGetNext', BoolSort())
-
-axioms = [
-    Implies(UsingLinkedListForGetNext, UsingLinkedList),
-    Implies(UsingLinkedListForGetNext, GetNext == 1),
-    CanGetNext == Or(UsingLinkedListForGetNext),
-    CanGetNext
-]
-
-# opt = Optimize()
-# opt.add(axioms)
-# mGetNext = opt.minimize(GetNext)
-
-# print opt.check()
-# print opt.model()
-# print mGetNext.value()
-
-
 impls = [
     ("getNext", { "getByIndex": 0 }),
     ("getFirst", { "getByIndex": 0 }),
@@ -33,6 +9,10 @@ impls = [
 ]
 
 structures = {
+    "LinkedList": {
+        'getFirst': 1,
+        'getNext': 1
+    },
     "LinkedList": {
         'getFirst': 1,
         'getNext': 1

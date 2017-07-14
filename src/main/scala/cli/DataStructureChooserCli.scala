@@ -26,6 +26,17 @@ object DataStructureChooserCli {
     }).toSet
   }
 
+  lazy val publicMethods: Set[MethodName] = impls.map(_.lhs.name)
+
+  def randomMethods(): List[String] = {
+    val chosen = scala.util.Random.shuffle(DataStructureChooserCli.publicMethods.toList).take(4)
+
+    if (chosen.exists(_.isMutating) && chosen.exists(!_.isMutating))
+      chosen.map(_.name)
+    else
+      randomMethods()
+  }
+
   lazy val (dataStructures: Map[String, DataStructure], dataStructureTexts: Map[String, (String, String)]) = {
     val dataStructureTuples =
       dataStructuresFiles.map((x: String) => MainParser.parseSingleDataStructureFileString(x, decls).get)
